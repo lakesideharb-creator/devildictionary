@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#17120e" />
+    <meta name="description" content="在随机字母方格中滑出单词，揭开反常识的恶魔辞典式定义。" />
+    <link rel="canonical" href="https://devildictionary.com/" />
+    <script>
+      if (location.hostname === "www.devildictionary.com") {
+        location.replace(`https://devildictionary.com${location.pathname}${location.search}${location.hash}`);
+      }
+    </script>
+    <title>The Devil's Dictionary — 滑词游戏</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="grain" aria-hidden="true"></div>
+    <main class="shell">
+      <header class="masthead">
+        <div class="brand-lockup">
+          <div class="seal" aria-hidden="true">D</div>
+          <div>
+            <p class="eyebrow">A POCKET EDITION FOR THE SUSPICIOUS</p>
+            <h1>The Devil’s Dictionary</h1>
+            <p class="subtitle">滑出一个单词。看它怎样反过来定义你。</p>
+          </div>
+        </div>
+
+        <div class="status-cluster" aria-label="游戏进度">
+          <button class="sound-toggle" id="soundToggle" type="button" aria-label="关闭音效" aria-pressed="true" title="音效开关">
+            <span class="sound-note" aria-hidden="true">♪</span>
+            <span class="sound-waves" aria-hidden="true"><i></i><i></i><i></i></span>
+          </button>
+          <button class="coin-vault" id="coinVault" type="button" aria-label="金币规则">
+            <span class="coin" id="coin" aria-hidden="true"><span>Ð</span></span>
+            <span><strong id="coinCount">0</strong><small>DEVIL COINS</small></span>
+          </button>
+          <div class="progress-card">
+            <div class="progress-copy">
+              <span id="stageName">第一阶段 · 识字者</span>
+              <span><b id="completedCount">0</b>/<span id="totalCount">45</span></span>
+            </div>
+            <div class="progress-track"><span id="progressFill"></span></div>
+          </div>
+        </div>
+      </header>
+
+      <section class="game-card" aria-labelledby="roundTitle">
+        <div class="ornament ornament-left" aria-hidden="true">☞</div>
+        <div class="ornament ornament-right" aria-hidden="true">☜</div>
+
+        <div class="round-head">
+          <div>
+            <p class="folio" id="folio">ENTRY № 001</p>
+            <h2 id="roundTitle">Find the word</h2>
+          </div>
+          <div class="target-word" id="targetWord" aria-live="polite"></div>
+        </div>
+
+        <div class="selection-line" aria-live="polite">
+          <span class="selection-label">YOUR DEFINITION</span>
+          <strong id="selectionText">—</strong>
+        </div>
+
+        <div class="board-frame">
+          <div class="board" id="board" role="grid" aria-label="字母方格"></div>
+          <svg class="path-layer" id="pathLayer" aria-hidden="true"></svg>
+          <p class="gesture-note" id="gestureNote">从第一个字母按住滑动 · 横、竖、斜向均可</p>
+        </div>
+
+        <div class="controls">
+          <button class="button button-ink" id="hintButton" type="button">
+            <span aria-hidden="true">⌁</span> 显示虚线提示
+          </button>
+          <button class="button button-ghost" id="shuffleButton" type="button">
+            <span aria-hidden="true">↻</span> 换一盘字母
+          </button>
+        </div>
+
+        <div class="coin-rule" id="coinRule">
+          <span>下一枚金币</span>
+          <div class="pips" id="coinPips" aria-label="金币进度"></div>
+          <strong id="coinRuleText">还需 5 词</strong>
+        </div>
+      </section>
+
+      <footer class="colophon">
+        <p>“常识，是偏见终于熬到了退休年龄。”</p>
+        <button id="resetButton" class="text-button" type="button">重置私人进度</button>
+      </footer>
+    </main>
+
+    <div class="modal" id="definitionModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="definitionWord">
+      <div class="modal-backdrop"></div>
+      <article class="definition-card">
+        <div class="flash-rays" aria-hidden="true"></div>
+        <p class="definition-kicker">THE DEVIL DEFINES</p>
+        <h2 id="definitionWord">AMBITION</h2>
+        <div class="definition-rule"><span>◆</span></div>
+        <p class="definition-pos" id="definitionPos">noun</p>
+        <p class="judgment-prompt" id="judgmentPrompt" hidden>三条定义都很合理。真正的定义，通常最不让人舒服。</p>
+        <div class="definition-choices" id="definitionChoices" hidden></div>
+        <p class="judgment-feedback" id="judgmentFeedback" hidden></p>
+        <div class="definition-reveal" id="definitionReveal">
+          <p class="definition-text" id="definitionText"></p>
+          <p class="definition-cn" id="definitionCn"></p>
+          <p class="reader-note" id="readerNote" hidden></p>
+        </div>
+        <div class="modal-meta">
+          <span id="newEntryBadge">NEW ENTRY</span>
+          <span id="modalProgress"></span>
+        </div>
+        <button class="button button-gold" id="nextButton" type="button">收进辞典 · 下一词</button>
+      </article>
+    </div>
+
+    <div class="coin-celebration" id="coinCelebration" aria-hidden="true" role="status">
+      <div class="earned-coin coin"><span>Ð</span></div>
+      <p>THE DEVIL PAYS HIS DEBTS</p>
+      <strong>金币 +1</strong>
+      <small id="coinMilestone">完成 5 个词条</small>
+    </div>
+
+    <div class="stage-curtain" id="stageCurtain" aria-hidden="true" role="status">
+      <div class="stage-sigil" aria-hidden="true">II</div>
+      <p>THE DICTIONARY NO LONGER TRUSTS YOU</p>
+      <strong>第二阶段 · 定义审判</strong>
+      <small>找到单词，只证明你识字。现在，证明你会怀疑。</small>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
