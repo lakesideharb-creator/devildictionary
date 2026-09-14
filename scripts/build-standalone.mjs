@@ -12,7 +12,7 @@ const standalone = html
   .replace(/    <script>\n      if \(location\.hostname === "www\.devildictionary\.com"\) \{[\s\S]*?    <\/script>\n/, "")
   .replace('    <link rel="stylesheet" href="./styles.css" />', `    <style>\n${css}\n    </style>`)
   .replace('    <script src="./app.js"></script>', `    <script>\n${js}\n    </script>`)
-  .replace("<title>", "<!-- 单文件离线版：直接双击即可运行 -->\n    <title>");
+  .replace("<title>", "<!-- Standalone offline edition: just double-click to run -->\n    <title>");
 
 const output = path.join(root, "The-Devils-Dictionary.html");
 fs.writeFileSync(output, standalone);

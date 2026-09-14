@@ -266,7 +266,6 @@ h1 { margin: 4px 0 0; font-size: clamp(30px, 4vw, 52px); line-height: .95; font-
 .definition-rule::before, .definition-rule::after { content: ""; height: 1px; flex: 1; background: linear-gradient(90deg, transparent, var(--gold), transparent); }
 .definition-pos { margin: 13px 0 0; color: var(--gold); font-style: italic; }
 .definition-text { margin: 13px auto 0; max-width: 430px; font-size: clamp(19px, 3.4vw, 25px); line-height: 1.34; }
-.definition-cn { margin: 13px auto 0; max-width: 420px; color: var(--paper-deep); font-size: 14px; line-height: 1.6; }
 .modal-meta { display: flex; justify-content: space-between; margin-top: 20px; font: 700 9px/1 Arial, sans-serif; letter-spacing: .14em; color: var(--gold); }
 
 .modal.judging .definition-card { width: min(720px, 100%); padding-top: clamp(26px, 5vw, 44px); padding-bottom: clamp(28px, 5vw, 46px); }
@@ -295,8 +294,7 @@ h1 { margin: 4px 0 0; font-size: clamp(30px, 4vw, 52px); line-height: .95; font-
   color: var(--gold);
   font: 700 13px/1 Georgia, serif;
 }
-.definition-choice strong { display: block; font: 500 14px/1.35 Georgia, serif; }
-.definition-choice small { display: block; margin-top: 4px; color: var(--paper-deep); font: 12px/1.45 Georgia, serif; }
+.definition-choice strong { display: block; font: 500 15px/1.42 Georgia, serif; }
 .definition-choice:hover, .definition-choice:focus-visible { transform: translateX(4px); border-color: var(--gold-light); background: rgba(92,25,22,.72); outline: none; }
 .definition-choice.rejected { opacity: .34; border-color: var(--blood-bright); text-decoration: line-through; cursor: default; transform: translateX(-6px); }
 .definition-choice.correct { color: var(--ink); border-color: var(--gold-light); background: var(--gold); box-shadow: 0 0 30px rgba(216,166,58,.35); }
@@ -386,8 +384,7 @@ h1 { margin: 4px 0 0; font-size: clamp(30px, 4vw, 52px); line-height: .95; font-
   .modal.judging .definition-card { margin: 10px 0; padding: 30px 18px 24px; }
   .definition-choice { padding: 10px 10px 10px 40px; }
   .definition-choice::before { left: 12px; }
-  .definition-choice strong { font-size: 13px; }
-  .definition-choice small { font-size: 11px; }
+  .definition-choice strong { font-size: 14px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

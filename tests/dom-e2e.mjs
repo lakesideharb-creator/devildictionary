@@ -99,7 +99,7 @@ const first14 = window.__DEVILS_GAME__.entries.slice(0, 14).map(entry => entry.w
 const unlock = boot({ completed: first14, order: first14.slice(-5), current: null, hints: 0, rounds: 14 });
 await swipeCurrent(unlock);
 assert.equal(unlock.document.getElementById("completedCount").textContent, "15");
-assert.match(unlock.document.getElementById("nextButton").textContent, /进入第二阶段/);
+assert.match(unlock.document.getElementById("nextButton").textContent, /ENTER STAGE II/);
 unlock.document.getElementById("nextButton").click();
 assert.ok(unlock.document.getElementById("stageCurtain").classList.contains("show"), "stage two gets a dramatic unlock curtain");
 await sleep(2400);
@@ -114,7 +114,7 @@ const wrongChoice = unlock.document.querySelector('.definition-choice[data-corre
 wrongChoice.click();
 assert.ok(wrongChoice.classList.contains("rejected"), "a comfortable definition is rejected with feedback");
 assert.equal(unlock.document.getElementById("completedCount").textContent, "15", "wrong verdict cannot advance progress");
-assert.match(unlock.document.getElementById("judgmentFeedback").textContent, /辞典记录/);
+assert.match(unlock.document.getElementById("judgmentFeedback").textContent, /DICTIONARY RECORD/);
 unlock.document.querySelector('.definition-choice[data-correct="true"]').click();
 assert.equal(unlock.document.getElementById("completedCount").textContent, "16", "correct anti-common-sense verdict collects the entry");
 assert.equal(unlock.document.getElementById("definitionReveal").hidden, false);

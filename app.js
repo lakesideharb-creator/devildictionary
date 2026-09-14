@@ -2,115 +2,115 @@
   "use strict";
 
   const ENTRIES = [
-    { word: "EGO", pos: "noun", en: "The pocket mirror in which the universe is expected to admire itself.", cn: "一面随身镜，宇宙被要求每天从里面欣赏你。", tier: 1 },
-    { word: "HOPE", pos: "noun", en: "A loan taken from tomorrow, with no intention of reading the interest rate.", cn: "向明天借的一笔钱——签字时通常没人看利率。", tier: 1 },
-    { word: "LUCK", pos: "noun", en: "Skill, as described by its beneficiary; injustice, as described by everyone else.", cn: "受益者称它为本事，旁观者称它为不公。", tier: 1 },
-    { word: "BOSS", pos: "noun", en: "One who arrives late because time reports to them.", cn: "一个迟到的人——因为时间归他管理。", tier: 1 },
-    { word: "RULE", pos: "noun", en: "A fence built by those already standing on the pleasant side.", cn: "已经站在风景那边的人，修给后来者的一道篱笆。", tier: 1 },
-    { word: "FAME", pos: "noun", en: "The punishment of being recognized by people you would never recognize.", cn: "被一群你认不出来的人认出来的惩罚。", tier: 1 },
-    { word: "DUTY", pos: "noun", en: "A desire that has learned to wear someone else’s uniform.", cn: "一种穿上别人制服的欲望。", tier: 1 },
-    { word: "TASTE", pos: "noun", en: "An opinion wealthy enough to hire confidence.", cn: "一种雇得起自信的意见。", tier: 1 },
-    { word: "TRUTH", pos: "noun", en: "A fact that survived the meeting where the story was approved.", cn: "一个从‘统一口径会’里侥幸活下来的事实。", tier: 1 },
-    { word: "SMILE", pos: "noun", en: "A curve that conceals the shortest distance between two suspicions.", cn: "一条曲线，用来隐藏两份猜疑之间最短的距离。", tier: 1 },
-    { word: "SLEEP", pos: "noun", en: "A rehearsal for death, interrupted daily by invoices.", cn: "死亡的彩排，每天都被账单叫停。", tier: 1 },
-    { word: "MONEY", pos: "noun", en: "A universal language in which everyone develops an accent near the bill.", cn: "一种世界语；账单出现时，每个人都会忽然带口音。", tier: 1 },
-    { word: "ADVICE", pos: "noun", en: "A gift whose receipt is kept longer than its contents.", cn: "一种礼物：收据往往比内容保存得更久。", tier: 1 },
-    { word: "FRIEND", pos: "noun", en: "A witness for the defense who has read the prosecution’s notes.", cn: "一位替你辩护、但读过控方笔记的证人。", tier: 1 },
-    { word: "HONEST", pos: "adj.", en: "Temporarily unable to calculate the profitable answer.", cn: "暂时还没算出哪个答案更赚钱。", tier: 1 },
+    { word: "EGO", pos: "noun", en: "The pocket mirror in which the universe is expected to admire itself.", tier: 1 },
+    { word: "HOPE", pos: "noun", en: "A loan taken from tomorrow, with no intention of reading the interest rate.", tier: 1 },
+    { word: "LUCK", pos: "noun", en: "Skill, as described by its beneficiary; injustice, as described by everyone else.", tier: 1 },
+    { word: "BOSS", pos: "noun", en: "One who arrives late because time reports to them.", tier: 1 },
+    { word: "RULE", pos: "noun", en: "A fence built by those already standing on the pleasant side.", tier: 1 },
+    { word: "FAME", pos: "noun", en: "The punishment of being recognized by people you would never recognize.", tier: 1 },
+    { word: "DUTY", pos: "noun", en: "A desire that has learned to wear someone else’s uniform.", tier: 1 },
+    { word: "TASTE", pos: "noun", en: "An opinion wealthy enough to hire confidence.", tier: 1 },
+    { word: "TRUTH", pos: "noun", en: "A fact that survived the meeting where the story was approved.", tier: 1 },
+    { word: "SMILE", pos: "noun", en: "A curve that conceals the shortest distance between two suspicions.", tier: 1 },
+    { word: "SLEEP", pos: "noun", en: "A rehearsal for death, interrupted daily by invoices.", tier: 1 },
+    { word: "MONEY", pos: "noun", en: "A universal language in which everyone develops an accent near the bill.", tier: 1 },
+    { word: "ADVICE", pos: "noun", en: "A gift whose receipt is kept longer than its contents.", tier: 1 },
+    { word: "FRIEND", pos: "noun", en: "A witness for the defense who has read the prosecution’s notes.", tier: 1 },
+    { word: "HONEST", pos: "adj.", en: "Temporarily unable to calculate the profitable answer.", tier: 1 },
 
-    { word: "CAREER", pos: "noun", en: "A ladder that becomes a treadmill one promotion at a time.", cn: "一架梯子，每升一级，就更像一台跑步机。", tier: 2 },
-    { word: "EXPERT", pos: "noun", en: "A person who knows exactly why yesterday’s certainty failed.", cn: "一个精确知道昨天的确定性为何失败的人。", tier: 2 },
-    { word: "STATUS", pos: "noun", en: "The altitude at which one begins mistaking thin air for applause.", cn: "一种高度；到了那里，人会把稀薄空气误听成掌声。", tier: 2 },
-    { word: "POLITE", pos: "adj.", en: "Skilled at wrapping contempt so the recipient thanks you for the parcel.", cn: "擅长把轻蔑包成礼物，让收件人还向你道谢。", tier: 2 },
-    { word: "REGRET", pos: "noun", en: "Wisdom that arrives after the witnesses have gone home.", cn: "一种在证人都回家之后才抵达的智慧。", tier: 2 },
-    { word: "SECRET", pos: "noun", en: "Information told to one person at a time until everyone is trustworthy.", cn: "一种每次只告诉一个人的消息，直到所有人都变得可信。", tier: 2 },
-    { word: "MEETING", pos: "noun", en: "A ceremony in which minutes are kept and hours are lost.", cn: "一种保存‘分钟’、遗失‘小时’的仪式。", tier: 2 },
-    { word: "SUCCESS", pos: "noun", en: "The moment your old mistakes acquire biographers.", cn: "当你过去的错误终于有了传记作者。", tier: 2 },
-    { word: "NORMAL", pos: "adj.", en: "Common enough to escape examination.", cn: "因为足够常见，所以逃过了审问。", tier: 2 },
-    { word: "PROMISE", pos: "noun", en: "A future fact still protected from evidence.", cn: "一件尚未遭遇证据、因而安全的未来事实。", tier: 2 },
-    { word: "LOYALTY", pos: "noun", en: "The virtue of remembering which side currently signs the checks.", cn: "一种记得目前由哪一方签支票的美德。", tier: 2 },
-    { word: "REPUTE", pos: "noun", en: "A shadow that complains whenever its owner changes direction.", cn: "一团影子，主人每次转身，它都要抱怨。", tier: 2 },
-    { word: "CHOICE", pos: "noun", en: "The freedom to select which consequence will later feel imposed.", cn: "选择哪一种后果，将来可以抱怨是被强加的自由。", tier: 2 },
-    { word: "MATURE", pos: "adj.", en: "Too experienced to be surprised, too tired to be impressed.", cn: "经验多到不会吃惊，疲惫多到不会佩服。", tier: 2 },
-    { word: "JUSTICE", pos: "noun", en: "A balance admired most by those holding the weights.", cn: "一架天平，最欣赏它的人通常正拿着砝码。", tier: 2 },
+    { word: "CAREER", pos: "noun", en: "A ladder that becomes a treadmill one promotion at a time.", tier: 2 },
+    { word: "EXPERT", pos: "noun", en: "A person who knows exactly why yesterday’s certainty failed.", tier: 2 },
+    { word: "STATUS", pos: "noun", en: "The altitude at which one begins mistaking thin air for applause.", tier: 2 },
+    { word: "POLITE", pos: "adj.", en: "Skilled at wrapping contempt so the recipient thanks you for the parcel.", tier: 2 },
+    { word: "REGRET", pos: "noun", en: "Wisdom that arrives after the witnesses have gone home.", tier: 2 },
+    { word: "SECRET", pos: "noun", en: "Information told to one person at a time until everyone is trustworthy.", tier: 2 },
+    { word: "MEETING", pos: "noun", en: "A ceremony in which minutes are kept and hours are lost.", tier: 2 },
+    { word: "SUCCESS", pos: "noun", en: "The moment your old mistakes acquire biographers.", tier: 2 },
+    { word: "NORMAL", pos: "adj.", en: "Common enough to escape examination.", tier: 2 },
+    { word: "PROMISE", pos: "noun", en: "A future fact still protected from evidence.", tier: 2 },
+    { word: "LOYALTY", pos: "noun", en: "The virtue of remembering which side currently signs the checks.", tier: 2 },
+    { word: "REPUTE", pos: "noun", en: "A shadow that complains whenever its owner changes direction.", tier: 2 },
+    { word: "CHOICE", pos: "noun", en: "The freedom to select which consequence will later feel imposed.", tier: 2 },
+    { word: "MATURE", pos: "adj.", en: "Too experienced to be surprised, too tired to be impressed.", tier: 2 },
+    { word: "JUSTICE", pos: "noun", en: "A balance admired most by those holding the weights.", tier: 2 },
 
-    { word: "AMBITION", pos: "noun", en: "The art of climbing a ladder while explaining that height is vulgar.", cn: "一边爬梯子，一边解释高度很庸俗的艺术。", tier: 3 },
-    { word: "CONSENSUS", pos: "noun", en: "A conclusion everyone can defend because nobody remembers proposing it.", cn: "一个人人都能捍卫的结论，因为没人记得是谁提的。", tier: 3 },
-    { word: "PROGRESS", pos: "noun", en: "Replacing an old inconvenience with one that requires a password.", cn: "用一种需要密码的新麻烦，替换旧麻烦。", tier: 3 },
-    { word: "INNOCENT", pos: "adj.", en: "Not yet supplied with a sufficiently detailed accusation.", cn: "尚未收到一份足够详尽的指控。", tier: 3 },
-    { word: "EDUCATION", pos: "noun", en: "The discovery that ignorance can be itemized and financed.", cn: "发现无知原来可以分科计价、分期付款。", tier: 3 },
-    { word: "TRADITION", pos: "noun", en: "A dead person’s vote in a living person’s decision.", cn: "死人在活人的决定里投下的一票。", tier: 3 },
-    { word: "AUTHORITY", pos: "noun", en: "Confidence backed by furniture, a title, and a locked door.", cn: "由家具、头衔和一扇上锁的门担保的自信。", tier: 3 },
-    { word: "ORIGINAL", pos: "adj.", en: "Copied from a source the audience has not yet discovered.", cn: "抄自一个观众尚未发现的来源。", tier: 3 },
-    { word: "STRATEGY", pos: "noun", en: "A story explaining why the accident was always the destination.", cn: "一个用来说明意外其实一直都是目的地的故事。", tier: 3 },
-    { word: "CERTAINTY", pos: "noun", en: "Doubt promoted beyond its competence.", cn: "一份被提拔到超出能力范围的怀疑。", tier: 3 },
-    { word: "PATIENCE", pos: "noun", en: "The noble name we give to waiting when leaving is expensive.", cn: "当离开太贵时，我们给等待起的高贵名字。", tier: 3 },
-    { word: "PRINCIPLE", pos: "noun", en: "A rule kept most firmly when it costs someone else.", cn: "一种规则：代价由别人支付时，我们坚持得最牢。", tier: 3 },
-    { word: "CULTURE", pos: "noun", en: "What remains after a group forgets why it began behaving that way.", cn: "一群人忘了为何那样做之后，留下来的东西。", tier: 3 },
-    { word: "NETWORK", pos: "noun", en: "Friendship measured in future usefulness.", cn: "用未来用途计量的友谊。", tier: 3 },
-    { word: "LEGACY", pos: "noun", en: "An argument with the future conducted by someone unable to hear the reply.", cn: "一个听不见回答的人，与未来进行的争论。", tier: 3 }
+    { word: "AMBITION", pos: "noun", en: "The art of climbing a ladder while explaining that height is vulgar.", tier: 3 },
+    { word: "CONSENSUS", pos: "noun", en: "A conclusion everyone can defend because nobody remembers proposing it.", tier: 3 },
+    { word: "PROGRESS", pos: "noun", en: "Replacing an old inconvenience with one that requires a password.", tier: 3 },
+    { word: "INNOCENT", pos: "adj.", en: "Not yet supplied with a sufficiently detailed accusation.", tier: 3 },
+    { word: "EDUCATION", pos: "noun", en: "The discovery that ignorance can be itemized and financed.", tier: 3 },
+    { word: "TRADITION", pos: "noun", en: "A dead person’s vote in a living person’s decision.", tier: 3 },
+    { word: "AUTHORITY", pos: "noun", en: "Confidence backed by furniture, a title, and a locked door.", tier: 3 },
+    { word: "ORIGINAL", pos: "adj.", en: "Copied from a source the audience has not yet discovered.", tier: 3 },
+    { word: "STRATEGY", pos: "noun", en: "A story explaining why the accident was always the destination.", tier: 3 },
+    { word: "CERTAINTY", pos: "noun", en: "Doubt promoted beyond its competence.", tier: 3 },
+    { word: "PATIENCE", pos: "noun", en: "The noble name we give to waiting when leaving is expensive.", tier: 3 },
+    { word: "PRINCIPLE", pos: "noun", en: "A rule kept most firmly when it costs someone else.", tier: 3 },
+    { word: "CULTURE", pos: "noun", en: "What remains after a group forgets why it began behaving that way.", tier: 3 },
+    { word: "NETWORK", pos: "noun", en: "Friendship measured in future usefulness.", tier: 3 },
+    { word: "LEGACY", pos: "noun", en: "An argument with the future conducted by someone unable to hear the reply.", tier: 3 }
   ];
 
   const JUDGMENT_DECOYS = {
     CAREER: [
-      { bias: "COMFORT", en: "A professional path through which effort becomes expertise and leadership.", cn: "一条让努力逐渐变成专业与领导力的职业道路。" },
-      { bias: "ORDER", en: "A sequence of roles shaped by skill, opportunity, and persistence.", cn: "由能力、机会与坚持共同塑造的一系列职位。" }
+      { bias: "COMFORT", en: "A professional path through which effort becomes expertise and leadership." },
+      { bias: "ORDER", en: "A sequence of roles shaped by skill, opportunity, and persistence." }
     ],
     EXPERT: [
-      { bias: "COMFORT", en: "Someone whose specialized knowledge makes uncertain decisions more reliable.", cn: "用专业知识让不确定的决定变得更可靠的人。" },
-      { bias: "ORDER", en: "A professional recognized by peers for mastering a narrow field.", cn: "因精通某个细分领域而获得同行认可的专业人士。" }
+      { bias: "COMFORT", en: "Someone whose specialized knowledge makes uncertain decisions more reliable." },
+      { bias: "ORDER", en: "A professional recognized by peers for mastering a narrow field." }
     ],
     STATUS: [
-      { bias: "COMFORT", en: "A position earned when achievement becomes visible to others.", cn: "当成就终于被他人看见时获得的位置。" },
-      { bias: "ORDER", en: "A social rank that organizes responsibility, influence, and respect.", cn: "用来安排责任、影响力与尊重的社会等级。" }
+      { bias: "COMFORT", en: "A position earned when achievement becomes visible to others." },
+      { bias: "ORDER", en: "A social rank that organizes responsibility, influence, and respect." }
     ],
     POLITE: [
-      { bias: "COMFORT", en: "Showing consideration for others through tact and restraint.", cn: "通过克制与分寸表达对他人的体谅。" },
-      { bias: "ORDER", en: "Following the social rules that allow strangers to coexist smoothly.", cn: "遵守让陌生人得以顺畅相处的社会规则。" }
+      { bias: "COMFORT", en: "Showing consideration for others through tact and restraint." },
+      { bias: "ORDER", en: "Following the social rules that allow strangers to coexist smoothly." }
     ],
     REGRET: [
-      { bias: "COMFORT", en: "Pain caused by wishing a past decision had been different.", cn: "希望过去的决定有所不同时产生的痛苦。" },
-      { bias: "ORDER", en: "Evidence that conscience has examined experience and learned from it.", cn: "良知审视经验并从中学习的证据。" }
+      { bias: "COMFORT", en: "Pain caused by wishing a past decision had been different." },
+      { bias: "ORDER", en: "Evidence that conscience has examined experience and learned from it." }
     ],
     SECRET: [
-      { bias: "COMFORT", en: "Information protected because disclosure would cause unnecessary harm.", cn: "因公开会造成不必要伤害而受到保护的信息。" },
-      { bias: "ORDER", en: "A confidence shared only with those entitled to know it.", cn: "只与有资格知情的人分享的隐秘。" }
+      { bias: "COMFORT", en: "Information protected because disclosure would cause unnecessary harm." },
+      { bias: "ORDER", en: "A confidence shared only with those entitled to know it." }
     ],
     MEETING: [
-      { bias: "COMFORT", en: "A scheduled discussion where a group turns many views into one decision.", cn: "让一群人把多种观点变成一个决定的定期讨论。" },
-      { bias: "ORDER", en: "A formal gathering for exchanging information and assigning action.", cn: "用于交换信息并分配行动的正式集会。" }
+      { bias: "COMFORT", en: "A scheduled discussion where a group turns many views into one decision." },
+      { bias: "ORDER", en: "A formal gathering for exchanging information and assigning action." }
     ],
     SUCCESS: [
-      { bias: "COMFORT", en: "The achievement of a meaningful goal through sustained effort.", cn: "通过持续努力实现一个有意义的目标。" },
-      { bias: "ORDER", en: "A favorable outcome recognized by oneself, one’s peers, or society.", cn: "获得自己、同行或社会承认的有利结果。" }
+      { bias: "COMFORT", en: "The achievement of a meaningful goal through sustained effort." },
+      { bias: "ORDER", en: "A favorable outcome recognized by oneself, one’s peers, or society." }
     ],
     NORMAL: [
-      { bias: "COMFORT", en: "Belonging comfortably within the healthy range of human difference.", cn: "舒适地处在人类差异的健康范围之内。" },
-      { bias: "ORDER", en: "Conforming to the pattern most commonly observed in a population.", cn: "符合一个群体中最常被观察到的模式。" }
+      { bias: "COMFORT", en: "Belonging comfortably within the healthy range of human difference." },
+      { bias: "ORDER", en: "Conforming to the pattern most commonly observed in a population." }
     ],
     PROMISE: [
-      { bias: "COMFORT", en: "An assurance given so another person may safely rely on you.", cn: "为了让另一个人可以安心依赖你而给出的保证。" },
-      { bias: "ORDER", en: "A commitment that binds future conduct to words spoken in the present.", cn: "用现在说出的话约束未来行为的承诺。" }
+      { bias: "COMFORT", en: "An assurance given so another person may safely rely on you." },
+      { bias: "ORDER", en: "A commitment that binds future conduct to words spoken in the present." }
     ],
     LOYALTY: [
-      { bias: "COMFORT", en: "Steadfast support maintained through difficulty and change.", cn: "在困难与变化之中仍然保持的坚定支持。" },
-      { bias: "ORDER", en: "A durable allegiance created by trust, duty, or shared identity.", cn: "由信任、责任或共同身份建立的持久归属。" }
+      { bias: "COMFORT", en: "Steadfast support maintained through difficulty and change." },
+      { bias: "ORDER", en: "A durable allegiance created by trust, duty, or shared identity." }
     ],
     REPUTE: [
-      { bias: "COMFORT", en: "The respect accumulated when character remains consistent over time.", cn: "品格长期保持一致时积累起来的尊重。" },
-      { bias: "ORDER", en: "The public estimate of a person formed from past conduct.", cn: "公众依据一个人过去行为形成的评价。" }
+      { bias: "COMFORT", en: "The respect accumulated when character remains consistent over time." },
+      { bias: "ORDER", en: "The public estimate of a person formed from past conduct." }
     ],
     CHOICE: [
-      { bias: "COMFORT", en: "The power to select the path that best reflects one’s values.", cn: "选择最能体现自身价值之道路的权力。" },
-      { bias: "ORDER", en: "A decision made after comparing the available alternatives.", cn: "比较现有选项之后作出的决定。" }
+      { bias: "COMFORT", en: "The power to select the path that best reflects one’s values." },
+      { bias: "ORDER", en: "A decision made after comparing the available alternatives." }
     ],
     MATURE: [
-      { bias: "COMFORT", en: "Able to meet complexity with perspective, patience, and self-command.", cn: "能够以远见、耐心和自制面对复杂处境。" },
-      { bias: "ORDER", en: "Having reached the expected level of emotional and intellectual development.", cn: "达到预期的情绪与智力发展水平。" }
+      { bias: "COMFORT", en: "Able to meet complexity with perspective, patience, and self-command." },
+      { bias: "ORDER", en: "Having reached the expected level of emotional and intellectual development." }
     ],
     JUSTICE: [
-      { bias: "COMFORT", en: "The fair protection of each person’s dignity, rights, and due reward.", cn: "公平保护每个人的尊严、权利与应得回报。" },
-      { bias: "ORDER", en: "The impartial application of rules to comparable acts and disputes.", cn: "对相似行为与争议不偏不倚地适用规则。" }
+      { bias: "COMFORT", en: "The fair protection of each person’s dignity, rights, and due reward." },
+      { bias: "ORDER", en: "The impartial application of rules to comparable acts and disputes." }
     ]
   };
 
@@ -119,7 +119,7 @@
   const els = Object.fromEntries([
     "board", "pathLayer", "selectionText", "targetWord", "folio", "hintButton", "shuffleButton",
     "coinCount", "completedCount", "totalCount", "progressFill", "coinPips", "coinRuleText",
-    "stageName", "definitionModal", "definitionWord", "definitionPos", "definitionText", "definitionCn",
+    "stageName", "definitionModal", "definitionWord", "definitionPos", "definitionText",
     "definitionReveal", "judgmentPrompt", "definitionChoices", "judgmentFeedback", "readerNote",
     "newEntryBadge", "modalProgress", "nextButton", "coinCelebration", "coinMilestone", "stageCurtain",
     "toast", "coinVault", "soundToggle", "resetButton", "gestureNote"
@@ -298,9 +298,9 @@
   }
 
   function getStage(count = save.completed.length) {
-    if (count < 15) return { tier: 1, name: "第一阶段 · 识字者", size: 5, title: "Find the word" };
-    if (count < 30) return { tier: 2, name: "第二阶段 · 怀疑者", size: 6, title: "Read between the letters" };
-    return { tier: 3, name: "第三阶段 · 共谋者", size: 7, title: "The definition is watching" };
+    if (count < 15) return { tier: 1, name: "STAGE I · THE LITERATE", size: 5, title: "Find the word" };
+    if (count < 30) return { tier: 2, name: "STAGE II · THE DOUBTER", size: 6, title: "Read between the letters" };
+    return { tier: 3, name: "STAGE III · THE ACCOMPLICE", size: 7, title: "The definition is watching" };
   }
 
   function pickEntry() {
@@ -378,8 +378,8 @@
       : round.entry.word.split("").map((letter, index) => index === 0 || index === round.entry.word.length - 1 ? letter : `<span class="mask">·</span>`).join("");
     document.getElementById("roundTitle").textContent = stage.title;
     els.gestureNote.textContent = stage.tier === 1
-      ? "从第一个字母按住滑动 · 横、竖、斜向均可"
-      : `首尾字母已给出 · 共 ${round.entry.word.length} 个字母`;
+      ? "Hold the first letter and slide · rows, columns and diagonals all work"
+      : `First and last letters are given · ${round.entry.word.length} letters in all`;
     bindCells();
     requestAnimationFrame(resizeSvg);
     updateHUD();
@@ -454,7 +454,7 @@
         { transform: "translateX(0)" }, { transform: "translateX(-7px)" },
         { transform: "translateX(7px)" }, { transform: "translateX(0)" }
       ], { duration: 250 });
-      showToast(attempt.length < round.entry.word.length ? "还没拼完——继续怀疑字母。" : "这个定义还骗不过恶魔。");
+      showToast(attempt.length < round.entry.word.length ? "Not finished yet — keep suspecting the letters." : "That definition does not fool the Devil.");
       window.setTimeout(clearSelection, 300);
     }
   }
@@ -489,7 +489,6 @@
     els.definitionWord.textContent = round.entry.word;
     els.definitionPos.textContent = round.entry.pos;
     els.definitionText.textContent = round.entry.en;
-    els.definitionCn.textContent = round.entry.cn;
     els.judgmentPrompt.hidden = true;
     els.definitionChoices.hidden = true;
     els.judgmentFeedback.hidden = true;
@@ -498,8 +497,8 @@
     els.readerNote.hidden = true;
     els.nextButton.hidden = false;
     els.nextButton.textContent = save.completed.length === 15 && round.entry.tier === 1
-      ? "进入第二阶段 · 定义审判"
-      : "收进辞典 · 下一词";
+      ? "ENTER STAGE II · THE JUDGMENT"
+      : "BIND IT IN · NEXT WORD";
     els.newEntryBadge.textContent = isNew ? "NEW ENTRY" : "REVISITED";
     els.modalProgress.textContent = `${save.completed.length} / ${ENTRIES.length} COLLECTED`;
     openModal(els.nextButton);
@@ -508,21 +507,19 @@
   function openJudgment() {
     window.setTimeout(() => sound.judgment(), 90);
     const choices = shuffle([
-      { bias: "TRUTH", correct: true, en: round.entry.en, cn: round.entry.cn },
+      { bias: "TRUTH", correct: true, en: round.entry.en },
       ...JUDGMENT_DECOYS[round.entry.word]
     ]);
     els.definitionModal.classList.add("judging");
     els.definitionWord.textContent = round.entry.word;
     els.definitionPos.textContent = round.entry.pos;
     els.definitionText.textContent = round.entry.en;
-    els.definitionCn.textContent = round.entry.cn;
     els.judgmentPrompt.hidden = false;
     els.definitionChoices.hidden = false;
     els.definitionChoices.classList.remove("resolved");
     els.definitionChoices.innerHTML = choices.map(choice => `
       <button class="definition-choice" type="button" data-bias="${choice.bias}" data-correct="${choice.correct === true}">
         <strong>${choice.en}</strong>
-        <small>${choice.cn}</small>
       </button>
     `).join("");
     els.judgmentFeedback.hidden = true;
@@ -531,7 +528,7 @@
     els.definitionReveal.classList.remove("judgment-result");
     els.readerNote.hidden = true;
     els.nextButton.hidden = true;
-    els.nextButton.textContent = "接受判词 · 下一词";
+    els.nextButton.textContent = "ACCEPT THE VERDICT · NEXT WORD";
     els.newEntryBadge.textContent = "AWAITING VERDICT";
     els.modalProgress.textContent = `${save.completed.length} COLLECTED · VERDICT PENDING`;
     els.definitionChoices.querySelectorAll(".definition-choice").forEach(button => {
@@ -555,8 +552,8 @@
       els.judgmentFeedback.hidden = false;
       els.judgmentFeedback.className = "judgment-feedback wrong";
       els.judgmentFeedback.textContent = bias === "COMFORT"
-        ? "辞典记录：你选择了安慰。你希望词语善良，胜过希望它准确。"
-        : "辞典记录：你选择了秩序。你仍相信写进手册的定义不会偏袒任何人。";
+        ? "DICTIONARY RECORD: You chose comfort. You wanted the word to be kind more than you wanted it to be true."
+        : "DICTIONARY RECORD: You chose order. You still believe the definition printed in the manual favors no one.";
       const nextChoice = [...els.definitionChoices.querySelectorAll(".definition-choice")].find(choice => !choice.disabled);
       nextChoice?.focus();
       return;
@@ -570,7 +567,7 @@
     els.definitionChoices.querySelectorAll(".definition-choice").forEach(choice => { choice.disabled = true; });
     els.judgmentFeedback.hidden = false;
     els.judgmentFeedback.className = "judgment-feedback right";
-    els.judgmentFeedback.textContent = "判决成立：真正的定义不是解释这个词，而是揭穿使用这个词的人。";
+    els.judgmentFeedback.textContent = "VERDICT STANDS: A real definition does not explain the word. It exposes the person using it.";
     els.definitionReveal.hidden = false;
     els.definitionReveal.classList.add("judgment-result");
     els.readerNote.hidden = false;
@@ -588,12 +585,12 @@
 
   function getReaderNote() {
     if (round.judgmentAttempts === 0) {
-      return "读者注释：你第一次就选择了最不舒服的答案。辞典暂时对你保持警惕。";
+      return "READER'S NOTE: You picked the most uncomfortable answer on the first try. The dictionary remains wary of you.";
     }
     if (round.lastBias === "COMFORT") {
-      return "读者注释：你先相信了安慰，后来才相信真相。很有人性。";
+      return "READER'S NOTE: You believed the comfort first, and the truth second. Very human of you.";
     }
-    return "读者注释：你先相信了秩序，后来才相信真相。制度会想念你的。";
+    return "READER'S NOTE: You believed the order first, and the truth second. The institutions will miss you.";
   }
 
   function shuffle(items) {
@@ -642,13 +639,13 @@
     els.totalCount.textContent = ENTRIES.length;
     els.progressFill.style.width = `${Math.min(100, count / ENTRIES.length * 100)}%`;
     els.stageName.textContent = getStage(count).name;
-    els.coinRuleText.textContent = count === ENTRIES.length ? "全辞典已征服" : `还需 ${remaining} 词`;
+    els.coinRuleText.textContent = count === ENTRIES.length ? "The whole dictionary has been conquered" : `${remaining} ${remaining === 1 ? "word" : "words"} to go`;
     els.coinPips.innerHTML = Array.from({ length: 5 }, (_, index) => `<i class="pip ${index < within ? "filled" : ""}"></i>`).join("");
-    els.coinVault.setAttribute("aria-label", `当前 ${coins} 枚金币。每完成 5 个不同词条获得 1 枚。`);
+    els.coinVault.setAttribute("aria-label", `${coins} Devil Coins held. One coin is minted for every 5 different entries completed.`);
     const soundOn = save.sound !== false;
     els.soundToggle.classList.toggle("muted", !soundOn);
     els.soundToggle.setAttribute("aria-pressed", String(soundOn));
-    els.soundToggle.setAttribute("aria-label", soundOn ? "关闭音效" : "开启音效");
+    els.soundToggle.setAttribute("aria-label", soundOn ? "Mute sound" : "Unmute sound");
   }
 
   function toggleSound() {
@@ -661,7 +658,7 @@
     }
     persist();
     updateHUD();
-    showToast(save.sound ? "声音回到了辞典里。" : "辞典现在保持沉默。" );
+    showToast(save.sound ? "Sound has returned to the dictionary." : "The dictionary keeps its silence now." );
   }
 
   function showHint() {
@@ -671,7 +668,7 @@
     clearSelection();
     els.board.querySelectorAll(".letter").forEach((cell, index) => cell.classList.toggle("hint-node", round.path.includes(index)));
     drawPath(round.path, true);
-    els.hintButton.textContent = "虚线已现形";
+    els.hintButton.textContent = "The trail is showing";
     clearTimeout(hintTimer);
     hintTimer = window.setTimeout(hideHint, 3600);
   }
@@ -680,7 +677,7 @@
     clearTimeout(hintTimer);
     els.board.querySelectorAll(".letter").forEach(cell => cell.classList.remove("hint-node"));
     if (!selection.length) els.pathLayer.innerHTML = "";
-    els.hintButton.innerHTML = '<span aria-hidden="true">⌁</span> 显示虚线提示';
+    els.hintButton.innerHTML = '<span aria-hidden="true">⌁</span> SHOW THE DOTTED TRAIL';
   }
 
   function drawPath(indices, hint) {
@@ -708,7 +705,7 @@
 
   function celebrateCoin(total) {
     sound.coin();
-    els.coinMilestone.textContent = `完成 ${total * 5} 个不同词条 · 共 ${total} 枚`;
+    els.coinMilestone.textContent = `${total * 5} different entries completed · ${total} in all`;
     els.coinCelebration.classList.remove("show");
     void els.coinCelebration.offsetWidth;
     els.coinCelebration.classList.add("show");
@@ -727,20 +724,20 @@
     const firstClick = els.resetButton.dataset.confirm !== "yes";
     if (firstClick) {
       els.resetButton.dataset.confirm = "yes";
-      els.resetButton.textContent = "再点一次确认重置";
-      showToast("所有词条与金币都会清零。");
+      els.resetButton.textContent = "TAP AGAIN TO CONFIRM RESET";
+      showToast("Every entry and every coin will be wiped.");
       window.setTimeout(() => {
         els.resetButton.dataset.confirm = "";
-        els.resetButton.textContent = "重置私人进度";
+        els.resetButton.textContent = "RESET MY PROGRESS";
       }, 3500);
       return;
     }
     localStorage.removeItem(STORAGE_KEY);
     save = loadSave();
     els.resetButton.dataset.confirm = "";
-    els.resetButton.textContent = "重置私人进度";
+    els.resetButton.textContent = "RESET MY PROGRESS";
     makeBoard(pickEntry());
-    showToast("新的一本辞典已经打开。");
+    showToast("A new dictionary has been opened.");
   }
 
   function init() {
@@ -749,9 +746,9 @@
     const current = ENTRIES.find(entry => entry.word === save.current && !save.completed.includes(entry.word));
     makeBoard(current || pickEntry());
     els.hintButton.addEventListener("click", showHint);
-    els.shuffleButton.addEventListener("click", () => { sound.shuffle(); makeBoard(round.entry, true); showToast("词没变，谎言换了位置。"); });
+    els.shuffleButton.addEventListener("click", () => { sound.shuffle(); makeBoard(round.entry, true); showToast("Same word. The lies have been rearranged."); });
     els.nextButton.addEventListener("click", nextRound);
-    els.coinVault.addEventListener("click", () => { sound.coinTap(); showToast("每完成 5 个不同词条，金币总数自动校准 +1。"); });
+    els.coinVault.addEventListener("click", () => { sound.coinTap(); showToast("Every 5 different entries completed resets the count and mints one more coin."); });
     els.soundToggle.addEventListener("click", toggleSound);
     els.resetButton.addEventListener("click", resetProgress);
     window.addEventListener("resize", () => requestAnimationFrame(() => drawPath(selection, false)));
