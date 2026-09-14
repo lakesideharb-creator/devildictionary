@@ -6,7 +6,16 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const dist = path.join(root, "dist");
 fs.rmSync(dist, { recursive: true, force: true });
 fs.mkdirSync(dist, { recursive: true });
-for (const file of ["index.html", "styles.css", "app.js"]) {
+for (const file of [
+  "index.html",
+  "styles.css",
+  "app.js",
+  "legal.css",
+  "privacy.html",
+  "refund.html",
+  "pricing.html",
+  "terms.html"
+]) {
   fs.copyFileSync(path.join(root, file), path.join(dist, file));
 }
 console.log("Built static site in dist/");

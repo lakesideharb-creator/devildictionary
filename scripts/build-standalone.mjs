@@ -11,6 +11,7 @@ const standalone = html
   .replace('    <link rel="canonical" href="https://devildictionary.com/" />\n', "")
   .replace(/    <script>\n      if \(location\.hostname === "www\.devildictionary\.com"\) \{[\s\S]*?    <\/script>\n/, "")
   .replace('    <link rel="stylesheet" href="./styles.css" />', `    <style>\n${css}\n    </style>`)
+  .replace(/        <nav class="colophon-links"[\s\S]*?<\/nav>\n/, "")
   .replace('    <script src="./app.js"></script>', `    <script>\n${js}\n    </script>`)
   .replace("<title>", "<!-- Standalone offline edition: just double-click to run -->\n    <title>");
 

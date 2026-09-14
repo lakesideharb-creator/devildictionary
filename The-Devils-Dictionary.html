@@ -246,8 +246,12 @@ h1 { margin: 4px 0 0; font-size: clamp(30px, 4vw, 52px); line-height: .95; font-
 .pip { width: 7px; height: 7px; border-radius: 50%; border: 1px solid var(--blood); }
 .pip.filled { background: var(--blood); }
 
-.colophon { width: min(760px, 100%); margin: 0 auto; display: flex; justify-content: space-between; align-items: center; gap: 20px; color: var(--paper-deep); }
+.colophon { width: min(760px, 100%); margin: 0 auto; display: grid; gap: 11px; justify-items: center; padding-inline: 6px; color: var(--paper-deep); }
 .colophon p { margin: 0; font-size: 13px; font-style: italic; }
+.colophon-row { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+.colophon-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; }
+.colophon-links a { color: var(--paper-deep); text-decoration: none; padding-bottom: 2px; border-bottom: 1px solid rgba(189,164,119,.35); font: 10px/1 Arial, sans-serif; letter-spacing: .16em; text-transform: uppercase; }
+.colophon-links a:hover { color: var(--gold); border-bottom-color: var(--gold); }
 .text-button { color: var(--paper-deep); background: none; border: 0; border-bottom: 1px solid rgba(189,164,119,.45); padding: 3px 0; font: 11px/1 Arial, sans-serif; cursor: pointer; }
 
 .modal { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; padding: 28px 20px; overflow-y: auto; visibility: hidden; opacity: 0; transition: opacity .28s ease, visibility .28s; }
@@ -387,8 +391,9 @@ h1 { margin: 4px 0 0; font-size: clamp(30px, 4vw, 52px); line-height: .95; font-
   .letter { font-size: 24px; }
   .controls { gap: 7px; }
   .button { padding-inline: 12px; font-size: 10px; }
-  .colophon { padding-inline: 6px; }
+  .colophon-row { gap: 12px; }
   .colophon p { max-width: 230px; font-size: 11px; }
+  .colophon-links { gap: 12px; }
   .definition-card { padding: 40px 28px 34px; }
   .modal.judging { padding: 10px; align-items: start; }
   .modal.judging .definition-card { margin: 10px 0; padding: 30px 18px 24px; }
@@ -475,8 +480,10 @@ h1 { margin: 4px 0 0; font-size: clamp(30px, 4vw, 52px); line-height: .95; font-
       </section>
 
       <footer class="colophon">
-        <p>“Common sense is prejudice that finally reached retirement age.”</p>
-        <button id="resetButton" class="text-button" type="button">RESET MY PROGRESS</button>
+        <div class="colophon-row">
+          <p>“Common sense is prejudice that finally reached retirement age.”</p>
+          <button id="resetButton" class="text-button" type="button">RESET MY PROGRESS</button>
+        </div>
       </footer>
     </main>
 
