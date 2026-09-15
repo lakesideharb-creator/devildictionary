@@ -15,11 +15,23 @@ test("page contains all playable surfaces", () => {
   assert.match(html, /<script src="\.\/app\.js"><\/script>/);
 });
 
-test("dictionary has 45 unique playable entries across three stages", () => {
-  const words = [...js.matchAll(/\{ word: "([A-Z]+)"[^\n]+tier: ([123]) \}/g)];
-  assert.equal(words.length, 45);
-  assert.equal(new Set(words.map(match => match[1])).size, 45);
-  assert.deepEqual(new Set(words.map(match => match[2])), new Set(["1", "2", "3"]));
+test("dictionary has 100 unique playable entries across four stages", () => {
+  const words = [...js.matchAll(/\{ word: "([A-Z]+)"[^\n]+tier: ([1-4]) \}/g)];
+  assert.equal(words.length, 100);
+  assert.equal(new Set(words.map(match => match[1])).size, 100);
+  assert.deepEqual(new Set(words.map(match => match[2])), new Set(["1", "2", "3", "4"]));
+  for (const tier of ["1", "2", "3", "4"]) {
+    assert.equal(words.filter(match => match[2] === tier).length, 25, `stage ${tier} has 25 entries`);
+  }
+});
+
+test("every judged entry has two contrasting decoys", () => {
+  const decoyWords = [...js.matchAll(/^    ([A-Z]+): \[$/gm)].map(match => match[1]);
+  const judged = [...js.matchAll(/\{ word: "([A-Z]+)"[^\n]+tier: ([24]) \}/g)].map(match => match[1]);
+  assert.equal(decoyWords.length, 50, "half the dictionary is judged");
+  assert.deepEqual(new Set(decoyWords), new Set(judged), "decoys exist for exactly the judged words");
+  assert.equal((js.match(/bias: "COMFORT"/g) || []).length, decoyWords.length);
+  assert.equal((js.match(/bias: "ORDER"/g) || []).length, decoyWords.length);
 });
 
 test("coin balance is derived from unique completed count", () => {
@@ -36,10 +48,7 @@ test("hint and reward animations are present", () => {
   assert.match(js, /drawPath\(round\.path, true\)/);
 });
 
-test("stage two has a complete definition judgment set", () => {
-  assert.equal((js.match(/^    [A-Z]+: \[$/gm) || []).length, 15);
-  assert.equal((js.match(/bias: "COMFORT"/g) || []).length, 15);
-  assert.equal((js.match(/bias: "ORDER"/g) || []).length, 15);
+test("stage judgment is wired into the reveal flow", () => {
   assert.match(js, /function judgeDefinition/);
   assert.match(css, /@keyframes curtain-reveal/);
   assert.match(css, /@keyframes definition-strike/);

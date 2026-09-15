@@ -21,7 +21,7 @@ window.Element.prototype.animate = () => ({ finished: Promise.resolve() });
 window.eval(scripts[0][1]);
 
 assert.equal(window.document.querySelectorAll(".letter").length, 25);
-assert.equal(window.__DEVILS_GAME__.entries.length, 45);
+assert.equal(window.__DEVILS_GAME__.entries.length, 100);
 window.document.getElementById("hintButton").click();
 assert.ok(window.document.querySelector(".path-line.hint"));
 window.__DEVILS_GAME__.solveCurrent();

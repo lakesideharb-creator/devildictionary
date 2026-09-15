@@ -17,7 +17,6 @@
     { word: "ADVICE", pos: "noun", en: "A gift whose receipt is kept longer than its contents.", tier: 1 },
     { word: "FRIEND", pos: "noun", en: "A witness for the defense who has read the prosecution’s notes.", tier: 1 },
     { word: "HONEST", pos: "adj.", en: "Temporarily unable to calculate the profitable answer.", tier: 1 },
-
     { word: "CAREER", pos: "noun", en: "A ladder that becomes a treadmill one promotion at a time.", tier: 2 },
     { word: "EXPERT", pos: "noun", en: "A person who knows exactly why yesterday’s certainty failed.", tier: 2 },
     { word: "STATUS", pos: "noun", en: "The altitude at which one begins mistaking thin air for applause.", tier: 2 },
@@ -33,7 +32,6 @@
     { word: "CHOICE", pos: "noun", en: "The freedom to select which consequence will later feel imposed.", tier: 2 },
     { word: "MATURE", pos: "adj.", en: "Too experienced to be surprised, too tired to be impressed.", tier: 2 },
     { word: "JUSTICE", pos: "noun", en: "A balance admired most by those holding the weights.", tier: 2 },
-
     { word: "AMBITION", pos: "noun", en: "The art of climbing a ladder while explaining that height is vulgar.", tier: 3 },
     { word: "CONSENSUS", pos: "noun", en: "A conclusion everyone can defend because nobody remembers proposing it.", tier: 3 },
     { word: "PROGRESS", pos: "noun", en: "Replacing an old inconvenience with one that requires a password.", tier: 3 },
@@ -48,7 +46,62 @@
     { word: "PRINCIPLE", pos: "noun", en: "A rule kept most firmly when it costs someone else.", tier: 3 },
     { word: "CULTURE", pos: "noun", en: "What remains after a group forgets why it began behaving that way.", tier: 3 },
     { word: "NETWORK", pos: "noun", en: "Friendship measured in future usefulness.", tier: 3 },
-    { word: "LEGACY", pos: "noun", en: "An argument with the future conducted by someone unable to hear the reply.", tier: 3 }
+    { word: "LEGACY", pos: "noun", en: "An argument with the future conducted by someone unable to hear the reply.", tier: 3 },
+    { word: "YEAR", pos: "noun", en: "A period of three hundred and sixty-five disappointments.", tier: 1 },
+    { word: "BACK", pos: "noun", en: "That part of your friend which it is your privilege to contemplate in your adversity.", tier: 1 },
+    { word: "VOTE", pos: "noun", en: "The instrument and symbol of a freeman’s power to make a fool of himself and a wreck of his country.", tier: 1 },
+    { word: "PLAN", pos: "verb-transitive", en: "To bother about the best method of accomplishing an accidental result.", tier: 1 },
+    { word: "PRICE", pos: "noun", en: "Value, plus a reasonable sum for the wear and tear of conscience in demanding it.", tier: 1 },
+    { word: "FAITH", pos: "noun", en: "Belief without evidence in what is told by one who speaks without knowledge, of things without parallel.", tier: 1 },
+    { word: "NOISE", pos: "noun", en: "A stench in the ear. Undomesticated music. The chief product and authenticating sign of civilization.", tier: 1 },
+    { word: "PRAY", pos: "verb", en: "To ask that the laws of the universe be annulled in behalf of a single petitioner confessedly unworthy.", tier: 1 },
+    { word: "LABOR", pos: "noun", en: "One of the processes by which A acquires property for B.", tier: 1 },
+    { word: "TALK", pos: "verb-transitive", en: "To commit an indiscretion without temptation, from an impulse without purpose.", tier: 1 },
+    { word: "PLEASE", pos: "verb", en: "To lay the foundation for a superstructure of imposition.", tier: 2 },
+    { word: "FUTURE", pos: "noun", en: "That period of time in which our affairs prosper, our friends are true and our happiness is assured.", tier: 2 },
+    { word: "POLICE", pos: "noun", en: "An armed force for protection and participation.", tier: 2 },
+    { word: "REASON", pos: "verb-intransitive", en: "To weigh probabilities in the scales of desire.", tier: 2 },
+    { word: "BATTLE", pos: "noun", en: "A method of untying with the teeth of a political knot that would not yield to the tongue.", tier: 2 },
+    { word: "SENATE", pos: "noun", en: "A body of elderly gentlemen charged with high duties and misdemeanors.", tier: 2 },
+    { word: "LAWYER", pos: "noun", en: "One skilled in circumvention of the law.", tier: 2 },
+    { word: "APPEAL", pos: "verb-transitive", en: "In law, to put the dice into the box for another throw.", tier: 2 },
+    { word: "REFORM", pos: "verb", en: "A thing that mostly satisfies reformers opposed to reformation.", tier: 2 },
+    { word: "HARBOR", pos: "noun", en: "A place where ships taking shelter from storms are exposed to the fury of the customs.", tier: 2 },
+    { word: "PRIVATE", pos: "noun", en: "A military gentleman with a field-marshal’s baton in his knapsack and an impediment in his hope.", tier: 3 },
+    { word: "PRESENT", pos: "noun", en: "That part of eternity dividing the domain of disappointment from the realm of hope.", tier: 3 },
+    { word: "ECONOMY", pos: "noun", en: "Purchasing the barrel of whiskey that you do not need for the price of the cow that you cannot afford.", tier: 3 },
+    { word: "WEDDING", pos: "noun", en: "A ceremony at which two persons undertake to become one, one undertakes to become nothing, and nothing undertakes to become supportable.", tier: 3 },
+    { word: "COMFORT", pos: "noun", en: "A state of mind produced by contemplation of a neighbor’s uneasiness.", tier: 3 },
+    { word: "JEALOUS", pos: "adjective", en: "Unduly concerned about the preservation of that which can be lost only if not worth keeping.", tier: 3 },
+    { word: "DESTINY", pos: "noun", en: "A tyrant’s authority for crime and fool’s excuse for failure.", tier: 3 },
+    { word: "GRAMMAR", pos: "noun", en: "A system of pitfalls thoughtfully prepared for the feet of the self-made man, along the path by which he advances to distinction.", tier: 3 },
+    { word: "SELFISH", pos: "adjective", en: "Devoid of consideration for the selfishness of others.", tier: 3 },
+    { word: "MIRACLE", pos: "noun", en: "An act or event out of the order of nature and unaccountable, as beating a normal hand of four kings and an ace with four aces and a king.", tier: 3 },
+    { word: "LANGUAGE", pos: "noun", en: "The music with which we charm the serpents guarding another’s treasure.", tier: 4 },
+    { word: "INSURANCE", pos: "noun", en: "An ingenious modern game of chance in which the player is permitted to enjoy the comfortable conviction that he is beating the man who keeps the table.", tier: 4 },
+    { word: "LEARNING", pos: "noun", en: "The kind of ignorance distinguishing the studious.", tier: 4 },
+    { word: "MARRIAGE", pos: "noun", en: "The state or condition of a community consisting of a master, a mistress and two slaves, making in all, two.", tier: 4 },
+    { word: "POLITICS", pos: "noun", en: "A strife of interests masquerading as a contest of principles. The conduct of public affairs for private advantage.", tier: 4 },
+    { word: "DISTANCE", pos: "noun", en: "The only thing that the rich are willing for the poor to call theirs, and keep.", tier: 4 },
+    { word: "INFLUENCE", pos: "noun", en: "In politics, a visionary quo given in exchange for a substantial quid.", tier: 4 },
+    { word: "MEDICINE", pos: "noun", en: "A stone flung down the Bowery to kill a dog in Broadway.", tier: 4 },
+    { word: "ACCIDENT", pos: "noun", en: "An inevitable occurrence due to the action of immutable natural laws.", tier: 4 },
+    { word: "HAPPINESS", pos: "noun", en: "An agreeable sensation arising from contemplating the misery of another.", tier: 4 },
+    { word: "TELEPHONE", pos: "noun", en: "An invention of the devil which abrogates some of the advantages of making a disagreeable person keep his distance.", tier: 4 },
+    { word: "ALLIANCE", pos: "noun", en: "In international politics, the union of two thieves who have their hands so deeply inserted in each other’s pockets that they cannot separately plunder a third.", tier: 4 },
+    { word: "COMMERCE", pos: "noun", en: "A kind of transaction in which A plunders from B the goods of C, and for compensation B picks the pocket of D of money belonging to E.", tier: 4 },
+    { word: "DEPENDENT", pos: "adjective", en: "Reliant upon another’s generosity for the support which you are not in a position to exact from his fears.", tier: 4 },
+    { word: "DIAGNOSIS", pos: "noun", en: "A physician’s forecast of the disease by the patient’s pulse and purse.", tier: 4 },
+    { word: "PHYSICIAN", pos: "noun", en: "One upon whom we set our hopes when ill and our dogs when well.", tier: 4 },
+    { word: "APOLOGIZE", pos: "verb-intransitive", en: "To lay the foundation for a future offence.", tier: 4 },
+    { word: "BOUNDARY", pos: "noun", en: "In political geography, an imaginary line between two nations, separating the imaginary rights of one from the imaginary rights of the other.", tier: 4 },
+    { word: "NEIGHBOR", pos: "noun", en: "One whom we are commanded to love as ourselves, and who does all he knows how to make us disobedient.", tier: 4 },
+    { word: "ARCHITECT", pos: "noun", en: "One who drafts a plan of your house, and plans a draft of your money.", tier: 4 },
+    { word: "MERCHANT", pos: "noun", en: "One engaged in a commercial pursuit. A commercial pursuit is one in which the thing pursued is a dollar.", tier: 4 },
+    { word: "RATIONAL", pos: "adjective", en: "Devoid of all delusions save those of observation, experience and reflection.", tier: 4 },
+    { word: "KINDNESS", pos: "noun", en: "A brief preface to ten volumes of exaction.", tier: 4 },
+    { word: "GENEROUS", pos: "adjective", en: "Originally this word meant noble by birth and was rightly applied to a great multitude of persons. It now means noble by nature and is taking a bit of a rest.", tier: 4 },
+    { word: "PASSPORT", pos: "noun", en: "A document treacherously inflicted upon a citizen going abroad, exposing him as an alien and pointing him out for special reprobation and outrage.", tier: 4 },
   ];
 
   const JUDGMENT_DECOYS = {
@@ -111,7 +164,147 @@
     JUSTICE: [
       { bias: "COMFORT", en: "The fair protection of each person’s dignity, rights, and due reward." },
       { bias: "ORDER", en: "The impartial application of rules to comparable acts and disputes." }
-    ]
+    ],
+    PLEASE: [
+      { bias: "COMFORT", en: "A sign that something will happen if nothing happens." },
+      { bias: "ORDER", en: "One who moves along the line of least reluctance to a desired death." },
+    ],
+    FUTURE: [
+      { bias: "COMFORT", en: "An ingenious instrument which indicates what kind of weather we are having." },
+      { bias: "ORDER", en: "A prestidigitator who, putting metal into your mouth, pulls coins out of your pocket." },
+    ],
+    POLICE: [
+      { bias: "COMFORT", en: "One who has relied on the assistance of his friends." },
+      { bias: "ORDER", en: "A person whose vices and follies are not sociable." },
+    ],
+    REASON: [
+      { bias: "COMFORT", en: "To acquire, frequently by force but preferably by stealth." },
+      { bias: "ORDER", en: "A means, under Providence, of withholding alms from the destitute." },
+    ],
+    BATTLE: [
+      { bias: "COMFORT", en: "A play in which the story is told without violence to the language. The least disagreeable form of dramatic action." },
+      { bias: "ORDER", en: "A sentiment appropriate to the occasion of another’s superiority." },
+    ],
+    SENATE: [
+      { bias: "ORDER", en: "An instrument employed in the rectification of national boundaries." },
+      { bias: "COMFORT", en: "A proponent of a new misrule who has failed to establish it." },
+    ],
+    LAWYER: [
+      { bias: "COMFORT", en: "A disease incurred by exposure to the prosperity of a friend." },
+      { bias: "ORDER", en: "An American sovereign in his probationary state." },
+    ],
+    APPEAL: [
+      { bias: "COMFORT", en: "The kind of clothing worn by a man whose tailor is a blacksmith." },
+      { bias: "ORDER", en: "A woman with a fine prospect of happiness behind her." },
+    ],
+    REFORM: [
+      { bias: "COMFORT", en: "A preparation that renders the hook more palatable. The best kind is beauty." },
+      { bias: "ORDER", en: "A person who talks when you wish him to listen." },
+    ],
+    HARBOR: [
+      { bias: "COMFORT", en: "There is no definition for this word—nobody knows what hash is." },
+      { bias: "ORDER", en: "To treat with merited indifference the landlord’s notification that he has let his house to a party willin’ to pay." },
+    ],
+    LANGUAGE: [
+      { bias: "ORDER", en: "A muscular partition separating disorders of the chest from disorders of the bowels." },
+      { bias: "COMFORT", en: "In literary affairs, to become the fundamental element in a cone of critics." },
+    ],
+    INSURANCE: [
+      { bias: "ORDER", en: "In the Buddhist religion, a state of pleasurable annihilation awarded to the wise, particularly to those wise enough to understand it." },
+      { bias: "COMFORT", en: "An indocile horse of the western plains. In English society, the American wife of an English nobleman." },
+    ],
+    LEARNING: [
+      { bias: "COMFORT", en: "The Second Person of the secular Trinity." },
+      { bias: "ORDER", en: "A vagrant opinion without visible means of support." },
+    ],
+    MARRIAGE: [
+      { bias: "COMFORT", en: "An instrument of torture operated by a person with cotton in his ears. There are two instruments that are worse than a clarinet—two clarinets." },
+      { bias: "ORDER", en: "A woman by whom the realm is ruled when there is a king, and through whom it is ruled when there is not." },
+    ],
+    POLITICS: [
+      { bias: "ORDER", en: "A staff of office signifying authority. Its form, that of a heavy club, indicates its original purpose and use in dissuading from dissent." },
+      { bias: "COMFORT", en: "An account of one’s descent from an ancestor who did not particularly care to trace his own." },
+    ],
+    DISTANCE: [
+      { bias: "ORDER", en: "The chief of a nation that prefers the pestilence of despotism to the plague of anarchy." },
+      { bias: "COMFORT", en: "One with his hand in your pocket, his tongue in your ear and his faith in your patience." },
+    ],
+    INFLUENCE: [
+      { bias: "COMFORT", en: "A notable first experiment in baptism which washed away the sins (and sinners) of the world." },
+      { bias: "ORDER", en: "In politics, an imaginary rat-pit in which the statesman wrestles with his record." },
+    ],
+    MEDICINE: [
+      { bias: "COMFORT", en: "Unwarranted repose of manner in a person of low degree." },
+      { bias: "ORDER", en: "The patriotic art of lying for one’s country." },
+    ],
+    ACCIDENT: [
+      { bias: "COMFORT", en: "A kind of animal that the ancients catalogued under many heads." },
+      { bias: "ORDER", en: "A device for promoting dejection. Gentle exercise for intellectual debility." },
+    ],
+    HAPPINESS: [
+      { bias: "COMFORT", en: "One who is obstinately and zealously attached to an opinion that you do not entertain." },
+      { bias: "ORDER", en: "An unenlightened person who thinks one country better than another." },
+    ],
+    TELEPHONE: [
+      { bias: "COMFORT", en: "An instinct thoughtfully implanted by Providence as a solution to the labor question." },
+      { bias: "ORDER", en: "The hair that is commonly cut off by those who justly execrate the absurd Chinese custom of shaving the head." },
+    ],
+    ALLIANCE: [
+      { bias: "COMFORT", en: "To correct an erring friend or admonish a needy one. Of women the word abandoned is used in the sense of indiscreet." },
+      { bias: "ORDER", en: "A burden which of all those that we load upon others and carry ourselves is lightest in the hands and heaviest upon the back." },
+    ],
+    COMMERCE: [
+      { bias: "COMFORT", en: "A place where horses, ponies and elephants are permitted to see men, women and children acting the fool." },
+      { bias: "ORDER", en: "In American politics, a person who having failed to secure an office from the people is given one by the Administration on condition that he leave the country." },
+    ],
+    DEPENDENT: [
+      { bias: "COMFORT", en: "One who, professing virtues that he does not respect, secures the advantage of seeming to be what he despises." },
+      { bias: "ORDER", en: "A savage beast which, when it sleeps, Man girds at and despises, But takes himself away by leaps And bounds when it arises." },
+    ],
+    DIAGNOSIS: [
+      { bias: "ORDER", en: "The spiritual attitude of a man to a god and a dog to a man." },
+      { bias: "COMFORT", en: "A person with a Caucasian body and a Mongolian soul. A Tartar Emetic." },
+    ],
+    PHYSICIAN: [
+      { bias: "COMFORT", en: "A nutritious substance supplied by a bountiful Providence for the fattening of the poor." },
+      { bias: "ORDER", en: "A form of expression peculiar to the Land beyond the Magazines." },
+    ],
+    APOLOGIZE: [
+      { bias: "COMFORT", en: "An ox wearing the popular religious yoke." },
+      { bias: "ORDER", en: "An arboreal animal which makes itself at home in genealogical trees." },
+    ],
+    BOUNDARY: [
+      { bias: "COMFORT", en: "Sensible, madam, to the worth of this present writer. Alive, sir, to the advantages of letting him alone." },
+      { bias: "ORDER", en: "A prostrating disease caused by a determination of the heart to the head. It is sometimes accompanied by a copious discharge of hydrated chloride of sodium from the eyes." },
+    ],
+    NEIGHBOR: [
+      { bias: "COMFORT", en: "The feeling of a prudent man for an enemy who is too formidable safely to be opposed." },
+      { bias: "ORDER", en: "One of the two things mainly conducive to success, especially in politics. The other is Pull." },
+    ],
+    ARCHITECT: [
+      { bias: "ORDER", en: "A physician’s name for the rheumatism of a rich patient." },
+      { bias: "COMFORT", en: "“A kind of cloth the making of which, when made of hemp, entails a great waste of hemp.”" },
+    ],
+    MERCHANT: [
+      { bias: "COMFORT", en: "The purchase of that which neither belongs to the seller, nor can belong to the buyer. The most unprofitable of investments." },
+      { bias: "ORDER", en: "One to whom the interests of a part seem superior to those of the whole. The dupe of statesmen and the tool of conquerors." },
+    ],
+    RATIONAL: [
+      { bias: "ORDER", en: "The state of an enemy or opponent after an imaginary encounter with oneself." },
+      { bias: "COMFORT", en: "The human race, collectively, exclusive of the anthropoid poets." },
+    ],
+    KINDNESS: [
+      { bias: "COMFORT", en: "A father who has made a vow not to be a husband." },
+      { bias: "ORDER", en: "An offense next in degree of enormity to a slight." },
+    ],
+    GENEROUS: [
+      { bias: "COMFORT", en: "An animal (Porcus omnivorus) closely allied to the human race by the splendor and vivacity of its appetite, which, however, is inferior in scope, for it sticks at pig." },
+      { bias: "ORDER", en: "The period of human life intermediate between the idiocy of infancy and the folly of youth—two removes from the sin of manhood and three from the remorse of age." },
+    ],
+    PASSPORT: [
+      { bias: "COMFORT", en: "Good to eat, and wholesome to digest, as a worm to a toad, a toad to a snake, a snake to a pig, a pig to a man, and a man to a worm." },
+      { bias: "ORDER", en: "The dream of a mad philosopher. That which would remain in the cupel if one should assay a phantom. The nucleus of a vacuum." },
+    ],
   };
 
   const STORAGE_KEY = "devils-dictionary-save-v3";
@@ -122,6 +315,7 @@
     "stageName", "definitionModal", "definitionWord", "definitionPos", "definitionText",
     "definitionReveal", "judgmentPrompt", "definitionChoices", "judgmentFeedback", "readerNote",
     "newEntryBadge", "modalProgress", "nextButton", "coinCelebration", "coinMilestone", "stageCurtain",
+    "curtainSigil", "curtainKicker", "curtainName", "curtainNote",
     "toast", "coinVault", "soundToggle", "resetButton", "gestureNote"
   ].map(id => [id, document.getElementById(id)]));
 
@@ -297,10 +491,34 @@
     };
   }
 
+  const STAGE_SIZE = 25;
+
+  const STAGE_CURTAINS = {
+    2: {
+      sigil: "II",
+      kicker: "THE DICTIONARY NO LONGER TRUSTS YOU",
+      name: "STAGE II · THE JUDGMENT",
+      note: "Finding the word only proves you can read. Now prove you can doubt."
+    },
+    3: {
+      sigil: "III",
+      kicker: "THE DICTIONARY HAS STOPPED PRETENDING",
+      name: "STAGE III · THE ACCOMPLICE",
+      note: "You doubted every definition, and still you turned the page. That is consent."
+    },
+    4: {
+      sigil: "IV",
+      kicker: "THERE IS NO ONE LEFT TO BLAME",
+      name: "STAGE IV · THE AUTHOR",
+      note: "You have read the whole indictment. Now the dictionary hands you the pen."
+    }
+  };
+
   function getStage(count = save.completed.length) {
-    if (count < 15) return { tier: 1, name: "STAGE I · THE LITERATE", size: 5, title: "Find the word" };
-    if (count < 30) return { tier: 2, name: "STAGE II · THE DOUBTER", size: 6, title: "Read between the letters" };
-    return { tier: 3, name: "STAGE III · THE ACCOMPLICE", size: 7, title: "The definition is watching" };
+    if (count < STAGE_SIZE) return { tier: 1, name: "STAGE I · THE LITERATE", size: 5, title: "Find the word" };
+    if (count < STAGE_SIZE * 2) return { tier: 2, name: "STAGE II · THE DOUBTER", size: 6, title: "Read between the letters" };
+    if (count < STAGE_SIZE * 3) return { tier: 3, name: "STAGE III · THE ACCOMPLICE", size: 7, title: "The definition is watching" };
+    return { tier: 4, name: "STAGE IV · THE AUTHOR", size: 8, title: "You are the dictionary now" };
   }
 
   function pickEntry() {
@@ -461,7 +679,7 @@
 
   function solveRound() {
     sound.word();
-    if (round.entry.tier === 2 && JUDGMENT_DECOYS[round.entry.word]) {
+    if ((round.entry.tier === 2 || round.entry.tier === 4) && JUDGMENT_DECOYS[round.entry.word]) {
       openJudgment();
       return;
     }
@@ -496,8 +714,9 @@
     els.definitionReveal.classList.remove("judgment-result");
     els.readerNote.hidden = true;
     els.nextButton.hidden = false;
-    els.nextButton.textContent = save.completed.length === 15 && round.entry.tier === 1
-      ? "ENTER STAGE II · THE JUDGMENT"
+    const upcoming = getStage().tier > round.entry.tier ? STAGE_CURTAINS[getStage().tier] : null;
+    els.nextButton.textContent = upcoming
+      ? `ENTER ${upcoming.name}`
       : "BIND IT IN · NEXT WORD";
     els.newEntryBadge.textContent = isNew ? "NEW ENTRY" : "REVISITED";
     els.modalProgress.textContent = `${save.completed.length} / ${ENTRIES.length} COLLECTED`;
@@ -609,12 +828,17 @@
   }
 
   function nextRound() {
-    const unlockJudgment = save.completed.length === 15 && round.entry.tier === 1;
+    const enteredTier = getStage().tier;
+    const curtain = round.entry.tier < enteredTier ? STAGE_CURTAINS[enteredTier] : null;
     els.definitionModal.classList.remove("open");
     els.definitionModal.classList.remove("judging");
     els.definitionModal.setAttribute("aria-hidden", "true");
     const next = pickEntry();
-    if (unlockJudgment) {
+    if (curtain) {
+      els.curtainSigil.textContent = curtain.sigil;
+      els.curtainKicker.textContent = curtain.kicker;
+      els.curtainName.textContent = curtain.name;
+      els.curtainNote.textContent = curtain.note;
       sound.stage();
       els.stageCurtain.classList.add("show");
       els.stageCurtain.setAttribute("aria-hidden", "false");
