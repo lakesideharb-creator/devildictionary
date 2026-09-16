@@ -54,6 +54,27 @@ test("stage judgment is wired into the reveal flow", () => {
   assert.match(css, /@keyframes definition-strike/);
 });
 
+test("mobile edition sells the complete edition through one non-consumable product", () => {
+  assert.match(js, /const FREE_LIMIT = 30;/);
+  assert.match(js, /const COMPLETE_PRODUCT_ID = "com\.devildictionary\.app\.complete";/);
+  assert.match(js, /productType: "inapp"/, "the product is a one-time in-app purchase, not a subscription");
+  assert.match(js, /function restoreCompleteEdition/, "restore purchases is offered");
+  assert.match(js, /onlyCurrentEntitlements: true/, "entitlement checks stay scoped to the signed-in Apple ID");
+  // App Review rejects hardcoded prices, so the price must come from the store.
+  assert.match(js, /product\?\.priceString/);
+  assert.doesNotMatch(html, /\$4\.99|\$3\.99|\$2\.99/);
+  for (const id of ["paywallModal", "paywallPrice", "buyButton", "restoreButton", "lockPanel", "lockUnlockButton"]) {
+    assert.match(html, new RegExp(`id="${id}"`));
+  }
+});
+
+test("the paywall only exists inside the native shell", () => {
+  assert.match(js, /function hasFullAccess\(\) \{\s*\n\s*return !Native\.isNative \|\| save\.unlocked === true;/);
+  assert.match(js, /const pool = hasFullAccess\(\) \? ENTRIES : FREE_ENTRIES;/);
+  assert.match(js, /parsed\.unlocked === true/);
+  assert.match(js, /save\.unlocked = purchased;/, "resetting progress never revokes a purchase");
+});
+
 test("mechanical sound system is synthesized without external audio files", () => {
   assert.match(js, /function createSoundEngine/);
   assert.match(js, /window\.AudioContext \|\| window\.webkitAudioContext/);

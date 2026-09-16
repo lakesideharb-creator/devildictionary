@@ -4,3 +4,12 @@ test-*.png
 *.tar.gz
 .DS_Store
 upload/
+
+# iOS (Capacitor, SPM mode)
+ios/App/App/public/
+ios/App/App/capacitor.config.json
+ios/App/build/
+ios/App/DerivedData/
+ios/.swiftpm/
+*.xcuserdatad/
+*.xcuserstate/

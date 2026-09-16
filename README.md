@@ -20,6 +20,30 @@
 
 定义审判的两个干扰项不是编造的假句子，而是原作中**其他词条的真实释义**——三条都是 Bierce 的真笔，玩家要判断的是“哪一条属于这个词”，而非“哪一条是真的”。
 
+## iOS 版（Capacitor）
+
+网页版与 iOS 版共用同一份 `dist/`：网页端 100 个词条全免费，iOS 端前 30 个词条免费，其余 70 个通过一次性内购解锁。付费墙只在原生壳里生效（`Native.isNative`），网页端完全不存在。
+
+- Bundle ID：`com.devildictionary.app`
+- 内购产品 ID：`com.devildictionary.app.complete`（Non-Consumable，USD 4.99）
+- 依赖管理：**Swift Package Manager**（`cap add ios --packagemanager SPM`），不需要 CocoaPods
+- 最低系统：iOS 15（StoreKit 2 的下限）
+- 内购插件：`@capgo/native-purchases`，其 UMD 产物由 `scripts/build.mjs` 复制为 `dist/purchase.js`，运行时按需加载，避免为一个插件引入打包器
+
+```bash
+npm run build          # 生成 dist/（含 purchase.js）
+npx cap sync ios       # 同步 Web 资源与插件
+npx cap open ios       # 在 Xcode 中打开
+```
+
+原生侧的几点：
+
+- 价格与商品标题一律取自 StoreKit（`product.priceString`），不硬编码，否则会被拒审
+- 提供 Restore Purchases；启动时用 `getPurchases({ onlyCurrentEntitlements: true })` 静默校准解锁状态
+- `RESET MY PROGRESS` 不会撤销已购内容
+- In-App Purchase **没有对应 entitlement**，explicit App ID 默认即开启；不要加 `com.apple.developer.in-app-payments`（那是 Apple Pay）
+- 已知限制：本仓库的命令行环境禁止 `sandbox-exec`，`xcodebuild` 无法完成 SPM 解析，构建需在 Xcode GUI 中进行
+
 ## 自动部署
 
 Vercel 已连接本仓库：推送到 `main` 会自动更新生产部署，其他分支和 Pull Request 会生成预览部署。构建命令和输出目录由 `vercel.json` 管理。
