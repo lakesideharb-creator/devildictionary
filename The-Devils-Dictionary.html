@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#17120e" />
     <meta name="description" content="Slide a word out of a grid of letters, then let the dictionary define you back. A pocket edition of cynical definitions." />
+    <script>
+      if (!window.Capacitor && location.hostname === "www.devildictionary.com") {
+        location.replace(`https://devildictionary.com${location.pathname}${location.search}${location.hash}`);
+      }
+    </script>
     <!-- Standalone offline edition: just double-click to run -->
     <title>The Devil's Dictionary — A Word-Sliding Game</title>
     <style>

@@ -14,7 +14,8 @@ for (const file of [
   "privacy.html",
   "refund.html",
   "pricing.html",
-  "terms.html"
+  "terms.html",
+  "support.html"
 ]) {
   fs.copyFileSync(path.join(root, file), path.join(dist, file));
 }

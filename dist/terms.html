@@ -11,7 +11,7 @@
     <link rel="canonical" href="https://devildictionary.com/terms" />
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%2317120e'/%3E%3Ctext x='32' y='46' font-family='Georgia,serif' font-size='42' font-weight='700' fill='%23d8a63a' text-anchor='middle'%3ED%3C/text%3E%3C/svg%3E" />
     <script>
-      if (location.hostname === "www.devildictionary.com") {
+      if (!window.Capacitor && location.hostname === "www.devildictionary.com") {
         location.replace(`https://devildictionary.com${location.pathname}${location.search}${location.hash}`);
       }
     </script>
@@ -36,6 +36,7 @@
         <a href="/privacy">Privacy</a>
         <a href="/refund">Refunds</a>
         <a href="/terms" aria-current="page">Terms</a>
+        <a href="/support">Support</a>
       </nav>
 
       <article class="legal-card">

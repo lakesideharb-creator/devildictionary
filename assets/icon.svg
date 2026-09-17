@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="42%" r="66%">
+      <stop offset="0%" stop-color="#2a2018"/>
+      <stop offset="100%" stop-color="#17120e"/>
+    </radialGradient>
+  </defs>
+  <rect width="1024" height="1024" fill="#17120e"/>
+  <rect width="1024" height="1024" fill="url(#glow)"/>
+  <path fill="#d8a63a" fill-rule="evenodd" d="
+    M 296 192 H 500 C 660 192, 764 330, 764 512 C 764 694, 660 832, 500 832 H 296 Z
+    M 392 300 H 500 C 610 300, 668 385, 668 512 C 668 639, 610 700, 500 700 H 392 Z"/>
+  <path fill="#d8a63a" fill-opacity="0.55" d="M 512 872 L 534 896 L 512 920 L 490 896 Z"/>
+</svg>

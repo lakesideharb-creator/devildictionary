@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2732" height="2732" viewBox="0 0 2732 2732">
+  <rect width="2732" height="2732" fill="#17120e"/>
+  <g transform="translate(1366,1366) scale(1.55) translate(-530,-512)">
+    <path fill="#d8a63a" fill-rule="evenodd" d="
+      M 296 192 H 500 C 660 192, 764 330, 764 512 C 764 694, 660 832, 500 832 H 296 Z
+      M 392 300 H 500 C 610 300, 668 385, 668 512 C 668 639, 610 700, 500 700 H 392 Z"/>
+    <path fill="#d8a63a" fill-opacity="0.55" d="M 512 872 L 534 896 L 512 920 L 490 896 Z"/>
+  </g>
+</svg>

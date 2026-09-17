@@ -41,8 +41,22 @@ npx cap open ios       # 在 Xcode 中打开
 - 棋盘 `touch-action: none`，禁用长按放大镜与文本选择，防止连词时被系统手势打断
 - 深色状态栏与启动屏配色跟随页面主题
 - 连词、审判、进入新阶段、获得金币各有一次触感反馈
-- iPhone 锁定竖屏（棋盘是竖排布局，横屏会截断）
+- iPhone 锁定竖屏（棋盘是竖排布局，横屏会截断），设备族为 iPhone only，无需提交 iPad 截图
 - 已知限制：本仓库的命令行环境禁止 `sandbox-exec`，`xcodebuild` 无法完成 SPM 解析，构建需在 Xcode GUI 中进行
+
+### 上架素材
+
+`docs/app-store.md` 是完整的 App Store Connect 提交包：App 名称、副标题、关键词、描述、版本说明、年龄分级问卷、App Privacy 问答、审核备注，以及提交前清单。各字段字符数已按 Apple 限额校验，可直接复制。
+
+```bash
+node scripts/generate-store-screenshots.mjs   # 生成 5 张截图（6.9" + 6.5"）
+npx capacitor-assets generate --ios \         # 从 assets/icon.svg 生成全套图标与启动屏
+  --iconBackgroundColor "#17120e" --splashBackgroundColor "#17120e"
+```
+
+截图是矢量合成的（`app.js` 里读真实词条，文案不会与线上脱节），不是设备实拍。上架前建议在模拟器里重拍，脚本与清单见文档第 11 节。
+
+App 图标上传 `assets/icon.png`：1024×1024、无 alpha、无预置圆角（Apple 自己加遮罩）。
 
 ## 自动部署
 
