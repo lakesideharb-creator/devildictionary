@@ -96,6 +96,14 @@ The support page already exists in the repo (`support.html`) and is linked from
 the footer of every page. Push to `main` first so the URL is live before you
 submit — App Review does click these links.
 
+One caveat worth knowing: Cloudflare's email obfuscation rewrites `mailto:`
+links into `/cdn-cgi/l/email-protection#…`, so the served HTML no longer
+contains a plain-text address and anything without the decoding script renders
+it as `[email protected]`. The page therefore also spells the address out in words
+("support at devildictionary dot com"), so a reviewer can always read a working
+contact address. If you ever turn that Cloudflare feature off, the plain link
+renders normally again.
+
 ---
 
 ## 8. Age Rating questionnaire
