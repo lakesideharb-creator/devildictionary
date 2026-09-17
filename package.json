@@ -10,9 +10,7 @@
     "test": "node --test tests/game.test.js && node tests/dom-e2e.mjs"
   },
   "devDependencies": {
-    "@capacitor/assets": "^4.0.1",
-    "happy-dom": "^20.0.10",
-    "sharp": "^0.34.5"
+    "happy-dom": "^20.0.10"
   },
   "dependencies": {
     "@capacitor/cli": "^8.5.2",

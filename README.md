@@ -48,9 +48,13 @@ npx cap open ios       # 在 Xcode 中打开
 
 `docs/app-store.md` 是完整的 App Store Connect 提交包：App 名称、副标题、关键词、描述、版本说明、年龄分级问卷、App Privacy 问答、审核备注，以及提交前清单。各字段字符数已按 Apple 限额校验，可直接复制。
 
+这两个脚本只在准备上架素材时用到，依赖不写进 `package.json`（避免部署时装它们），按需安装即可：
+
 ```bash
-node scripts/generate-store-screenshots.mjs   # 生成 5 张截图（6.9" + 6.5"）
-npx capacitor-assets generate --ios \         # 从 assets/icon.svg 生成全套图标与启动屏
+npm i -D sharp @capacitor/assets    # 仅本地素材生成需要
+
+npm run shots                       # 生成 5 张截图（6.9" + 6.5"）
+npx capacitor-assets generate --ios \
   --iconBackgroundColor "#17120e" --splashBackgroundColor "#17120e"
 ```
 
