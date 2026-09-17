@@ -310,12 +310,6 @@
   const STORAGE_KEY = "devils-dictionary-save-v3";
   const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-  // The mobile edition gives away the first FREE_LIMIT entries and charges once for
-  // the rest. The web edition has no paywall at all, so nothing here is enforced
-  // unless the page is actually running inside the native shell.
-  const FREE_LIMIT = 30;
-  const COMPLETE_PRODUCT_ID = "com.devildictionary.app.complete";
-
   const Native = (() => {
     const bridge = window.Capacitor;
     const isNative = !!(bridge && typeof bridge.isNativePlatform === "function" && bridge.isNativePlatform());
@@ -331,8 +325,6 @@
     Promise.resolve(HapticsPlugin.impact({ style })).catch(() => {});
   }
 
-  // Free pool: every tier-1 entry plus just enough tier-2 to taste the judgment.
-  const FREE_ENTRIES = [...ENTRIES].sort((a, b) => a.tier - b.tier).slice(0, FREE_LIMIT);
   const els = Object.fromEntries([
     "board", "pathLayer", "selectionText", "targetWord", "folio", "hintButton", "shuffleButton",
     "coinCount", "completedCount", "totalCount", "progressFill", "coinPips", "coinRuleText",
@@ -340,10 +332,7 @@
     "definitionReveal", "judgmentPrompt", "definitionChoices", "judgmentFeedback", "readerNote",
     "newEntryBadge", "modalProgress", "nextButton", "coinCelebration", "coinMilestone", "stageCurtain",
     "curtainSigil", "curtainKicker", "curtainName", "curtainNote",
-    "toast", "coinVault", "soundToggle", "resetButton", "gestureNote",
-    "gameCard", "lockPanel", "lockHeadline", "lockUnlockButton", "lockRestoreButton",
-    "paywallModal", "paywallLede", "paywallPrice", "buyButton", "restoreButton",
-    "paywallStatus", "paywallDismiss"
+    "toast", "coinVault", "soundToggle", "resetButton", "gestureNote"
   ].map(id => [id, document.getElementById(id)]));
 
   let save = loadSave();
@@ -357,7 +346,7 @@
 
   function loadSave() {
     const blank = {
-      completed: [], order: [], current: null, hints: 0, rounds: 0, unlocked: false,
+      completed: [], order: [], current: null, hints: 0, rounds: 0,
       judgment: { comfort: 0, order: 0, correct: 0, firstTry: 0 }, sound: true
     };
     try {
@@ -369,7 +358,6 @@
       parsed.hints = Number.isFinite(parsed.hints) ? parsed.hints : 0;
       parsed.rounds = Number.isFinite(parsed.rounds) ? parsed.rounds : 0;
       parsed.sound = parsed.sound !== false;
-      parsed.unlocked = parsed.unlocked === true;
       const judgment = parsed.judgment && typeof parsed.judgment === "object" ? parsed.judgment : {};
       parsed.judgment = Object.fromEntries(["comfort", "order", "correct", "firstTry"].map(key => [
         key, Number.isFinite(judgment[key]) ? Math.max(0, judgment[key]) : 0
@@ -549,24 +537,13 @@
     return { tier: 4, name: "STAGE IV · THE AUTHOR", size: 8, title: "You are the dictionary now" };
   }
 
-  function hasFullAccess() {
-    return !Native.isNative || save.unlocked === true;
-  }
-
-  // True once a free player has read every entry they are allowed to read.
-  function isLockedOut() {
-    return !hasFullAccess() && save.completed.length >= FREE_LIMIT;
-  }
-
   function pickEntry() {
     const stage = getStage();
-    const pool = hasFullAccess() ? ENTRIES : FREE_ENTRIES;
-    const eligible = pool.filter(entry => entry.tier <= stage.tier);
+    const eligible = ENTRIES.filter(entry => entry.tier <= stage.tier);
     let candidates = eligible.filter(entry => !save.completed.includes(entry.word));
-    if (!candidates.length) candidates = pool.filter(entry => !save.completed.includes(entry.word));
-    // Nothing left to discover: owners replay, free players hit the wall instead.
-    if (!candidates.length) candidates = hasFullAccess() ? (eligible.length ? eligible : pool) : [];
-    if (!candidates.length) return null;
+    if (!candidates.length) candidates = ENTRIES.filter(entry => !save.completed.includes(entry.word));
+    // Everything has been read: hand back a replay rather than an empty board.
+    if (!candidates.length) candidates = eligible.length ? eligible : ENTRIES;
     const recent = new Set(save.order.slice(-5));
     const fresh = candidates.filter(entry => !recent.has(entry.word));
     const final = fresh.length ? fresh : candidates;
@@ -879,10 +856,6 @@
     els.definitionModal.classList.remove("judging");
     els.definitionModal.setAttribute("aria-hidden", "true");
     const next = pickEntry();
-    if (isLockedOut() || !next) {
-      openPaywall();
-      return;
-    }
     if (curtain) {
       els.curtainSigil.textContent = curtain.sigil;
       els.curtainKicker.textContent = curtain.kicker;
@@ -995,163 +968,6 @@
     toastTimer = window.setTimeout(() => els.toast.classList.remove("show"), 2200);
   }
 
-  /* ---------------- Complete edition: StoreKit bridge ---------------- */
-
-  let purchasePlugin;
-  let purchasePluginTried = false;
-
-  // The plugin ships as a UMD bundle (dist/purchase.js) that hangs itself off the
-  // `capacitorExports` global Capacitor injects. Loading it lazily keeps the web
-  // build untouched and avoids a bundler for a single plugin.
-  async function ensurePurchases() {
-    if (!Native.isNative) return null;
-    if (purchasePlugin || purchasePluginTried) return purchasePlugin;
-    purchasePluginTried = true;
-    if (!window.capacitorNativePurchases) {
-      await new Promise((resolve, reject) => {
-        const script = document.createElement("script");
-        script.src = "./purchase.js";
-        script.onload = resolve;
-        script.onerror = () => reject(new Error("purchase.js failed to load"));
-        document.head.appendChild(script);
-      });
-    }
-    purchasePlugin = window.capacitorNativePurchases?.NativePurchases || null;
-    return purchasePlugin;
-  }
-
-  async function hasEntitlement() {
-    const plugin = await ensurePurchases().catch(() => null);
-    if (!plugin) return false;
-    try {
-      const { purchases } = await plugin.getPurchases({ productType: "inapp", onlyCurrentEntitlements: true });
-      return (purchases || []).some(item => item.productIdentifier === COMPLETE_PRODUCT_ID);
-    } catch {
-      return false;
-    }
-  }
-
-  async function loadProductPrice() {
-    const plugin = await ensurePurchases().catch(() => null);
-    if (!plugin) return null;
-    try {
-      const { products } = await plugin.getProducts({
-        productIdentifiers: [COMPLETE_PRODUCT_ID],
-        productType: "inapp"
-      });
-      // App Review: always show the store's own title and price, never a hardcoded one.
-      return products?.[0] || null;
-    } catch {
-      return null;
-    }
-  }
-
-  function setPaywallBusy(busy) {
-    els.buyButton.disabled = busy;
-    els.restoreButton.disabled = busy;
-  }
-
-  function setPaywallStatus(message) {
-    els.paywallStatus.textContent = message;
-    els.paywallStatus.hidden = !message;
-  }
-
-  async function openPaywall() {
-    const read = save.completed.length;
-    els.paywallLede.textContent = `You have read ${read} of ${ENTRIES.length} entries. The other ${ENTRIES.length - read} are still in the vault.`;
-    setPaywallStatus("");
-    els.paywallModal.classList.add("open");
-    els.paywallModal.setAttribute("aria-hidden", "false");
-    if (!Native.isNative) return;
-    setPaywallBusy(true);
-    const product = await loadProductPrice();
-    setPaywallBusy(false);
-    els.paywallPrice.textContent = product?.priceString || "unavailable";
-  }
-
-  function closePaywall() {
-    els.paywallModal.classList.remove("open");
-    els.paywallModal.setAttribute("aria-hidden", "true");
-    setPaywallBusy(false);
-  }
-
-  function showLockPanel() {
-    els.lockHeadline.textContent = `You have read ${save.completed.length} of ${ENTRIES.length}.`;
-    els.lockPanel.hidden = false;
-    els.gameCard.classList.add("locked");
-  }
-
-  function hideLockPanel() {
-    els.lockPanel.hidden = true;
-    els.gameCard.classList.remove("locked");
-  }
-
-  async function grantUnlock(message) {
-    save.unlocked = true;
-    persist();
-    haptic("HEAVY");
-    closePaywall();
-    hideLockPanel();
-    updateHUD();
-    showToast(message);
-    const next = pickEntry();
-    if (next) makeBoard(next);
-  }
-
-  async function buyCompleteEdition() {
-    const plugin = await ensurePurchases().catch(() => null);
-    if (!plugin) return setPaywallStatus("Purchases are unavailable right now. Check your connection and try again.");
-    setPaywallBusy(true);
-    setPaywallStatus("Contacting the App Store…");
-    try {
-      const transaction = await plugin.purchaseProduct({
-        productIdentifier: COMPLETE_PRODUCT_ID,
-        productType: "inapp"
-      });
-      if (transaction?.productIdentifier === COMPLETE_PRODUCT_ID) {
-        await grantUnlock("Paid in full. The vault is open.");
-      } else {
-        setPaywallStatus("The purchase did not finish. Nothing has been charged.");
-      }
-    } catch (error) {
-      const cancelled = /cancel/i.test(String(error?.message || error?.code || ""));
-      setPaywallStatus(cancelled
-        ? "Purchase cancelled. The dictionary will wait."
-        : "The purchase could not be completed. Please try again.");
-    } finally {
-      setPaywallBusy(false);
-    }
-  }
-
-  async function restoreCompleteEdition() {
-    const plugin = await ensurePurchases().catch(() => null);
-    if (!plugin) return setPaywallStatus("Purchases are unavailable right now.");
-    setPaywallBusy(true);
-    setPaywallStatus("Looking for your purchase…");
-    try {
-      await plugin.restorePurchases();
-      if (await hasEntitlement()) {
-        await grantUnlock("Restored. The vault is open again.");
-      } else {
-        setPaywallStatus("No earlier purchase was found for this Apple ID.");
-      }
-    } catch {
-      setPaywallStatus("Restore failed. Please try again.");
-    } finally {
-      setPaywallBusy(false);
-    }
-  }
-
-  // A reinstall or a new device must not lose a purchase the user already paid for.
-  async function syncEntitlementOnLaunch() {
-    if (!Native.isNative || save.unlocked) return;
-    if (await hasEntitlement()) {
-      save.unlocked = true;
-      persist();
-      updateHUD();
-    }
-  }
-
   async function configureNativeChrome() {
     if (!Native.isNative) return;
     try { await StatusBarPlugin.setStyle({ style: "DARK" }); } catch { /* older iOS */ }
@@ -1171,15 +987,10 @@
       }, 3500);
       return;
     }
-    // Resetting progress must never revoke something the player already paid for.
-    const purchased = save.unlocked === true;
     localStorage.removeItem(STORAGE_KEY);
     save = loadSave();
-    save.unlocked = purchased;
-    persist();
     els.resetButton.dataset.confirm = "";
     els.resetButton.textContent = "RESET MY PROGRESS";
-    hideLockPanel();
     makeBoard(pickEntry());
     showToast("A new dictionary has been opened.");
   }
@@ -1188,17 +999,7 @@
     els.totalCount.textContent = ENTRIES.length;
     updateHUD();
     const current = ENTRIES.find(entry => entry.word === save.current && !save.completed.includes(entry.word));
-    const first = current && !isLockedOut() ? current : pickEntry();
-    if (isLockedOut() || !first) {
-      showLockPanel();
-    } else {
-      makeBoard(first);
-    }
-    els.buyButton.addEventListener("click", buyCompleteEdition);
-    els.restoreButton.addEventListener("click", restoreCompleteEdition);
-    els.paywallDismiss.addEventListener("click", () => { closePaywall(); showLockPanel(); });
-    els.lockUnlockButton.addEventListener("click", openPaywall);
-    els.lockRestoreButton.addEventListener("click", restoreCompleteEdition);
+    makeBoard(current || pickEntry());
     els.hintButton.addEventListener("click", showHint);
     els.shuffleButton.addEventListener("click", () => { sound.shuffle(); makeBoard(round.entry, true); showToast("Same word. The lies have been rearranged."); });
     els.nextButton.addEventListener("click", nextRound);
@@ -1207,27 +1008,16 @@
     els.resetButton.addEventListener("click", resetProgress);
     window.addEventListener("resize", () => requestAnimationFrame(() => drawPath(selection, false)));
     document.addEventListener("keydown", event => {
-      if (event.key !== "Escape") return;
-      if (els.paywallModal.classList.contains("open")) {
-        closePaywall();
-        showLockPanel();
-      } else if (els.definitionModal.classList.contains("open") && !els.nextButton.hidden) {
-        nextRound();
-      }
+      if (event.key === "Escape" && els.definitionModal.classList.contains("open") && !els.nextButton.hidden) nextRound();
     });
     window.__DEVILS_GAME__ = {
       entries: ENTRIES,
-      freeEntries: FREE_ENTRIES,
       isNative: Native.isNative,
-      hasFullAccess,
       getState: () => ({ ...save, coins: Math.floor(save.completed.length / 5), round: round ? { ...round } : null }),
       solveCurrent: () => { selection = [...round.path]; paintSelection(); finishSelection(); },
-      openPaywall,
-      grantUnlock,
       reset: () => { localStorage.removeItem(STORAGE_KEY); location.reload(); }
     };
     configureNativeChrome();
-    syncEntitlementOnLaunch();
   }
 
   init();

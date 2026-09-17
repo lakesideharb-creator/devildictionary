@@ -18,12 +18,4 @@ for (const file of [
 ]) {
   fs.copyFileSync(path.join(root, file), path.join(dist, file));
 }
-// Ship the in-app purchase plugin's browser build so the native WebView can reach
-// StoreKit without a bundler. Capacitor injects the `capacitorExports` global itself.
-const purchaseSrc = path.join(root, "node_modules/@capgo/native-purchases/dist/plugin.js");
-if (fs.existsSync(purchaseSrc)) {
-  fs.copyFileSync(purchaseSrc, path.join(dist, "purchase.js"));
-} else {
-  console.log("warning: @capgo/native-purchases missing, skipping purchase.js");
-}
 console.log("Built static site in dist/");

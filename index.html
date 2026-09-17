@@ -46,7 +46,7 @@
         </div>
       </header>
 
-      <section class="game-card" id="gameCard" aria-labelledby="roundTitle">
+      <section class="game-card" aria-labelledby="roundTitle">
         <div class="ornament ornament-left" aria-hidden="true">☞</div>
         <div class="ornament ornament-right" aria-hidden="true">☜</div>
 
@@ -84,13 +84,6 @@
           <strong id="coinRuleText">5 words to go</strong>
         </div>
 
-        <div class="lock-panel" id="lockPanel" hidden>
-          <p class="lock-kicker">THE DICTIONARY IS CLOSED</p>
-          <h3 id="lockHeadline">You have read 30 of 100.</h3>
-          <p class="lock-copy">The remaining 70 entries — including Stage III · The Accomplice and Stage IV · The Author — are bound behind a lock the dictionary pretends not to own.</p>
-          <button class="button button-gold" id="lockUnlockButton" type="button">OPEN THE COMPLETE EDITION</button>
-          <button class="text-button" id="lockRestoreButton" type="button">RESTORE MY PURCHASE</button>
-        </div>
       </section>
 
       <footer class="colophon">
@@ -127,30 +120,6 @@
           <span id="modalProgress"></span>
         </div>
         <button class="button button-gold" id="nextButton" type="button">BIND IT IN · NEXT WORD</button>
-      </article>
-    </div>
-
-    <div class="modal" id="paywallModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="paywallTitle">
-      <div class="modal-backdrop"></div>
-      <article class="definition-card paywall-card">
-        <div class="flash-rays" aria-hidden="true"></div>
-        <p class="definition-kicker">THE DEVIL CHARGES FOR THE REST</p>
-        <h2 id="paywallTitle">THE COMPLETE EDITION</h2>
-        <div class="definition-rule"><span>◆</span></div>
-        <p class="paywall-lede" id="paywallLede">You have read 30 of 100 entries. The other 70 are still in the vault.</p>
-        <ul class="paywall-list">
-          <li>70 more entries, including <strong>Stage III · The Accomplice</strong> and <strong>Stage IV · The Author</strong></li>
-          <li>The 8×8 grid and the second definition judgment</li>
-          <li>One payment. No subscription, no account, no advertising.</li>
-        </ul>
-        <button class="button button-gold" id="buyButton" type="button">UNLOCK — <span id="paywallPrice">…</span></button>
-        <button class="button button-ink paywall-restore" id="restoreButton" type="button">RESTORE MY PURCHASE</button>
-        <p class="paywall-status" id="paywallStatus" role="status" aria-live="polite" hidden></p>
-        <p class="paywall-legal">
-          Payment is handled by the App Store.
-          <a href="/terms">Terms</a> · <a href="/privacy">Privacy</a> · <a href="/refund">Refunds</a>
-        </p>
-        <button class="text-button paywall-dismiss" id="paywallDismiss" type="button">NOT NOW</button>
       </article>
     </div>
 

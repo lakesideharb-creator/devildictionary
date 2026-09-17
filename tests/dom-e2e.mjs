@@ -42,8 +42,8 @@ function boot(storage, options = {}) {
   window.__audioEvents = audioEvents;
   if (storage) window.localStorage.setItem("devils-dictionary-save-v3", JSON.stringify(storage));
   if (options.native) {
-    // Stand in for the Capacitor bridge the iOS shell injects, without any plugin
-    // behind it — enough to prove the paywall gates, not to exercise StoreKit.
+    // Stand in for the Capacitor bridge the iOS shell injects, to prove the game
+    // behaves identically inside the native wrapper.
     window.Capacitor = {
       isNativePlatform: () => true,
       getPlatform: () => "ios",
@@ -157,68 +157,31 @@ await sleep(690);
 assert.equal(stageFourDocument.getElementById("coinCount").textContent, "15", "75→76 boundary earns the fifteenth coin");
 assert.ok(stageFourDocument.getElementById("coinCelebration").classList.contains("show"));
 
-// ---------- mobile paywall ----------
-const freeWords = window.__DEVILS_GAME__.freeEntries.map(entry => entry.word);
-assert.equal(freeWords.length, 30, "the mobile edition gives away 30 entries");
-assert.equal(new Set(freeWords).size, 30);
-assert.equal(window.__DEVILS_GAME__.freeEntries.filter(entry => entry.tier === 1).length, 25, "every stage-one entry is free");
-assert.equal(window.__DEVILS_GAME__.freeEntries.filter(entry => entry.tier === 2).length, 5, "stage two is only tasted");
+// ---------- nothing is gated, on the web or inside the native shell ----------
+const everyWord = window.__DEVILS_GAME__.entries.map(entry => entry.word);
+const partway = everyWord.slice(0, 30);
+const gatedSave = { completed: partway, order: partway.slice(-5), current: null, hints: 0, rounds: 30 };
 
-const gatedSave = { completed: freeWords, order: freeWords.slice(-5), current: null, hints: 0, rounds: 30, unlocked: false };
-
-// The web edition never gates anything, even with the same exhausted save.
 const webGated = boot(gatedSave);
 assert.equal(webGated.__DEVILS_GAME__.isNative, false);
-assert.equal(webGated.__DEVILS_GAME__.hasFullAccess(), true);
-assert.equal(webGated.document.getElementById("lockPanel").hidden, true, "the web build has no paywall");
+assert.equal(webGated.document.getElementById("lockPanel"), null, "no vault panel exists at all");
 assert.ok(webGated.document.querySelectorAll(".letter").length >= 36, "the web build keeps dealing words");
 
-// Inside the native shell the same save is locked out.
+// Inside the iOS shell the same save is treated exactly the same way.
 const gated = boot(gatedSave, { native: true });
-const gatedDocument = gated.document;
 assert.equal(gated.__DEVILS_GAME__.isNative, true);
-assert.equal(gated.__DEVILS_GAME__.hasFullAccess(), false);
-assert.equal(gatedDocument.getElementById("lockPanel").hidden, false, "exhausted free tier shows the vault panel");
-assert.ok(gatedDocument.getElementById("gameCard").classList.contains("locked"), "the board is swapped for the vault");
-assert.equal(gatedDocument.getElementById("lockHeadline").textContent, "You have read 30 of 100.");
+assert.equal(gated.document.getElementById("lockPanel"), null, "the native shell has no paywall either");
+assert.ok(gated.document.querySelectorAll(".letter").length >= 36, "the native shell deals past 30 entries");
 
-gatedDocument.getElementById("lockUnlockButton").click();
-assert.ok(gatedDocument.getElementById("paywallModal").classList.contains("open"), "the vault panel opens the paywall");
-assert.equal(gatedDocument.getElementById("paywallModal").getAttribute("aria-hidden"), "false");
-assert.match(gatedDocument.getElementById("paywallLede").textContent, /You have read 30 of 100 entries/);
-
-gatedDocument.getElementById("paywallDismiss").click();
-assert.equal(gatedDocument.getElementById("paywallModal").classList.contains("open"), false, "the paywall can be dismissed");
-assert.equal(gatedDocument.getElementById("lockPanel").hidden, false, "dismissing returns to the vault, not to a dead board");
-
-await gated.__DEVILS_GAME__.grantUnlock("Paid in full. The vault is open.");
-assert.equal(gatedDocument.getElementById("lockPanel").hidden, true, "unlocking restores the board");
-assert.equal(gatedDocument.getElementById("gameCard").classList.contains("locked"), false);
-assert.equal(gated.__DEVILS_GAME__.getState().unlocked, true);
-assert.ok(gatedDocument.querySelectorAll(".letter").length >= 36, "a fresh word is dealt after unlocking");
-
-// A free player is served only free words.
-const nearlyGated = boot({ completed: freeWords.slice(0, 25), order: freeWords.slice(20, 25), current: null, hints: 0, rounds: 25, unlocked: false }, { native: true });
-for (let i = 0; i < 6; i += 1) {
-  const word = nearlyGated.__DEVILS_GAME__.getState().round.entry.word;
-  assert.ok(freeWords.includes(word), `${word} is inside the free tier`);
-  nearlyGated.__DEVILS_GAME__.solveCurrent();
-  if (nearlyGated.document.getElementById("definitionModal").classList.contains("judging")) {
-    nearlyGated.document.querySelector('.definition-choice[data-correct="true"]').click();
-  }
-  if (nearlyGated.document.getElementById("completedCount").textContent === "30") break;
-  nearlyGated.document.getElementById("nextButton").click();
-  await sleep(280);
-}
-assert.equal(nearlyGated.document.getElementById("completedCount").textContent, "30");
-nearlyGated.document.getElementById("nextButton").click();
-await sleep(120);
-assert.ok(nearlyGated.document.getElementById("paywallModal").classList.contains("open"), "the 30th word opens the paywall instead of dealing a paid one");
+// Reading every entry replays instead of dead-ending.
+const finished = boot({ completed: everyWord, order: everyWord.slice(-5), current: null, hints: 0, rounds: 100 }, { native: true });
+assert.equal(finished.document.querySelectorAll(".letter").length, 64, "a finished dictionary deals an 8×8 replay");
+assert.equal(finished.document.getElementById("completedCount").textContent, "100");
 
 window.close();
 unlock.close();
 stageFour.close();
 webGated.close();
 gated.close();
-nearlyGated.close();
-console.log("DOM E2E OK: stage II and IV unlocks, swipe, hint, three-way judgment, reader note, progress, coin boundaries, and the mobile paywall");
+finished.close();
+console.log("DOM E2E OK: stage II and IV unlocks, swipe, hint, three-way judgment, reader note, progress, coin boundaries, and no paywall anywhere");
