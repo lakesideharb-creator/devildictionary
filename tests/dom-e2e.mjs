@@ -94,8 +94,21 @@ for (let solved = 1; solved <= 5; solved += 1) {
   assert.ok(document.getElementById("definitionModal").classList.contains("open"), "definition popup opens after a valid swipe");
   assert.ok(document.getElementById("definitionText").textContent.length > 20, "counter-intuitive definition is shown");
   assert.equal(document.getElementById("completedCount").textContent, String(solved), "cumulative progress increments");
+  if (solved === 1) {
+    assert.equal(document.querySelector(".shell").inert, true, "open definition keeps keyboard focus out of the background");
+    const copied = [];
+    Object.defineProperty(window.navigator, "clipboard", { configurable: true, value: { writeText: async text => copied.push(text) } });
+    document.getElementById("shareWordButton").click();
+    await sleep(0);
+    assert.ok(copied[0].includes(window.__DEVILS_GAME__.getState().round.entry.en), "share copies the actual unlocked definition");
+    assert.ok(copied[0].endsWith("https://devildictionary.com"), "share includes the canonical game link");
+    document.getElementById("nextButton").focus();
+    document.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Tab", bubbles: true, cancelable: true }));
+    assert.equal(document.activeElement.id, "saveCardButton", "Tab wraps to the first modal action");
+  }
   if (solved < 5) {
     document.getElementById("nextButton").click();
+    assert.equal(document.querySelector(".shell").inert, false, "next word restores background interaction");
     await sleep(280);
   }
 }
@@ -119,6 +132,7 @@ assert.ok(unlock.document.querySelector("#targetWord .mask"), "stage two conceal
 await swipeCurrent(unlock);
 assert.ok(unlock.document.getElementById("definitionModal").classList.contains("judging"));
 assert.equal(unlock.document.querySelectorAll(".definition-choice").length, 3, "judgment presents three definitions");
+assert.equal(unlock.document.getElementById("definitionReveal").hidden, true, "share actions remain hidden until the verdict is resolved");
 assert.equal(unlock.document.getElementById("completedCount").textContent, "25", "word is not collected before a verdict");
 const wrongChoice = unlock.document.querySelector('.definition-choice[data-correct="false"]');
 wrongChoice.click();

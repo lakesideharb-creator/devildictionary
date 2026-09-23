@@ -17,13 +17,14 @@
   <body>
     <div class="grain" aria-hidden="true"></div>
     <main class="shell">
+      <article class="edition" aria-label="The pocket dictionary">
       <header class="masthead">
         <div class="brand-lockup">
-          <div class="seal" aria-hidden="true">D</div>
+          <img class="devil-engraving" src="./assets/devil-engraving.png" width="240" height="120" alt="" />
           <div>
             <p class="eyebrow">A POCKET EDITION FOR THE SUSPICIOUS</p>
             <h1>The Devil’s Dictionary</h1>
-            <p class="subtitle">Slide out a word. Watch it define you back.</p>
+            <p class="subtitle">Find the word. Face the truth.</p>
           </div>
         </div>
 
@@ -59,7 +60,7 @@
         </div>
 
         <div class="selection-line" aria-live="polite">
-          <span class="selection-label">YOUR DEFINITION</span>
+          <span class="selection-label">YOUR LETTERS</span>
           <strong id="selectionText">—</strong>
         </div>
 
@@ -85,6 +86,8 @@
         </div>
 
       </section>
+      <p class="edition-signoff"><span aria-hidden="true">✦</span> A little wiser. A little less innocent. <span aria-hidden="true">✦</span></p>
+      </article>
 
       <footer class="colophon">
         <div class="colophon-row">
@@ -115,6 +118,10 @@
         <div class="definition-reveal" id="definitionReveal">
           <p class="definition-text" id="definitionText"></p>
           <p class="reader-note" id="readerNote" hidden></p>
+          <div class="share-actions">
+            <button class="button button-ghost" id="saveCardButton" type="button">SAVE WORD CARD ↓</button>
+            <button class="button button-ghost" id="shareWordButton" type="button">COPY FOR X ↗</button>
+          </div>
         </div>
         <div class="modal-meta">
           <span id="newEntryBadge">NEW ENTRY</span>

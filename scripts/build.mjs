@@ -6,6 +6,8 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const dist = path.join(root, "dist");
 fs.rmSync(dist, { recursive: true, force: true });
 fs.mkdirSync(dist, { recursive: true });
+fs.mkdirSync(path.join(dist, "assets"), { recursive: true });
+fs.copyFileSync(path.join(root, "assets/devil-engraving.png"), path.join(dist, "assets/devil-engraving.png"));
 for (const file of [
   "index.html",
   "styles.css",

@@ -6,10 +6,12 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
 const css = fs.readFileSync(path.join(root, "styles.css"), "utf8");
 const js = fs.readFileSync(path.join(root, "app.js"), "utf8");
+const engraving = fs.readFileSync(path.join(root, "assets/devil-engraving.png")).toString("base64");
 
 const standalone = html
   .replace('    <link rel="canonical" href="https://devildictionary.com/" />\n', "")
-  .replace(/    <script>\n      if \(location\.hostname === "www\.devildictionary\.com"\) \{[\s\S]*?    <\/script>\n/, "")
+  .replace(/    <script>\n      if \(!window\.Capacitor && location\.hostname === "www\.devildictionary\.com"\) \{[\s\S]*?    <\/script>\n/, "")
+  .replace('./assets/devil-engraving.png', `data:image/png;base64,${engraving}`)
   .replace('    <link rel="stylesheet" href="./styles.css" />', `    <style>\n${css}\n    </style>`)
   .replace(/        <nav class="colophon-links"[\s\S]*?<\/nav>\n/, "")
   .replace('    <script src="./app.js"></script>', `    <script>\n${js}\n    </script>`)
