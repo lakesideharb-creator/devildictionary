@@ -332,7 +332,7 @@
     "definitionReveal", "judgmentPrompt", "definitionChoices", "judgmentFeedback", "readerNote",
     "newEntryBadge", "modalProgress", "nextButton", "coinCelebration", "coinMilestone", "stageCurtain",
     "curtainSigil", "curtainKicker", "curtainName", "curtainNote",
-    "toast", "coinVault", "soundToggle", "resetButton", "gestureNote"
+    "toast", "coinVault", "soundToggle", "resetButton", "gestureNote", "saveCardButton", "shareWordButton"
   ].map(id => [id, document.getElementById(id)]));
 
   let save = loadSave();
@@ -844,12 +844,14 @@
   }
 
   function openModal(focusTarget) {
+    document.querySelector(".shell").inert = true;
     els.definitionModal.classList.add("open");
     els.definitionModal.setAttribute("aria-hidden", "false");
     window.setTimeout(() => focusTarget?.focus(), 480);
   }
 
   function nextRound() {
+    document.querySelector(".shell").inert = false;
     const enteredTier = getStage().tier;
     const curtain = round.entry.tier < enteredTier ? STAGE_CURTAINS[enteredTier] : null;
     els.definitionModal.classList.remove("open");
@@ -873,7 +875,94 @@
       return;
     }
     sound.page();
-    window.setTimeout(() => makeBoard(next), 250);
+    window.setTimeout(() => { makeBoard(next); els.board.querySelector(".letter")?.focus(); }, 250);
+  }
+
+  async function copyWord() {
+    if (els.definitionReveal.hidden) return;
+    const text = `${round.entry.word}, ${round.entry.pos}\n\n${round.entry.en}\n\nFind the word. Face the truth.\nhttps://devildictionary.com`;
+    try {
+      if (!navigator.clipboard?.writeText) throw new Error("Clipboard unavailable");
+      await navigator.clipboard.writeText(text);
+      showToast("Copied. Paste it into your next post.");
+    } catch {
+      // Offline files and some embedded browsers do not expose the Clipboard API.
+      window.prompt("Copy this word for your post:", text);
+    }
+  }
+
+  async function saveWordCard() {
+    if (els.definitionReveal.hidden || els.saveCardButton.disabled) return;
+    const entry = { ...round.entry };
+    els.saveCardButton.disabled = true;
+    try {
+      const canvas = document.createElement("canvas");
+      canvas.width = 1080;
+      canvas.height = 1080;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("Canvas unavailable");
+      ctx.fillStyle = "#241c16";
+      ctx.fillRect(0, 0, 1080, 1080);
+      ctx.fillStyle = "#f1e4ca";
+      ctx.beginPath();
+      ctx.roundRect(52, 52, 976, 976, 44);
+      ctx.fill();
+      ctx.strokeStyle = "#782d29";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(78, 78, 924, 924);
+      const mascot = document.querySelector(".devil-engraving");
+      if (mascot?.complete && mascot.naturalWidth) ctx.drawImage(mascot, 410, 104, 260, 130);
+      ctx.textAlign = "center";
+      ctx.fillStyle = "#782d29";
+      ctx.font = "bold 22px Georgia, serif";
+      ctx.fillText("THE DEVIL’S DICTIONARY", 540, 277);
+      let titleSize = 92;
+      do { ctx.font = `bold ${titleSize--}px Georgia, serif`; } while (ctx.measureText(entry.word).width > 800 && titleSize > 32);
+      ctx.fillStyle = "#241c16";
+      ctx.fillText(entry.word, 540, 402);
+      ctx.font = "italic 27px Georgia, serif";
+      ctx.fillStyle = "#782d29";
+      ctx.fillText(entry.pos, 540, 449);
+      let lines;
+      let fontSize = 40;
+      do {
+        ctx.font = `${fontSize}px Georgia, serif`;
+        lines = [];
+        let line = "";
+        for (const word of entry.en.split(/\s+/)) {
+          const candidate = line ? `${line} ${word}` : word;
+          if (line && ctx.measureText(candidate).width > 780) { lines.push(line); line = word; }
+          else line = candidate;
+        }
+        if (line) lines.push(line);
+        if (lines.length * fontSize * 1.45 <= 365 || fontSize <= 22) break;
+        fontSize -= 2;
+      } while (true);
+      ctx.fillStyle = "#30241c";
+      const lineHeight = fontSize * 1.45;
+      const startY = 654 - (lines.length - 1) * lineHeight / 2;
+      lines.forEach((line, i) => ctx.fillText(line, 540, startY + i * lineHeight));
+      ctx.fillStyle = "#782d29";
+      ctx.font = "italic 25px Georgia, serif";
+      ctx.fillText("Find the word. Face the truth.", 540, 914);
+      ctx.font = "bold 27px Georgia, serif";
+      ctx.fillText("devildictionary.com", 540, 962);
+      const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
+      if (!blob) throw new Error("Image export unavailable");
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `devils-dictionary-${entry.word.toLowerCase()}.png`;
+      document.body.append(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 60000);
+      showToast("Your word card is ready. Check your downloads.");
+    } catch {
+      showToast("This browser could not save an image. Try Copy for X instead.");
+    } finally {
+      els.saveCardButton.disabled = false;
+    }
   }
 
   function updateHUD() {
@@ -1003,12 +1092,21 @@
     els.hintButton.addEventListener("click", showHint);
     els.shuffleButton.addEventListener("click", () => { sound.shuffle(); makeBoard(round.entry, true); showToast("Same word. The lies have been rearranged."); });
     els.nextButton.addEventListener("click", nextRound);
+    els.saveCardButton.addEventListener("click", saveWordCard);
+    els.shareWordButton.addEventListener("click", copyWord);
     els.coinVault.addEventListener("click", () => { sound.coinTap(); showToast("Every 5 different entries completed resets the count and mints one more coin."); });
     els.soundToggle.addEventListener("click", toggleSound);
     els.resetButton.addEventListener("click", resetProgress);
     window.addEventListener("resize", () => requestAnimationFrame(() => drawPath(selection, false)));
     document.addEventListener("keydown", event => {
       if (event.key === "Escape" && els.definitionModal.classList.contains("open") && !els.nextButton.hidden) nextRound();
+      if (event.key === "Tab" && els.definitionModal.classList.contains("open")) {
+        const buttons = [...els.definitionModal.querySelectorAll("button:not(:disabled)")].filter(button => !button.closest("[hidden]"));
+        const first = buttons[0];
+        const last = buttons.at(-1);
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+      }
     });
     window.__DEVILS_GAME__ = {
       entries: ENTRIES,

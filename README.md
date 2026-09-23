@@ -68,6 +68,12 @@ Vercel 已连接本仓库：推送到 `main` 会自动更新生产部署，其�
 
 ## 本地开发
 
+### 复古纸卡界面
+
+主界面和词条揭晓卡使用统一的羊皮纸、酒红细线与小恶魔雕版插画。完成词条后可用 **Save word card** 导出 1080×1080 PNG，或用 **Copy for X** 复制真实释义与网站链接；定义审判完成前不显示分享操作。图片保存取决于浏览器的下载支持，iOS 原生壳中的导出仍需真机验证。
+
+插画 `assets/devil-engraving.png` 使用内置 ImageGen，从本项目的推广贴纸衍生生成；构建脚本会复制到网站资源目录，并嵌入离线单文件版本。新增插画的生成说明见 `docs/ui-art-direction.md`。
+
 ```bash
 npm install
 npm test
