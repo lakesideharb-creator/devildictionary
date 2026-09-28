@@ -7,7 +7,10 @@
     "build:standalone": "node scripts/build-standalone.mjs",
     "serve": "python3 -m http.server 4173",
     "shots": "node scripts/generate-store-screenshots.mjs",
-    "test": "node --test tests/game.test.js && node tests/dom-e2e.mjs"
+    "test": "node --test tests/game.test.js && node tests/dom-e2e.mjs",
+    "dev:community": "node scripts/build.mjs && node scripts/community-dev.mjs",
+    "test:community": "node --test tests/community.test.mjs tests/community-ui.test.mjs",
+    "db:migrate": "node --env-file=.env.local scripts/community-migrate.mjs"
   },
   "devDependencies": {
     "happy-dom": "^20.0.10"
@@ -18,6 +21,10 @@
     "@capacitor/haptics": "^8.0.2",
     "@capacitor/ios": "^8.5.2",
     "@capacitor/splash-screen": "^8.0.2",
-    "@capacitor/status-bar": "^8.0.3"
+    "@capacitor/status-bar": "^8.0.3",
+    "@neondatabase/serverless": "^1.1.0"
+  },
+  "engines": {
+    "node": "24.x"
   }
 }
