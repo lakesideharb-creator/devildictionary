@@ -557,3 +557,5 @@ h1 { margin-top: 8px; font-size: clamp(28px, 4vw, 37px); font-weight: 700; lette
   .share-actions { gap: 6px; }
   .modal-meta { font-size: 8px; }
 }
+
+.community-invitation{text-align:center;font:13px Georgia,serif;margin:18px 0}.community-invitation a{color:#803b31}

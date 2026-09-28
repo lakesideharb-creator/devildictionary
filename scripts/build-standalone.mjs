@@ -9,6 +9,7 @@ const js = fs.readFileSync(path.join(root, "app.js"), "utf8");
 const engraving = fs.readFileSync(path.join(root, "assets/devil-engraving.png")).toString("base64");
 
 const standalone = html
+  .replace(/<p class="community-invitation">[\s\S]*?<\/p>/, "")
   .replace('    <link rel="canonical" href="https://devildictionary.com/" />\n', "")
   .replace(/    <script>\n      if \(!window\.Capacitor && location\.hostname === "www\.devildictionary\.com"\) \{[\s\S]*?    <\/script>\n/, "")
   .replace('./assets/devil-engraving.png', `data:image/png;base64,${engraving}`)

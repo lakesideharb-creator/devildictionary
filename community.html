@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Community Edition · The Devil’s Dictionary</title>
+    <link rel="stylesheet" href="/community.css" />
+    <script type="module" src="/community.js"></script>
+  </head>
+  <body>
+    <main>
+      <nav>
+        <a href="/">← The original game</a
+        ><a href="#write">Write for the Devil ↗</a>
+      </nav>
+      <header>
+        <img src="/assets/devil-engraving.png" alt="" width="180" height="90" />
+        <p class="eyebrow">THE DEVIL’S DICTIONARY</p>
+        <h1>The Community Edition</h1>
+        <p class="intro">Human nature. Now accepting corrections.</p>
+        <p>Original definitions from our readers, selected by the editor.</p>
+      </header>
+      <p id="notice" role="status" aria-live="polite"></p>
+      <section id="collection" aria-label="Community words"></section>
+      <button id="more" hidden>MORE WORDS ↓</button>
+      <section id="play" hidden aria-labelledby="play-word">
+        <p class="eyebrow">FIND THE WORD · REVEAL THE AUTHOR’S DEFINITION</p>
+        <h2 id="play-word" tabindex="-1"></h2>
+        <p id="instructions">
+          Tap the first letter, then the last. Words run in straight lines, in
+          any direction.
+        </p>
+        <div id="community-board" aria-label="Letter puzzle"></div>
+        <p id="puzzle-status" role="status"></p>
+        <button id="hint">SHOW A HINT</button>
+        <article id="reveal" hidden>
+          <p class="eyebrow">COMMUNITY CONTRIBUTION</p>
+          <p id="definition"></p>
+          <p id="byline"></p>
+          <div class="actions">
+            <button id="save-card">SAVE WORD CARD ↓</button
+            ><button id="copy">COPY FOR X ↗</button
+            ><button id="report">REPORT ENTRY</button>
+          </div>
+        <div id="card-preview" hidden><img id="card-image" alt="Your community word card" style="width:100%;max-width:440px;display:block;margin:24px auto"><a id="card-download" download>DOWNLOAD PNG ↓</a></div></article>
+      </section>
+      <section id="write">
+        <p class="eyebrow">THE EDITOR IS LISTENING</p>
+        <h2>Write for the Devil.</h2>
+        <p>One word. One sharp sentence. Your own words.</p>
+        <form id="submission">
+          <label for="word">Your word</label
+          ><input
+            id="word"
+            name="word"
+            required
+            minlength="3"
+            maxlength="10"
+            pattern="[A-Za-z]{3,10}"
+            placeholder="AMBITION"
+          /><small>3–10 English letters. No spaces.</small
+          ><label for="pos">Part of speech</label
+          ><select id="pos" name="pos">
+            <option>noun</option>
+            <option>verb</option>
+            <option>adjective</option>
+            <option>adverb</option></select
+          ><label for="entry-definition">Your definition</label
+          ><textarea
+            id="entry-definition"
+            name="definition"
+            required
+            minlength="10"
+            maxlength="240"
+            placeholder="A short sentence with a long shadow."
+          ></textarea
+          ><label for="author">Pen name <small>optional</small></label
+          ><input
+            id="author"
+            name="author"
+            maxlength="40"
+            placeholder="Anonymous"
+          />
+          <div class="trap" aria-hidden="true">
+            <label
+              >Website<input name="website" tabindex="-1" autocomplete="off"
+            /></label>
+          </div>
+          <label class="check"
+            ><input type="checkbox" name="consent" required /><span
+              >I wrote this definition and allow this website to display it in
+              the game and on share cards under my pen name, or anonymously.
+              <a href="/community-policy.html">Submission policy</a></span
+            ></label
+          ><button type="submit">SEND TO THE EDITOR ↗</button>
+          <p id="submission-status" role="status" aria-live="polite"></p>
+        </form>
+        <p class="fine">
+          Every entry is reviewed before publication. Please avoid personal
+          information, targeted abuse and copied definitions. No account
+          required.
+        </p>
+      </section>
+      <footer>
+        <a href="/community-policy.html">Privacy & submissions</a
+        ><span>devildictionary.com</span>
+      </footer>
+    </main>
+  </body>
+</html>
