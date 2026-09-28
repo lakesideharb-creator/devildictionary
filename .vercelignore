@@ -1,0 +1,13 @@
+.git
+node_modules
+.env*
+.community*
+outputs
+ios
+tests
+pnpm-lock.yaml
+The-Devils-Dictionary.html
+dist
+store
+docs
+locales

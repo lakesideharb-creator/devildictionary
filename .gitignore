@@ -13,3 +13,8 @@ ios/App/DerivedData/
 ios/.swiftpm/
 *.xcuserdatad/
 *.xcuserstate/
+
+.env*
+!.env.community.example
+.community*
+.vercel

@@ -1120,3 +1120,5 @@
 
   init();
 })();
+
+if (window.Capacitor) document.querySelectorAll('[data-community]').forEach(link => { link.href = 'https://devildictionary.com/community' + (link.hash || ''); });

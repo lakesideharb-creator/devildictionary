@@ -9,6 +9,7 @@ fs.mkdirSync(dist, { recursive: true });
 fs.mkdirSync(path.join(dist, "assets"), { recursive: true });
 fs.copyFileSync(path.join(root, "assets/devil-engraving.png"), path.join(dist, "assets/devil-engraving.png"));
 for (const file of [
+  "community.html", "community.css", "community.js", "editor.html", "editor.js", "community-policy.html",
   "index.html",
   "styles.css",
   "app.js",
@@ -22,3 +23,6 @@ for (const file of [
   fs.copyFileSync(path.join(root, file), path.join(dist, file));
 }
 console.log("Built static site in dist/");
+
+// Create only missing community tables in the configured deployment database.
+if (process.env.VERCEL) await import("./community-migrate.mjs");
