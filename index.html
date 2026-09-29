@@ -13,7 +13,7 @@
     </script>
     <title>The Devil's Dictionary — A Word-Sliding Game</title>
     <link rel="stylesheet" href="./styles.css" />
-  </head>
+  <link rel="stylesheet" href="/shop.css"></head>
   <body>
     <div class="grain" aria-hidden="true"></div>
     <main class="shell">
@@ -28,7 +28,7 @@
           </div>
         </div>
 
-        <div class="status-cluster" aria-label="Game progress">
+        <div class="shop-banner"><span>Take the game to your table.</span><a href="/print-play" data-shop-open>Get Printable Cards ↗</a><small>From $2.99 · one-time purchase</small></div><div class="status-cluster" aria-label="Game progress">
           <button class="sound-toggle" id="soundToggle" type="button" aria-label="Mute sound" aria-pressed="true" title="Sound">
             <span class="sound-note" aria-hidden="true">♪</span>
             <span class="sound-waves" aria-hidden="true"><i></i><i></i><i></i></span>
@@ -96,6 +96,7 @@
         </div>
         <nav class="colophon-links" aria-label="Policies and pricing">
           <a data-community href="/community.html">Community Edition · Write for the Devil</a>
+          <a href="/print-play">Printable Cards · Shop &amp; Free Samples</a>
           <a href="/pricing">Pricing</a>
           <a href="/privacy">Privacy</a>
           <a href="/refund">Refunds</a>
@@ -124,7 +125,7 @@
             <button class="button button-ghost" id="shareWordButton" type="button">COPY FOR X ↗</button>
           </div>
         </div>
-        <p class="community-invitation"><a data-community href="/community.html#write">Your definition could be next. Write for the Devil ↗</a></p>
+        <p class="shop-result"><a href="/print-play">Enjoyed that? Get the printable card collection ↗</a></p><p class="community-invitation"><a data-community href="/community.html#write">Your definition could be next. Write for the Devil ↗</a></p>
         <div class="modal-meta">
           <span id="newEntryBadge">NEW ENTRY</span>
           <span id="modalProgress"></span>
@@ -150,5 +151,5 @@
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
     <script src="./app.js"></script>
-  </body>
+  <script src="/shop.js" defer></script><div class="shop-mobile"><a href="/print-play" data-shop-open>Get Printable Cards <span>from $2.99 ↗</span></a></div></body>
 </html>
