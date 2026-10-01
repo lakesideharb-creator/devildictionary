@@ -572,3 +572,5 @@ h1 { margin-top: 8px; font-size: clamp(28px, 4vw, 37px); font-weight: 700; lette
 .colophon-links a { display: inline-flex; align-items: center; min-height: 44px; padding: 6px 2px; font: 14px/1.5 Arial, sans-serif; letter-spacing: .02em; text-transform: none; color: #d9c6a6; border-bottom: 1px solid #79674f; }
 .colophon a:focus-visible { outline: 3px solid #f3d99c; outline-offset: 4px; }
 @media (max-width: 520px) { .colophon-actions { flex-direction: column; } .colophon-actions a { width: 100%; font-size: 16px; } .colophon p { font-size: 15px; } }
+
+.colophon .book-invitation{font:16px/1.5 Georgia,serif}.book-invitation a{color:#f0ddba;text-underline-offset:5px;display:inline-block;padding:8px}
