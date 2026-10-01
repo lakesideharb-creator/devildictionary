@@ -1,11 +1,38 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" translate="no">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#17120e" />
     <meta name="description" content="Slide a word out of a grid of letters, then let the dictionary define you back. A pocket edition of cynical definitions." />
     <link rel="canonical" href="https://devildictionary.com/" />
+
+    <!-- Auto-translation wrecks the letter grid (tiles are English words), so
+         ask Google and browsers to leave the page alone. -->
+    <meta name="google" content="notranslate" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+    <!-- Google Search Console: paste the verification token below once you have it. -->
+    <!-- <meta name="google-site-verification" content="PASTE_TOKEN_HERE" /> -->
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.png" type="image/png" sizes="64x64" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="The Devil's Dictionary" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:url" content="https://devildictionary.com/" />
+    <meta property="og:title" content="The Devil's Dictionary — A Word-Sliding Game" />
+    <meta property="og:description" content="Slide a word out of a grid of letters, then let the dictionary define you back. 100 cynical definitions, four stages, no ads and no paywall." />
+    <meta property="og:image" content="https://devildictionary.com/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="The Devil's Dictionary word-sliding game" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="The Devil's Dictionary — A Word-Sliding Game" />
+    <meta name="twitter:description" content="Slide a word out of a grid of letters, then let the dictionary define you back. 100 cynical definitions, four stages, no ads and no paywall." />
+    <meta name="twitter:image" content="https://devildictionary.com/og.png" />
+
     <script>
       if (!window.Capacitor && location.hostname === "www.devildictionary.com") {
         location.replace(`https://devildictionary.com${location.pathname}${location.search}${location.hash}`);
@@ -13,7 +40,56 @@
     </script>
     <title>The Devil's Dictionary — A Word-Sliding Game</title>
     <link rel="stylesheet" href="./styles.css" />
-  <link rel="stylesheet" href="/shop.css"></head>
+    <link rel="stylesheet" href="/shop.css" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://devildictionary.com/#website",
+            "url": "https://devildictionary.com/",
+            "name": "The Devil's Dictionary",
+            "description": "A word-sliding game built on 100 cynical definitions: 45 original, 55 from Ambrose Bierce's 1911 public-domain classic.",
+            "inLanguage": "en",
+            "publisher": { "@id": "https://devildictionary.com/#organization" }
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://devildictionary.com/#organization",
+            "name": "The Devil's Dictionary",
+            "url": "https://devildictionary.com/",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://devildictionary.com/og.png",
+              "width": 1200,
+              "height": 630
+            }
+          },
+          {
+            "@type": "VideoGame",
+            "name": "The Devil's Dictionary",
+            "url": "https://devildictionary.com/",
+            "description": "Slide a word out of a grid of letters in four stages, then face the dictionary's judgment. 100 words, free, no ads, no paywall.",
+            "genre": "Word game",
+            "gamePlatform": ["Web Browser", "iOS"],
+            "operatingSystem": "Any (web browser); iOS 15 or later",
+            "applicationCategory": "Game",
+            "inLanguage": "en",
+            "isAccessibleForFree": true,
+            "author": { "@id": "https://devildictionary.com/#organization" },
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD",
+              "availability": "https://schema.org/InStock"
+            }
+          }
+        ]
+      }
+    </script>
+  </head>
   <body>
     <div class="grain" aria-hidden="true"></div>
     <main class="shell">

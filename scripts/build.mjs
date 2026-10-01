@@ -24,6 +24,7 @@ for (const file of [
   fs.copyFileSync(path.join(root, file), path.join(dist, file));
 }
 fs.cpSync(path.join(root, "downloads"), path.join(dist, "downloads"), { recursive: true });
+await import("./seo.mjs");
 console.log("Built static site in dist/");
 
 // Create only missing community tables in the configured deployment database.

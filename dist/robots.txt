@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /editor
+
+# The 100 definitions live in app.js; let crawlers run JS so the in-game copy
+# is discoverable alongside the static pages below.
+Sitemap: https://devildictionary.com/sitemap.xml

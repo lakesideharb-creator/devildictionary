@@ -54,23 +54,36 @@ test("stage judgment is wired into the reveal flow", () => {
   assert.match(css, /@keyframes definition-strike/);
 });
 
-test("the whole dictionary is free, with no paywall and no in-app purchase", () => {
+test("the game itself is free: no paywall and no in-app purchase", () => {
   // No gating code of any kind: no free tier limit, no product id, no StoreKit calls.
   for (const token of ["FREE_LIMIT", "COMPLETE_PRODUCT_ID", "purchaseProduct", "restorePurchases", "getProducts", "hasFullAccess", "openPaywall", "save.unlocked"]) {
     assert.doesNotMatch(js, new RegExp(token.replace(".", "\\.")), `${token} must not exist`);
   }
-  // No paywall markup and no price anywhere on the playable page.
-  for (const token of ["paywall", "lockPanel", "RESTORE MY PURCHASE", "\\$4\\.99", "\\$3\\.99", "\\$2\\.99"]) {
-    assert.doesNotMatch(html, new RegExp(token, "i"), `${token} must not appear in index.html`);
+  // Strip meta and JSON-LD first: marketing copy saying "no paywall" must stay
+  // allowed, we only care about real gating markup.
+  const markup = html
+    .replace(/<!--[\s\S]*?-->/g, "")
+    .replace(/<meta\b[^>]*>/g, "")
+    .replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/g, "");
+  for (const token of ["paywall", "lockPanel", "RESTORE MY PURCHASE", "restorePurchases"]) {
+    assert.doesNotMatch(markup, new RegExp(token, "i"), `${token} must not appear in index.html`);
   }
   assert.doesNotMatch(css, /paywall|lock-panel/);
+  // The shop may sell paper goods, but nothing may sell access to the game.
+  assert.doesNotMatch(markup, /unlock (the )?(full|complete|rest)|full (version|access) (for|at) \$/i);
 });
 
-test("legal pages promise that nothing can be bought", () => {
+test("legal pages sell paper and PDFs, never access to the game", () => {
+  // Prices are allowed now that printable packs exist, but every price must sit
+  // next to a physical or downloadable product - never next to game content.
+  const GOODS = /printable|cards?|edition|bundle|paperback|kindle|pdf|a4|letter|shipping|pack/i;
   for (const file of ["pricing.html", "refund.html", "terms.html", "privacy.html"]) {
     const text = fs.readFileSync(path.join(root, file), "utf8");
-    assert.doesNotMatch(text, /\$4\.99|\$3\.99|\$2\.99/, `${file} still quotes a price`);
     assert.doesNotMatch(text, /Restore Purchases/i, `${file} still promises a restore`);
+    for (const m of text.matchAll(/\$\d+(?:\.\d\d)?/g)) {
+      const window = text.slice(Math.max(0, m.index - 240), m.index + 240);
+      assert.match(window, GOODS, `${file} quotes ${m[0]} without naming a product`);
+    }
   }
 });
 
