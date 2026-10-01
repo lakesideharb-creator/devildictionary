@@ -19,6 +19,7 @@ const PAGES = [
   { url: "/print-play", file: "print-play.html", priority: "0.7", changefreq: "monthly" },
   { url: "/community", file: "community.html", priority: "0.5", changefreq: "weekly" },
   { url: "/support", file: "support.html", priority: "0.6", changefreq: "monthly" },
+  { url: "/faq", file: "faq.html", priority: "0.7", changefreq: "monthly" },
   { url: "/pricing", file: "pricing.html", priority: "0.5", changefreq: "monthly" },
   { url: "/community-policy", file: "community-policy.html", priority: "0.3", changefreq: "yearly" },
   { url: "/privacy", file: "privacy.html", priority: "0.3", changefreq: "yearly" },

@@ -8,6 +8,7 @@
     "serve": "python3 -m http.server 4173",
     "shots": "node scripts/generate-store-screenshots.mjs",
     "test": "node --test tests/game.test.js && node tests/dom-e2e.mjs",
+    "audit": "node scripts/audit.mjs",
     "dev:community": "node scripts/build.mjs && node scripts/community-dev.mjs",
     "test:community": "node --test tests/community.test.mjs tests/community-ui.test.mjs",
     "db:migrate": "node --env-file=.env.local scripts/community-migrate.mjs"
