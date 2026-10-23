@@ -713,6 +713,9 @@ h1 { margin-top: 8px; font-size: clamp(28px, 4vw, 37px); font-weight: 700; lette
 }
 .board.is-drawing,
 .board.is-drawing .letter { cursor: grabbing; }
+.board.is-drawing.is-pointer,
+.board.is-drawing.is-pointer .letter { cursor: crosshair; }
+.board.is-drawing.is-pointer .letter { transition-duration: .04s; }
 .letter.selected { z-index: 2; transform: scale(0.985); }
 .letter.selected.is-head {
   z-index: 3;

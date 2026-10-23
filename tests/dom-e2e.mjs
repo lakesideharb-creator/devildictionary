@@ -84,12 +84,12 @@ function centerOf(geom, index) {
   };
 }
 
-function dispatchPointer(window, target, type, point) {
+function dispatchPointer(window, target, type, point, pointerType = "touch") {
   target.dispatchEvent(new window.PointerEvent(type, {
     bubbles: true,
     cancelable: true,
     pointerId: 1,
-    pointerType: "touch",
+    pointerType,
     button: 0,
     clientX: point.x,
     clientY: point.y
@@ -100,18 +100,18 @@ function selectedIndices(document) {
   return [...document.querySelectorAll(".letter.selected")].map(cell => Number(cell.dataset.cell));
 }
 
-async function swipeCurrent(window) {
+async function swipeCurrent(window, pointerType = "touch") {
   const { document } = window;
   const geom = stubBoardGeometry(document);
   const pathIndices = window.__DEVILS_GAME__.getState().round.path;
   const board = document.getElementById("board");
   let last = centerOf(geom, pathIndices[0]);
-  dispatchPointer(window, document.querySelector(`[data-cell="${pathIndices[0]}"]`), "pointerdown", last);
+  dispatchPointer(window, document.querySelector(`[data-cell="${pathIndices[0]}"]`), "pointerdown", last, pointerType);
   for (const index of pathIndices.slice(1)) {
     last = centerOf(geom, index);
-    dispatchPointer(window, board, "pointermove", last);
+    dispatchPointer(window, board, "pointermove", last, pointerType);
   }
-  dispatchPointer(window, board, "pointerup", last);
+  dispatchPointer(window, board, "pointerup", last, pointerType);
   await sleep(270);
 }
 
@@ -302,6 +302,12 @@ const dense = boot({
 assert.equal(dense.document.querySelectorAll(".letter").length, 36, "entry 26 is the dense 6×6 board");
 assert.ok(dense.document.getElementById("board").classList.contains("is-dense"));
 exerciseDenseFeel(dense, { cell: 48, gap: 3, origin: 80 });
+// Desktop board is 380px, or 300px when the laptop window is shorter than 850px.
+// 6×6 tiles land near 58px; the short-laptop 6×6 is near 45px. 8×8 on that
+// laptop is near 33px. The pointer aims at the glyph, not the centerline.
+exerciseMouseFeel(dense, { cell: 58, gap: 4, origin: 120 });
+exerciseMouseFeel(dense, { cell: 45, gap: 4, origin: 80 });
+exerciseTouchStillLanes(dense, { cell: 58, gap: 4, origin: 120 });
 
 const eightWords = window.__DEVILS_GAME__.entries.filter(entry => entry.tier <= 3).map(entry => entry.word);
 const eight = boot({
@@ -315,6 +321,7 @@ const eight = boot({
 });
 assert.equal(eight.document.querySelectorAll(".letter").length, 64, "the densest phone grid is 8×8");
 exerciseDenseFeel(eight, { cell: 36, gap: 3, origin: 40 });
+exerciseMouseFeel(eight, { cell: 33, gap: 4, origin: 40 });
 
 function exerciseDenseFeel(window, geomOptions) {
   const { document } = window;
@@ -330,6 +337,7 @@ function exerciseDenseFeel(window, geomOptions) {
   const grazeBack = { x: geom.origin + geom.cell - 1, y: start.y };
 
   dispatchPointer(window, document.querySelector('[data-cell="0"]'), "pointerdown", start);
+  assert.equal(board.classList.contains("is-pointer"), false, "a finger drag does not take the mouse aim path");
   dispatchPointer(window, board, "pointermove", belowEdge);
   assert.deepEqual(selectedIndices(document), [0], "entering the near edge of the tile below does not link it");
   dispatchPointer(window, board, "pointermove", diagonalCorner);
@@ -361,6 +369,167 @@ function exerciseDenseFeel(window, geomOptions) {
   assert.equal(document.getElementById("definitionModal").classList.contains("open"), false, "a cancelled stroke does not submit");
 }
 
+function pathPoints(document) {
+  const line = document.querySelector(".path-line");
+  return (line?.getAttribute("points") || "").trim().split(/\s+/).filter(Boolean).map(pair => {
+    const [x, y] = pair.split(",").map(Number);
+    return { x, y };
+  });
+}
+
+function hasPoint(points, x, y, slack = 1.6) {
+  return points.some(point => Math.hypot(point.x - x, point.y - y) <= slack);
+}
+
+function exerciseMouseFeel(window, geomOptions) {
+  const { document } = window;
+  const geom = stubBoardGeometry(document, geomOptions);
+  const board = document.getElementById("board");
+  const note = text => `${text} (${geom.cell}px tile, pitch ${geom.pitch})`;
+  const start = centerOf(geom, 0);
+  const east = centerOf(geom, 1);
+  const early = { x: start.x + geom.pitch * 0.24, y: start.y };
+  const downish = { x: start.x + geom.pitch * 0.12, y: start.y + geom.pitch * 0.46 };
+  const back = { x: start.x + 4, y: start.y };
+  const entered = { x: east.x - geom.cell / 2 + 2, y: east.y };
+  const offCenter = { x: east.x - 4, y: east.y + Math.min(16, geom.cell / 2 - 1) };
+  const diagonal = geom.size + 1;
+  const diagonalCenter = centerOf(geom, diagonal);
+  const corner = { x: diagonalCenter.x - geom.cell / 2 + 2, y: diagonalCenter.y - geom.cell / 2 + 2 };
+  const gap = { x: (start.x + east.x) / 2, y: start.y };
+  const onto = { x: start.x + geom.pitch * 0.42, y: start.y };
+
+  dispatchPointer(window, document.querySelector('[data-cell="0"]'), "pointerdown", start, "mouse");
+  assert.ok(board.classList.contains("is-pointer"), note("a mouse drag is marked so the pointer lane can stay snappy"));
+  dispatchPointer(window, board, "pointermove", early, "mouse");
+  assert.deepEqual(selectedIndices(document), [0], note("the ring leads the cursor and does not lock early"));
+  assert.ok(document.querySelector('[data-cell="1"]').classList.contains("candidate"), note("the aimed letter rings before the cursor reaches it"));
+  dispatchPointer(window, board, "pointermove", downish, "mouse");
+  assert.equal(document.querySelector('[data-cell="1"]').classList.contains("candidate"), false, note("the ring leaves a letter when the cursor turns away"));
+  assert.ok(document.querySelector(`[data-cell="${geom.size}"]`).classList.contains("candidate"), note("the ring follows the lane the cursor is actually in"));
+  dispatchPointer(window, board, "pointermove", back, "mouse");
+  assert.equal(document.querySelector(".letter.candidate"), null, note("backing toward the current letter clears the ring"));
+  dispatchPointer(window, board, "pointercancel", back, "mouse");
+
+  const elbow = { x: start.x + geom.pitch * 0.36, y: start.y };
+  const tip = { x: elbow.x, y: start.y + geom.pitch * 0.22 };
+  dispatchPointer(window, document.querySelector('[data-cell="0"]'), "pointerdown", start, "mouse");
+  dispatchPointer(window, board, "pointermove", elbow, "mouse");
+  dispatchPointer(window, board, "pointermove", tip, "mouse");
+  const ink = pathPoints(document);
+  assert.ok(hasPoint(ink, elbow.x - geom.origin, elbow.y - geom.origin), note("the ink keeps the corner the cursor actually turned"));
+  assert.ok(hasPoint(ink, tip.x - geom.origin, tip.y - geom.origin), note("the ink ends on the cursor"));
+  const finger = document.querySelector(".path-finger");
+  assert.ok(finger, note("the trail still has a tip"));
+  assert.ok(Math.abs(Number(finger.getAttribute("cx")) - (tip.x - geom.origin)) < 0.2, note("the tip sits on the cursor, not a chord behind it"));
+  assert.ok(Math.abs(Number(finger.getAttribute("cy")) - (tip.y - geom.origin)) < 0.2, note("the tip tracks the cursor's vertical position"));
+  dispatchPointer(window, board, "pointercancel", tip, "mouse");
+
+  dispatchPointer(window, document.querySelector('[data-cell="0"]'), "pointerdown", start, "mouse");
+  dispatchPointer(window, board, "pointermove", entered, "mouse");
+  assert.deepEqual(selectedIndices(document), [0, 1], note("the aimed letter locks as soon as the cursor is on it"));
+  assert.equal(document.querySelector('[data-cell="1"]').classList.contains("candidate"), false, note("a locked letter drops the preview ring"));
+  dispatchPointer(window, board, "pointercancel", entered, "mouse");
+
+  dispatchPointer(window, document.querySelector('[data-cell="0"]'), "pointerdown", start, "mouse");
+  dispatchPointer(window, board, "pointermove", offCenter, "mouse");
+  assert.deepEqual(selectedIndices(document), [0, 1], note("a cursor on the glyph but off the centerline still locks that letter"));
+  dispatchPointer(window, board, "pointercancel", offCenter, "mouse");
+
+  dispatchPointer(window, document.querySelector('[data-cell="0"]'), "pointerdown", start, "mouse");
+  dispatchPointer(window, board, "pointermove", corner, "mouse");
+  assert.deepEqual(selectedIndices(document), [0], note("a diagonal corner graze still does not link"));
+  assert.equal(document.querySelector(`[data-cell="${diagonal}"]`).classList.contains("candidate"), false, note("a corner graze does not leave a sticky ring"));
+  dispatchPointer(window, board, "pointercancel", corner, "mouse");
+
+  dispatchPointer(window, document.querySelector('[data-cell="0"]'), "pointerdown", start, "mouse");
+  dispatchPointer(window, board, "pointermove", east, "mouse");
+  assert.deepEqual(selectedIndices(document), [0, 1], note("the cursor can still lock by reaching the letter's center"));
+  dispatchPointer(window, board, "pointermove", gap, "mouse");
+  assert.deepEqual(selectedIndices(document), [0, 1], note("the gap between letters does not undo"));
+  dispatchPointer(window, board, "pointermove", onto, "mouse");
+  assert.deepEqual(selectedIndices(document), [0], note("putting the cursor back on the previous letter undoes one step"));
+  dispatchPointer(window, board, "pointercancel", onto, "mouse");
+
+  dispatchPointer(window, document.querySelector('[data-cell="0"]'), "pointerdown", start, "mouse");
+  dispatchPointer(window, board, "pointermove", centerOf(geom, 2), "mouse");
+  assert.deepEqual(selectedIndices(document), [0, 1, 2], note("a fast mouse flick still collects every letter it crosses"));
+  dispatchPointer(window, board, "pointercancel", centerOf(geom, 2), "mouse");
+
+  dispatchPointer(window, document.querySelector('[data-cell="0"]'), "pointerdown", start, "mouse");
+  dispatchPointer(window, board, "pointermove", diagonalCenter, "mouse");
+  assert.deepEqual(selectedIndices(document).slice().sort((a, b) => a - b), [0, diagonal], note("a diagonal flick still locks the letter the cursor crosses"));
+  dispatchPointer(window, board, "pointercancel", diagonalCenter, "mouse");
+
+  const home = geom.size + Math.floor(geom.size / 2);
+  const homePoint = centerOf(geom, home);
+  for (const [row, col] of [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]]) {
+    const index = home + row * geom.size + col;
+    dispatchPointer(window, document.querySelector(`[data-cell="${home}"]`), "pointerdown", homePoint, "mouse");
+    dispatchPointer(window, board, "pointermove", centerOf(geom, index), "mouse");
+    assert.deepEqual(selectedIndices(document).slice().sort((a, b) => a - b), [home, index].sort((a, b) => a - b), note(`mouse locks direction ${row},${col}`));
+    dispatchPointer(window, board, "pointercancel", centerOf(geom, index), "mouse");
+  }
+
+  dispatchPointer(window, document.querySelector('[data-cell="0"]'), "pointerdown", start, "mouse");
+  dispatchPointer(window, board, "pointermove", east, "mouse");
+  dispatchPointer(window, board, "pointerup", east, "mouse");
+  assert.equal(document.getElementById("definitionModal").classList.contains("open"), false, note("releasing a partial word does not submit"));
+  assert.deepEqual(selectedIndices(document), [0, 1], note("release keeps the path until the board clears it"));
+  dispatchPointer(window, document.querySelector('[data-cell="0"]'), "pointerdown", start, "mouse");
+  dispatchPointer(window, board, "pointercancel", start, "mouse");
+  assert.equal(board.classList.contains("is-pointer"), false, note("the pointer lane ends when the drag ends"));
+}
+
+// Same desktop tile size, still a finger: the phone lane must not inherit the mouse aim box.
+function exerciseTouchStillLanes(window, geomOptions) {
+  const { document } = window;
+  const geom = stubBoardGeometry(document, geomOptions);
+  const board = document.getElementById("board");
+  const start = centerOf(geom, 0);
+  const east = centerOf(geom, 1);
+  const entered = { x: east.x - geom.cell / 2 + 2, y: east.y };
+  const offCenter = { x: east.x - 4, y: east.y + Math.min(16, geom.cell / 2 - 1) };
+  const onto = { x: start.x + geom.pitch * 0.42, y: start.y };
+  dispatchPointer(window, document.querySelector('[data-cell="0"]'), "pointerdown", start, "touch");
+  dispatchPointer(window, board, "pointermove", entered, "touch");
+  assert.deepEqual(selectedIndices(document), [0], "a finger just inside the next tile still has not locked it");
+  dispatchPointer(window, board, "pointercancel", entered, "touch");
+
+  // Approach the off-center spot from the side so the stroke never crosses the centerline lane.
+  dispatchPointer(window, document.querySelector('[data-cell="0"]'), "pointerdown", start, "touch");
+  dispatchPointer(window, board, "pointermove", { x: start.x, y: offCenter.y }, "touch");
+  dispatchPointer(window, board, "pointermove", offCenter, "touch");
+  assert.deepEqual(selectedIndices(document), [0], "a finger off the centerline still misses on a desktop-sized dense tile");
+  dispatchPointer(window, board, "pointercancel", offCenter, "touch");
+
+  dispatchPointer(window, document.querySelector('[data-cell="0"]'), "pointerdown", start, "touch");
+  dispatchPointer(window, board, "pointermove", { x: start.x + geom.pitch * 0.82, y: start.y + 8 }, "touch");
+  assert.deepEqual(selectedIndices(document), [0, 1], "the finger still locks once it has traveled the lane");
+  dispatchPointer(window, board, "pointermove", onto, "touch");
+  assert.deepEqual(selectedIndices(document), [0, 1], "a finger that only reaches the near side of the previous tile does not undo");
+  dispatchPointer(window, board, "pointercancel", onto, "touch");
+  void board;
+}
+
+const stageOne = boot({ sound: false });
+assert.equal(stageOne.document.querySelectorAll(".letter").length, 25, "stage I stays a 5×5");
+{
+  const geom = stubBoardGeometry(stageOne.document, { cell: 58, gap: 4, origin: 90 });
+  const board = stageOne.document.getElementById("board");
+  const start = centerOf(geom, 0);
+  const east = centerOf(geom, 1);
+  dispatchPointer(stageOne, stageOne.document.querySelector('[data-cell="0"]'), "pointerdown", start, "mouse");
+  dispatchPointer(stageOne, board, "pointermove", { x: east.x - geom.cell / 2 + 2, y: east.y }, "mouse");
+  assert.deepEqual(selectedIndices(stageOne.document), [0], "stage I mouse still uses the lane and does not lock on tile entry");
+  dispatchPointer(stageOne, board, "pointermove", { x: start.x + geom.pitch * 0.72, y: start.y }, "mouse");
+  assert.deepEqual(selectedIndices(stageOne.document), [0, 1], "stage I mouse still locks after the lane commit");
+  dispatchPointer(stageOne, board, "pointercancel", start, "mouse");
+}
+
+await swipeCurrent(dense, "mouse");
+assert.ok(dense.document.getElementById("definitionModal").classList.contains("open"), "a mouse stroke of the real word still submits on release");
+
 deep.close();
 window.close();
 unlock.close();
@@ -370,4 +539,5 @@ gated.close();
 finished.close();
 dense.close();
 eight.close();
-console.log("DOM E2E OK: stage II and IV unlocks, swipe, hint, three-way judgment, reader note, progress, coin boundaries, dense-grid touch lanes, and no paywall anywhere");
+stageOne.close();
+console.log("DOM E2E OK: stage II and IV unlocks, swipe, hint, three-way judgment, reader note, progress, coin boundaries, dense-grid touch lanes, desktop mouse aim, and no paywall anywhere");
