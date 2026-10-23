@@ -56,16 +56,62 @@ function boot(storage, options = {}) {
 
 function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
 
+function stubBoardGeometry(document, { cell = 60, gap = 4, origin = 120 } = {}) {
+  const board = document.getElementById("board");
+  const size = Math.round(Math.sqrt(board.children.length));
+  const pitch = cell + gap;
+  const boardSize = size * pitch - gap;
+  const rect = (left, top, width, height) => ({
+    x: left, y: top, left, top, width, height,
+    right: left + width, bottom: top + height,
+    toJSON() { return this; }
+  });
+  board.getBoundingClientRect = () => rect(origin, origin, boardSize, boardSize);
+  [...board.children].forEach((el, index) => {
+    const col = index % size;
+    const row = Math.floor(index / size);
+    el.getBoundingClientRect = () => rect(origin + col * pitch, origin + row * pitch, cell, cell);
+  });
+  return { cell, gap, pitch, origin, size };
+}
+
+function centerOf(geom, index) {
+  const col = index % geom.size;
+  const row = Math.floor(index / geom.size);
+  return {
+    x: geom.origin + col * geom.pitch + geom.cell / 2,
+    y: geom.origin + row * geom.pitch + geom.cell / 2
+  };
+}
+
+function dispatchPointer(window, target, type, point) {
+  target.dispatchEvent(new window.PointerEvent(type, {
+    bubbles: true,
+    cancelable: true,
+    pointerId: 1,
+    pointerType: "touch",
+    button: 0,
+    clientX: point.x,
+    clientY: point.y
+  }));
+}
+
+function selectedIndices(document) {
+  return [...document.querySelectorAll(".letter.selected")].map(cell => Number(cell.dataset.cell));
+}
+
 async function swipeCurrent(window) {
-  const { document, PointerEvent } = window;
+  const { document } = window;
+  const geom = stubBoardGeometry(document);
   const pathIndices = window.__DEVILS_GAME__.getState().round.path;
-  const cells = pathIndices.map(index => document.querySelector(`[data-cell="${index}"]`));
-  cells[0].dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, pointerId: 1 }));
-  for (const cell of cells.slice(1)) {
-    document.elementFromPoint = () => cell;
-    document.getElementById("board").dispatchEvent(new PointerEvent("pointermove", { bubbles: true, pointerId: 1 }));
+  const board = document.getElementById("board");
+  let last = centerOf(geom, pathIndices[0]);
+  dispatchPointer(window, document.querySelector(`[data-cell="${pathIndices[0]}"]`), "pointerdown", last);
+  for (const index of pathIndices.slice(1)) {
+    last = centerOf(geom, index);
+    dispatchPointer(window, board, "pointermove", last);
   }
-  document.getElementById("board").dispatchEvent(new PointerEvent("pointerup", { bubbles: true, pointerId: 1 }));
+  dispatchPointer(window, board, "pointerup", last);
   await sleep(270);
 }
 
@@ -110,6 +156,16 @@ document.getElementById("hintButton").click();
 assert.ok(document.querySelector(".path-line.hint"), "hint draws a dashed SVG path");
 assert.ok(document.querySelectorAll(".hint-node").length >= 3, "hint identifies path cells");
 assert.ok(window.__audioEvents.some(event => event.kind === "noise"), "hint produces a paper-scratch sound");
+
+const firstLetter = document.querySelector('[data-cell="0"]');
+const secondLetter = document.querySelector('[data-cell="1"]');
+const skippedLetter = document.querySelector('[data-cell="2"]');
+firstLetter.click();
+skippedLetter.click();
+assert.equal(document.getElementById("selectionText").textContent, firstLetter.textContent, "keyboard activation ignores a letter that is not adjacent");
+secondLetter.click();
+assert.equal(document.getElementById("selectionText").textContent, firstLetter.textContent + secondLetter.textContent, "keyboard activation still links adjacent letters");
+assert.equal(document.getElementById("definitionModal").classList.contains("open"), false, "a partial keyboard path does not submit the word");
 
 for (let solved = 1; solved <= 5; solved += 1) {
   await swipeCurrent(window);
@@ -231,6 +287,80 @@ assert.equal(finished.document.getElementById("completedCount").textContent, "10
 const deep = boot(null, { url: "http://127.0.0.1:4173/?word=HOPE" });
 assert.equal(deep.__DEVILS_GAME__.getState().round.entry.word, "HOPE", "daily and word pages can open a specific entry");
 
+// Phone-sized stage II (entry 26): 6×6 tiles, 3px gutter. A graze into the
+// next tile used to link it; the finger now has to travel down that letter's lane.
+const stageTwoWords = window.__DEVILS_GAME__.entries.filter(entry => entry.tier === 1).map(entry => entry.word);
+const dense = boot({
+  completed: stageTwoWords,
+  order: stageTwoWords.slice(-5),
+  current: null,
+  hints: 0,
+  rounds: 25,
+  sound: false,
+  judgment: { comfort: 0, order: 0, correct: 0, firstTry: 0 }
+});
+assert.equal(dense.document.querySelectorAll(".letter").length, 36, "entry 26 is the dense 6×6 board");
+assert.ok(dense.document.getElementById("board").classList.contains("is-dense"));
+exerciseDenseFeel(dense, { cell: 48, gap: 3, origin: 80 });
+
+const eightWords = window.__DEVILS_GAME__.entries.filter(entry => entry.tier <= 3).map(entry => entry.word);
+const eight = boot({
+  completed: eightWords,
+  order: eightWords.slice(-5),
+  current: null,
+  hints: 0,
+  rounds: 75,
+  sound: false,
+  judgment: { comfort: 0, order: 0, correct: 0, firstTry: 0 }
+});
+assert.equal(eight.document.querySelectorAll(".letter").length, 64, "the densest phone grid is 8×8");
+exerciseDenseFeel(eight, { cell: 36, gap: 3, origin: 40 });
+
+function exerciseDenseFeel(window, geomOptions) {
+  const { document } = window;
+  const geom = stubBoardGeometry(document, geomOptions);
+  const board = document.getElementById("board");
+  const start = centerOf(geom, 0);
+  const aimed = centerOf(geom, 1);
+  const belowEdge = { x: start.x, y: geom.origin + geom.pitch + 2 };
+  const diagonal = geom.size + 1;
+  const diagonalCorner = { x: geom.origin + geom.pitch + 2, y: geom.origin + geom.pitch + 2 };
+  const preview = { x: start.x + geom.pitch * 0.5, y: start.y };
+  const wobble = { x: start.x + geom.pitch * 0.82, y: start.y + 10 };
+  const grazeBack = { x: geom.origin + geom.cell - 1, y: start.y };
+
+  dispatchPointer(window, document.querySelector('[data-cell="0"]'), "pointerdown", start);
+  dispatchPointer(window, board, "pointermove", belowEdge);
+  assert.deepEqual(selectedIndices(document), [0], "entering the near edge of the tile below does not link it");
+  dispatchPointer(window, board, "pointermove", diagonalCorner);
+  assert.equal(document.querySelector(`[data-cell="${diagonal}"]`).classList.contains("selected"), false, "a diagonal corner graze does not link that letter");
+  assert.deepEqual(selectedIndices(document), [0], "corner clips leave the path on the letter where the finger started");
+
+  dispatchPointer(window, board, "pointermove", preview);
+  assert.deepEqual(selectedIndices(document), [0], "halfway down the lane does not lock the neighbor yet");
+  assert.ok(document.querySelector('[data-cell="1"]').classList.contains("candidate"), "the aimed letter previews before it locks");
+  assert.ok(document.querySelector(".path-line"), "an ink trail is drawn while the finger is still between letters");
+  assert.ok(document.querySelector(".path-finger"), "the trail ends on the fingertip");
+  assert.ok(document.querySelector('[data-cell="0"]').classList.contains("is-head"), "the current letter presses in as the head of the path");
+
+  dispatchPointer(window, board, "pointermove", wobble);
+  assert.deepEqual(selectedIndices(document), [0, 1], "a small sideways wobble still locks the letter the finger is aiming at");
+  assert.equal(document.querySelector('[data-cell="1"]').classList.contains("candidate"), false, "a locked letter is no longer a preview");
+  assert.ok(document.querySelector('[data-cell="1"]').classList.contains("is-head"));
+  assert.ok(document.querySelector('[data-cell="1"]').classList.contains("selected"));
+
+  dispatchPointer(window, board, "pointermove", grazeBack);
+  assert.deepEqual(selectedIndices(document), [0, 1], "brushing the previous tile does not erase the path");
+  dispatchPointer(window, board, "pointermove", start);
+  assert.deepEqual(selectedIndices(document), [0], "returning to the previous letter undoes the link");
+
+  dispatchPointer(window, board, "pointermove", centerOf(geom, 2));
+  assert.deepEqual(selectedIndices(document), [0, 1, 2], "a fast flick still collects every letter the finger passes through");
+  dispatchPointer(window, board, "pointercancel", centerOf(geom, 2));
+  assert.deepEqual(selectedIndices(document), [], "cancelling the stroke clears the path");
+  assert.equal(document.getElementById("definitionModal").classList.contains("open"), false, "a cancelled stroke does not submit");
+}
+
 deep.close();
 window.close();
 unlock.close();
@@ -238,4 +368,6 @@ stageFour.close();
 webGated.close();
 gated.close();
 finished.close();
-console.log("DOM E2E OK: stage II and IV unlocks, swipe, hint, three-way judgment, reader note, progress, coin boundaries, and no paywall anywhere");
+dense.close();
+eight.close();
+console.log("DOM E2E OK: stage II and IV unlocks, swipe, hint, three-way judgment, reader note, progress, coin boundaries, dense-grid touch lanes, and no paywall anywhere");
