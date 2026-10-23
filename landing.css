@@ -120,7 +120,9 @@ a:focus-visible { outline: 3px solid #782d29; outline-offset: 3px; }
 .subscribe-note a { color: #782d29; }
 .subscribe input:focus-visible,
 .subscribe button:focus-visible { outline: 3px solid #782d29; outline-offset: 2px; }
-.subscribe[data-state="pending"] .subscribe-status { color: #782d29; }
+.subscribe[data-state="pending"] .subscribe-status,
+.subscribe[data-state="refused"] .subscribe-status { color: #782d29; }
+.subscribe[data-state="success"] .subscribe-status { color: #3f5c32; }
 @media (max-width: 540px) {
   main { padding: 22px 16px 26px; }
 }

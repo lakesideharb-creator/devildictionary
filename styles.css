@@ -697,7 +697,9 @@ h1 { margin-top: 8px; font-size: clamp(28px, 4vw, 37px); font-weight: 700; lette
 .colophon .subscribe-note a { color: #f3d99c; }
 .colophon .subscribe input:focus-visible,
 .colophon .subscribe button:focus-visible { outline: 3px solid #f3d99c; outline-offset: 2px; }
-.colophon .subscribe[data-state="pending"] .subscribe-status { color: #f3d99c; }
+.colophon .subscribe[data-state="pending"] .subscribe-status,
+.colophon .subscribe[data-state="success"] .subscribe-status { color: #f3d99c; }
+.colophon .subscribe[data-state="refused"] .subscribe-status { color: #e7b2a4; }
 
 /* Dragging a word: ink follows the finger, the aimed letter warns, the locked letter presses in. */
 .board-frame { overscroll-behavior: contain; }
