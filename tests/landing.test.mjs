@@ -56,6 +56,12 @@ test("word and daily pages expose OG tags, the slogan, and a play link", () => {
   assert.doesNotMatch(daily, /intent\/follow|Visit @|Follow on YouTube|Follow on Instagram/);
   const social = daily.match(/<nav class="social-links"[\s\S]*?<\/nav>/);
   assert.equal((social[0].match(/<a /g) || []).length, 3);
+  assert.equal((social[0].match(/<svg width="18" height="18"/g) || []).length, 3);
+  assert.equal((social[0].match(/<path fill="currentColor"/g) || []).length, 3);
+  for (const file of ["styles.css", "landing.css", "community.css", "legal.css", "print-play.css"]) {
+    const css = fs.readFileSync(path.join(root, file), "utf8").replace(/\s+/g, "");
+    assert.ok(css.includes("svgpath{fill:currentColor"), `${file} paints the social icon path`);
+  }
 });
 
 test("X intent uses @Lakesideobhj and the game campaign", () => {

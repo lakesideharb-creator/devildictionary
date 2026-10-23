@@ -87,6 +87,11 @@ assert.equal(document.querySelectorAll(".social-links").length, 3);
 for (const nav of document.querySelectorAll(".social-links")) {
   assert.equal(nav.querySelectorAll("a").length, 3, "one icon for X, YouTube, and Instagram");
   assert.equal(nav.querySelectorAll("svg").length, 3);
+  for (const svg of nav.querySelectorAll("svg")) {
+    assert.equal(svg.getAttribute("width"), "18");
+    assert.equal(svg.getAttribute("height"), "18");
+    assert.equal(svg.querySelector("path").getAttribute("fill"), "currentColor");
+  }
 }
 assert.equal(document.querySelector('.social-links a[data-network="x"]').getAttribute("href"), "https://x.com/Lakesideobhj");
 assert.equal(document.querySelector('.social-links a[data-network="x"]').getAttribute("aria-label"), "Follow on X");

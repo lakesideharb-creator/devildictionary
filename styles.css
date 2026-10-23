@@ -620,7 +620,9 @@ h1 { margin-top: 8px; font-size: clamp(28px, 4vw, 37px); font-weight: 700; lette
   color: #5c3428;
   text-decoration: none;
 }
-.social-links a svg { width: 18px; height: 18px; display: block; fill: currentColor; }
+.social-links a svg { width: 18px; height: 18px; display: block; }
+.social-links a svg,
+.social-links a svg path { fill: currentColor; }
 .social-links a:hover {
   color: #782d29;
   border-color: #8d6a32;
