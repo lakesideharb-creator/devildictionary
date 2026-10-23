@@ -91,11 +91,14 @@
         body: JSON.stringify({ email })
       });
       const body = await response.json().catch(() => ({}));
+      const accepted = response.ok && body.ok === true && body.status === "subscribed";
       if (status) {
-        status.textContent = body.message || "The daily-word list is not open yet. This address was not saved.";
+        status.textContent = accepted
+          ? (body.message || "You’re on the list for the day’s word.")
+          : (body.message || "The list could not be reached. This address was not saved.");
       }
-      form.dataset.state = "refused";
-      const result = body.status === "method_not_allowed" ? "method_not_allowed" : "coming_soon";
+      form.dataset.state = accepted ? "success" : "refused";
+      const result = accepted ? "subscribed" : String(body.status || "error").slice(0, 40);
       window.ddTrack("Subscribe", { result });
     } catch {
       if (status) status.textContent = "The list could not be reached. This address was not saved.";
