@@ -271,9 +271,11 @@ h1 { margin: 4px 0 0; font-size: clamp(30px, 4vw, 52px); line-height: .95; font-
 .letter.selected { color: var(--paper-light); background: var(--blood); transform: scale(.94); box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--blood); }
 .letter.hint-node { animation: hint-pulse 1s ease-in-out infinite alternate; }
 
-.path-layer { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; z-index: 3; }
-.path-line { fill: none; stroke: var(--blood); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; opacity: .8; filter: drop-shadow(0 1px var(--paper-light)); }
-.path-line.hint { stroke: var(--blood); stroke-width: 2.5; stroke-dasharray: 7 8; opacity: .62; animation: dash-march .65s linear infinite; }
+.path-layer { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; z-index: 3; }
+.path-under { fill: none; stroke: #3d1614; stroke-linecap: round; stroke-linejoin: round; opacity: .3; }
+.path-line { fill: none; stroke: var(--blood); stroke-linecap: round; stroke-linejoin: round; opacity: .94; filter: drop-shadow(0 1px 0 rgba(255, 245, 223, .9)); }
+.path-line.hint { stroke: var(--blood); stroke-width: 2.5; stroke-dasharray: 7 8; opacity: .62; animation: dash-march .65s linear infinite; filter: none; }
+.path-finger { fill: var(--blood); stroke: #fff6e4; }
 
 .gesture-note { margin: 11px 0 0; text-align: center; font-size: 12px; font-style: italic; color: rgba(23,18,14,.62); }
 .controls { display: flex; justify-content: center; gap: 10px; margin-top: 15px; }
@@ -738,8 +740,39 @@ h1 { margin-top: 8px; font-size: clamp(28px, 4vw, 37px); font-weight: 700; lette
 .colophon .subscribe button:focus-visible { outline: 3px solid #f3d99c; outline-offset: 2px; }
 .colophon .subscribe[data-state="pending"] .subscribe-status { color: #f3d99c; }
 
+/* Dragging a word: ink follows the finger, the aimed letter warns, the locked letter presses in. */
+.board-frame { overscroll-behavior: contain; }
+.board { touch-action: none; }
+.letter {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  touch-action: none;
+  user-select: none;
+  transition: transform .1s ease, color .1s ease, background .1s ease, box-shadow .1s ease;
+}
+.board.is-drawing,
+.board.is-drawing .letter { cursor: grabbing; }
+.letter.selected { z-index: 2; transform: scale(0.985); }
+.letter.selected.is-head {
+  z-index: 3;
+  transform: scale(0.92);
+  box-shadow: inset 0 3px 7px rgba(36, 8, 6, 0.42), inset 0 0 0 1px rgba(255, 245, 223, 0.5);
+}
+.board.is-dense .letter.selected.is-head { transform: scale(0.94); }
+.letter.candidate {
+  z-index: 4;
+  color: var(--blood);
+  background: #fff8e8;
+  transform: scale(1.045);
+  box-shadow: inset 0 0 0 2px var(--blood), 0 3px 0 rgba(23, 18, 14, 0.14);
+}
+.board.is-dense .letter.candidate { transform: scale(1.03); }
+.letter:focus-visible { z-index: 6; }
+@media (hover: none) {
+  .letter:hover:not(.selected):not(.candidate):not(.is-head) { transform: none; }
+}
+
     </style>
-    <link rel="stylesheet" href="/shop.css" />
 
     <script type="application/ld+json">
       {
@@ -1279,6 +1312,14 @@ h1 { margin-top: 8px; font-size: clamp(28px, 4vw, 37px); font-weight: 700; lette
   let hintTimer = null;
   let toastTimer = null;
   let solvedLock = false;
+  let pointerType = "mouse";
+  let dragPointerId = null;
+  let lastPoint = null;
+  let trailPoint = null;
+  let candidateIndex = -1;
+  let swallowClick = false;
+  let clearTimer = null;
+  let layout = { ready: false, pitch: 0, centers: [], boardBox: null };
   const sound = createSoundEngine();
 
   function loadSave() {
@@ -1542,6 +1583,7 @@ h1 { margin-top: 8px; font-size: clamp(28px, 4vw, 37px); font-weight: 700; lette
     solvedLock = false;
     const stage = getStage();
     els.board.style.setProperty("--size", round.size);
+    els.board.classList.toggle("is-dense", round.size >= 6);
     els.board.innerHTML = round.letters.map((letter, index) =>
       `<button class="letter" type="button" data-cell="${index}" data-index="${String(index + 1).padStart(2, "0")}" aria-label="${letter}">${letter}</button>`
     ).join("");
@@ -1558,18 +1600,201 @@ h1 { margin-top: 8px; font-size: clamp(28px, 4vw, 37px); font-weight: 700; lette
     updateHUD();
   }
 
+  // Stage II onward is a 6×6, then 7×7, then 8×8. On a phone the gutter is 3px,
+  // so the tile's full box used to lock a neighbor before the thumb reached the
+  // midpoint — diagonals and the previous letter flipped under a small wobble.
+  // A letter now locks only after the finger has traveled well down its lane.
+  function measureBoard() {
+    const boardBox = els.board.getBoundingClientRect();
+    const centers = [...els.board.children].map(cell => {
+      const box = cell.getBoundingClientRect();
+      return {
+        x: box.left + box.width / 2,
+        y: box.top + box.height / 2,
+        w: box.width
+      };
+    });
+    let pitch = 0;
+    if (round && round.size > 1 && centers.length > 1 && centers[0].w > 0) {
+      pitch = Math.hypot(centers[1].x - centers[0].x, centers[1].y - centers[0].y);
+    }
+    layout = { ready: pitch > 1, pitch, centers, boardBox };
+  }
+
+  function gestureProfile() {
+    const touch = pointerType === "touch" || pointerType === "pen";
+    const pitch = layout.pitch;
+    // A 6×6 on a phone is about 50px a tile with a 3px gutter. The same stage
+    // on a laptop is still under 90px, so the lane stays in force for a mouse too.
+    const dense = pitch > 0 && (pitch < 64 || (round.size >= 6 && pitch < 88));
+    if (dense && touch) return { commit: 0.64, preview: 0.4, lateral: 0.24, backtrack: 0.38, reach: 0.58, lateralMin: 13 };
+    if (dense) return { commit: 0.6, preview: 0.38, lateral: 0.28, backtrack: 0.4, reach: 0.62, lateralMin: 10 };
+    if (touch) return { commit: 0.58, preview: 0.36, lateral: 0.3, backtrack: 0.42, reach: 0.66, lateralMin: 12 };
+    return { commit: 0.54, preview: 0.34, lateral: 0.34, backtrack: 0.44, reach: 0.7, lateralMin: 8 };
+  }
+
+  function lateralLimit(profile, slack = 1) {
+    return Math.max(layout.pitch * profile.lateral, profile.lateralMin) * slack;
+  }
+
+  function clientToBoard(x, y) {
+    const box = layout.boardBox || els.board.getBoundingClientRect();
+    return { x: x - box.left, y: y - box.top };
+  }
+
+  function neighborIndexes(index) {
+    const size = round.size;
+    const row = Math.floor(index / size);
+    const col = index % size;
+    const list = [];
+    for (let dr = -1; dr <= 1; dr += 1) {
+      for (let dc = -1; dc <= 1; dc += 1) {
+        if (!dr && !dc) continue;
+        const nextRow = row + dr;
+        const nextCol = col + dc;
+        if (nextRow >= 0 && nextRow < size && nextCol >= 0 && nextCol < size) list.push(nextRow * size + nextCol);
+      }
+    }
+    return list;
+  }
+
+  function laneMetrics(from, to, x, y) {
+    const dx = to.x - from.x;
+    const dy = to.y - from.y;
+    const len = Math.hypot(dx, dy) || 1;
+    const px = x - from.x;
+    const py = y - from.y;
+    const progress = (px * dx + py * dy) / len;
+    return {
+      ratio: progress / len,
+      lateral: Math.abs(px * dy - py * dx) / len,
+      dist: Math.hypot(to.x - x, to.y - y)
+    };
+  }
+
+  function legacyPick(x, y) {
+    const cell = document.elementFromPoint(x, y)?.closest?.(".letter");
+    if (cell && els.board.contains(cell)) addCell(Number(cell.dataset.cell));
+  }
+
+  function considerPoint(x, y) {
+    if (!selection.length) return;
+    const profile = gestureProfile();
+    const headIndex = selection.at(-1);
+    const head = layout.centers[headIndex];
+    if (selection.length > 1) {
+      const prevIndex = selection.at(-2);
+      const prev = layout.centers[prevIndex];
+      const distPrev = Math.hypot(prev.x - x, prev.y - y);
+      const distHead = Math.hypot(head.x - x, head.y - y);
+      if (distPrev <= layout.pitch * profile.backtrack && distPrev + layout.pitch * 0.12 < distHead) {
+        addCell(prevIndex);
+        return;
+      }
+    }
+    let best = -1;
+    let bestLateral = Infinity;
+    const limit = lateralLimit(profile);
+    for (const index of neighborIndexes(headIndex)) {
+      if (selection.includes(index)) continue;
+      const lane = laneMetrics(head, layout.centers[index], x, y);
+      if (lane.ratio < profile.commit || lane.lateral > limit || lane.dist > layout.pitch * profile.reach) continue;
+      if (lane.lateral < bestLateral) {
+        best = index;
+        bestLateral = lane.lateral;
+      }
+    }
+    if (best >= 0) addCell(best);
+  }
+
+  function walkSegment(from, to) {
+    if (!layout.ready) {
+      legacyPick(to.x, to.y);
+      return;
+    }
+    const distance = Math.hypot(to.x - from.x, to.y - from.y);
+    const step = Math.max(3, layout.pitch * 0.16);
+    const steps = Math.max(1, Math.ceil(distance / step));
+    for (let i = 1; i <= steps; i += 1) {
+      const t = i / steps;
+      considerPoint(from.x + (to.x - from.x) * t, from.y + (to.y - from.y) * t);
+    }
+  }
+
+  function setCandidate(index) {
+    if (candidateIndex === index) return;
+    if (candidateIndex >= 0) els.board.children[candidateIndex]?.classList.remove("candidate");
+    candidateIndex = index;
+    if (index >= 0) els.board.children[index]?.classList.add("candidate");
+  }
+
+  function updateCandidate(x, y) {
+    if (!dragging || !layout.ready || !selection.length) {
+      setCandidate(-1);
+      return;
+    }
+    const profile = gestureProfile();
+    const headIndex = selection.at(-1);
+    const head = layout.centers[headIndex];
+    const limit = lateralLimit(profile, 1.25);
+    let best = -1;
+    let bestScore = Infinity;
+    for (const index of neighborIndexes(headIndex)) {
+      if (selection.includes(index)) continue;
+      const lane = laneMetrics(head, layout.centers[index], x, y);
+      if (lane.ratio < profile.preview || lane.ratio >= profile.commit || lane.lateral > limit) continue;
+      const score = lane.lateral - lane.ratio * layout.pitch;
+      if (score < bestScore) {
+        bestScore = score;
+        best = index;
+      }
+    }
+    setCandidate(best);
+  }
+
+  function endDrag(commit) {
+    if (!dragging) return;
+    dragging = false;
+    dragPointerId = null;
+    lastPoint = null;
+    trailPoint = null;
+    els.board.classList.remove("is-drawing");
+    setCandidate(-1);
+    if (commit) {
+      paintSelection();
+      finishSelection();
+    } else {
+      clearSelection();
+    }
+  }
+
   function bindCells() {
     els.board.querySelectorAll(".letter").forEach(cell => {
       cell.addEventListener("pointerdown", event => {
-        if (solvedLock) return;
+        if (solvedLock || dragging) return;
+        if (event.button != null && event.button !== 0) return;
         event.preventDefault();
-        dragging = true;
+        pointerType = event.pointerType || "mouse";
+        dragPointerId = event.pointerId;
+        clearTimeout(clearTimer);
+        swallowClick = true;
+        window.setTimeout(() => { swallowClick = false; }, 500);
         clearSelection();
+        dragging = true;
+        els.board.classList.add("is-drawing");
+        measureBoard();
+        lastPoint = { x: event.clientX, y: event.clientY };
+        trailPoint = layout.ready ? clientToBoard(event.clientX, event.clientY) : null;
         addCell(Number(cell.dataset.cell));
         try { els.board.setPointerCapture(event.pointerId); } catch { /* pointer capture is optional */ }
       });
-      cell.addEventListener("click", () => {
+      cell.addEventListener("click", event => {
         if (solvedLock || dragging) return;
+        if (swallowClick && event.detail !== 0) {
+          swallowClick = false;
+          return;
+        }
+        clearTimeout(clearTimer);
         const index = Number(cell.dataset.cell);
         if (!selection.length) addCell(index);
         else if (selection.at(-1) === index) finishSelection();
@@ -1578,15 +1803,33 @@ h1 { margin-top: 8px; font-size: clamp(28px, 4vw, 37px); font-weight: 700; lette
     });
     els.board.onpointermove = event => {
       if (!dragging || solvedLock) return;
-      const cell = document.elementFromPoint(event.clientX, event.clientY)?.closest?.(".letter");
-      if (cell && els.board.contains(cell)) addCell(Number(cell.dataset.cell));
+      if (dragPointerId != null && event.pointerId != null && event.pointerId !== dragPointerId) return;
+      measureBoard();
+      const coalesced = typeof event.getCoalescedEvents === "function" ? event.getCoalescedEvents() : null;
+      const samples = coalesced && coalesced.length ? coalesced : [event];
+      for (const sample of samples) {
+        const point = { x: sample.clientX, y: sample.clientY };
+        if (lastPoint) walkSegment(lastPoint, point);
+        else if (!layout.ready) legacyPick(point.x, point.y);
+        lastPoint = point;
+      }
+      const latest = samples.at(-1);
+      trailPoint = layout.ready ? clientToBoard(latest.clientX, latest.clientY) : null;
+      updateCandidate(latest.clientX, latest.clientY);
+      paintSelection();
     };
-    els.board.onpointerup = () => {
-      if (!dragging) return;
-      dragging = false;
-      finishSelection();
+    els.board.onpointerup = event => {
+      if (dragPointerId != null && event.pointerId != null && event.pointerId !== dragPointerId) return;
+      endDrag(true);
     };
-    els.board.onpointercancel = () => { dragging = false; clearSelection(); };
+    els.board.onpointercancel = event => {
+      if (dragPointerId != null && event.pointerId != null && event.pointerId !== dragPointerId) return;
+      endDrag(false);
+    };
+    els.board.onlostpointercapture = event => {
+      if (dragPointerId != null && event.pointerId != null && event.pointerId !== dragPointerId) return;
+      endDrag(true);
+    };
   }
 
   function isAdjacent(a, b) {
@@ -1612,7 +1855,14 @@ h1 { margin-top: 8px; font-size: clamp(28px, 4vw, 37px); font-weight: 700; lette
   }
 
   function paintSelection() {
-    els.board.querySelectorAll(".letter").forEach((cell, index) => cell.classList.toggle("selected", selection.includes(index)));
+    const head = selection.at(-1);
+    els.board.querySelectorAll(".letter").forEach((cell, index) => {
+      const onPath = selection.includes(index);
+      cell.classList.toggle("selected", onPath);
+      cell.classList.toggle("is-head", index === head);
+      if (onPath) cell.classList.remove("candidate");
+    });
+    if (candidateIndex >= 0 && selection.includes(candidateIndex)) candidateIndex = -1;
     els.selectionText.textContent = selection.length ? selection.map(index => round.letters[index]).join("") : "—";
     drawPath(selection, false);
   }
@@ -1629,7 +1879,8 @@ h1 { margin-top: 8px; font-size: clamp(28px, 4vw, 37px); font-weight: 700; lette
         { transform: "translateX(7px)" }, { transform: "translateX(0)" }
       ], { duration: 250 });
       showToast(attempt.length < round.entry.word.length ? "Not finished yet — keep suspecting the letters." : "That definition does not fool the Devil.");
-      window.setTimeout(clearSelection, 300);
+      clearTimeout(clearTimer);
+      clearTimer = window.setTimeout(() => { if (!dragging) clearSelection(); }, 300);
     }
   }
 
@@ -1986,24 +2237,53 @@ h1 { margin-top: 8px; font-size: clamp(28px, 4vw, 37px); font-weight: 700; lette
 
   function drawPath(indices, hint) {
     resizeSvg();
-    if (indices.length < 2) { els.pathLayer.innerHTML = ""; return; }
+    const finger = !hint && dragging && layout.ready ? trailPoint : null;
+    if ((hint && indices.length < 2) || (!hint && indices.length + (finger ? 1 : 0) < 2)) {
+      els.pathLayer.innerHTML = "";
+      return;
+    }
     const boardBox = els.board.getBoundingClientRect();
+    const round1 = value => Math.round(value * 10) / 10;
     const points = indices.map(index => {
       const box = els.board.children[index].getBoundingClientRect();
-      return `${box.left - boardBox.left + box.width / 2},${box.top - boardBox.top + box.height / 2}`;
-    }).join(" ");
-    els.pathLayer.innerHTML = `<polyline class="path-line ${hint ? "hint" : ""}" points="${points}"></polyline>`;
+      return { x: box.left - boardBox.left + box.width / 2, y: box.top - boardBox.top + box.height / 2, w: box.width };
+    });
+    if (finger) points.push({ x: finger.x, y: finger.y, w: points[0]?.w || 0 });
+    const serialized = points.map(point => `${round1(point.x)},${round1(point.y)}`).join(" ");
+    if (hint) {
+      els.pathLayer.innerHTML = `<polyline class="path-line hint" points="${serialized}"></polyline>`;
+      return;
+    }
+    const cell = points[0]?.w || 32;
+    const width = Math.max(4.5, Math.min(11, cell * 0.16));
+    const end = points[points.length - 1];
+    const head = finger
+      ? `<circle class="path-finger" cx="${round1(end.x)}" cy="${round1(end.y)}" r="${round1(Math.max(3.5, width * 0.62))}" stroke-width="${round1(Math.max(1.25, width * 0.18))}"></circle>`
+      : "";
+    els.pathLayer.innerHTML =
+      `<polyline class="path-under" points="${serialized}" stroke-width="${round1(width * 1.85)}"></polyline>` +
+      `<polyline class="path-line" points="${serialized}" stroke-width="${round1(width)}"></polyline>` +
+      head;
   }
 
   function resizeSvg() {
+    const frame = els.board.parentElement.getBoundingClientRect();
     const box = els.board.getBoundingClientRect();
-    els.pathLayer.setAttribute("viewBox", `0 0 ${box.width} ${box.height}`);
+    const svg = els.pathLayer;
+    svg.style.left = `${box.left - frame.left}px`;
+    svg.style.top = `${box.top - frame.top}px`;
+    svg.style.width = `${Math.max(box.width, 0)}px`;
+    svg.style.height = `${Math.max(box.height, 0)}px`;
+    svg.setAttribute("viewBox", `0 0 ${Math.max(box.width, 1)} ${Math.max(box.height, 1)}`);
+    svg.setAttribute("preserveAspectRatio", "none");
   }
 
   function clearSelection() {
     selection = [];
+    candidateIndex = -1;
     els.selectionText.textContent = "—";
-    els.board?.querySelectorAll(".letter").forEach(cell => cell.classList.remove("selected"));
+    els.board?.classList.remove("is-drawing");
+    els.board?.querySelectorAll(".letter").forEach(cell => cell.classList.remove("selected", "is-head", "candidate"));
     els.pathLayer.innerHTML = "";
   }
 
@@ -2068,7 +2348,10 @@ h1 { margin-top: 8px; font-size: clamp(28px, 4vw, 37px); font-weight: 700; lette
     els.coinVault.addEventListener("click", () => { sound.coinTap(); showToast("Every 5 different entries completed resets the count and mints one more coin."); });
     els.soundToggle.addEventListener("click", toggleSound);
     els.resetButton.addEventListener("click", resetProgress);
-    window.addEventListener("resize", () => requestAnimationFrame(() => drawPath(selection, false)));
+    window.addEventListener("resize", () => requestAnimationFrame(() => {
+      measureBoard();
+      drawPath(selection, false);
+    }));
     document.addEventListener("keydown", event => {
       if (event.key === "Escape" && els.definitionModal.classList.contains("open") && !els.nextButton.hidden) nextRound();
       if (event.key === "Tab" && els.definitionModal.classList.contains("open")) {
@@ -2096,5 +2379,5 @@ h1 { margin-top: 8px; font-size: clamp(28px, 4vw, 37px); font-weight: 700; lette
 if (window.Capacitor) document.querySelectorAll('[data-community]').forEach(link => { link.href = 'https://devildictionary.com/community' + (link.hash || ''); });
 
     </script>
-  <script src="/shop.js" defer></script><div class="shop-mobile shop-deferred" hidden><a href="/print-play" data-shop-open>Get Printable Cards <span>from $2.99 ↗</span></a></div></body>
+  <div class="shop-mobile shop-deferred" hidden><a href="/print-play" data-shop-open>Get Printable Cards <span>from $2.99 ↗</span></a></div></body>
 </html>

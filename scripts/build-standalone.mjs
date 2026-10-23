@@ -17,6 +17,8 @@ const standalone = html
   .replace(/        <nav class="colophon-links"[\s\S]*?<\/nav>\n/, "")
   .replace(/\s*<form class="subscribe"[\s\S]*?<\/form>\n/, "\n")
   .replace(/\s*<script src="\/analytics\.js"><\/script>\n/, "\n")
+  .replace(/<script src="\/shop\.js" defer><\/script>/, "")
+  .replace(/\s*<link rel="stylesheet" href="\/shop\.css" \/>\n?/, "\n")
   .replace('    <script src="./app.js"></script>', `    <script>\n${js}\n    </script>`)
   .replace("<title>", "<!-- Standalone offline edition: just double-click to run -->\n    <title>");
 
