@@ -4,6 +4,25 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Community Edition · The Devil’s Dictionary</title>
+    <meta name="description" content="Original definitions from readers of The Devil’s Dictionary. Find the word. Face the truth." />
+    <link rel="canonical" href="https://devildictionary.com/community" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="The Devil's Dictionary" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:url" content="https://devildictionary.com/community" />
+    <meta property="og:title" content="Community Edition — The Devil’s Dictionary" />
+    <meta property="og:description" content="Original definitions from readers of The Devil’s Dictionary. Find the word. Face the truth." />
+    <meta property="og:image" content="https://devildictionary.com/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="The Devil's Dictionary word-sliding game" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@Lakesideobhj" />
+    <meta name="twitter:title" content="Community Edition — The Devil’s Dictionary" />
+    <meta name="twitter:description" content="Original definitions from readers of The Devil’s Dictionary. Find the word. Face the truth." />
+    <meta name="twitter:image" content="https://devildictionary.com/og.png" />
     <link rel="stylesheet" href="/community.css" />
     <script type="module" src="/community.js"></script>
   </head>
@@ -11,10 +30,15 @@
     <main>
       <nav>
         <a href="/">← The original game</a
+        ><a href="/daily">Today’s word</a
         ><a href="/print-play">Print &amp; Play</a><a href="#write">Write for the Devil ↗</a>
       </nav>
       <header>
-        <img src="/assets/devil-engraving.png" alt="" width="180" height="90" />
+        <picture>
+          <source srcset="/assets/devil-engraving.avif" type="image/avif" />
+          <source srcset="/assets/devil-engraving.webp" type="image/webp" />
+          <img src="/assets/devil-engraving.png" alt="" width="180" height="90" decoding="async" />
+        </picture>
         <p class="eyebrow">THE DEVIL’S DICTIONARY</p>
         <h1>The Community Edition</h1>
         <p class="intro">Human nature. Now accepting corrections.</p>
@@ -39,7 +63,8 @@
           <p id="byline"></p>
           <div class="actions">
             <button id="save-card">SAVE WORD CARD ↓</button
-            ><button id="copy">COPY FOR X ↗</button
+            ><button id="share">SHARE ON X ↗</button
+            ><button id="copy">COPY</button
             ><button id="report">REPORT ENTRY</button>
           </div>
         <div id="card-preview" hidden><img id="card-image" alt="Your community word card" style="width:100%;max-width:440px;display:block;margin:24px auto"><a id="card-download" download>DOWNLOAD PNG ↓</a></div></article>
@@ -104,6 +129,14 @@
       <footer>
         <a href="/community-policy.html">Privacy & submissions</a
         ><span>devildictionary.com</span>
+        <nav class="social-links" aria-label="Follow The Devil’s Dictionary">
+          <a href="https://x.com/intent/follow?screen_name=Lakesideobhj" target="_blank" rel="noopener noreferrer">Follow on X</a>
+          <a href="https://x.com/Lakesideobhj" target="_blank" rel="me noopener noreferrer">Visit @Lakesideobhj</a>
+          <a href="https://www.youtube.com/@DevilsDictionary" target="_blank" rel="me noopener noreferrer">Follow on YouTube</a>
+          <a href="https://www.youtube.com/@DevilsDictionary" target="_blank" rel="noopener noreferrer">Visit Devil’s Dictionary</a>
+          <a href="https://www.instagram.com/lakesideharb/" target="_blank" rel="me noopener noreferrer">Follow on Instagram</a>
+          <a href="https://www.instagram.com/lakesideharb/" target="_blank" rel="noopener noreferrer">Visit @lakesideharb</a>
+        </nav>
       </footer>
     </main>
   </body>
