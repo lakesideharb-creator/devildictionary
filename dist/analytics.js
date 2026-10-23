@@ -66,12 +66,12 @@
       return;
     }
     if (!link.closest(".social-links, .legal-social")) return;
-    let network = "other";
-    if (href.includes("x.com") || href.includes("twitter.com")) network = "x";
-    else if (href.includes("youtube.com")) network = "youtube";
-    else if (href.includes("instagram.com")) network = "instagram";
-    const label = (link.textContent || "").toLowerCase();
-    window.ddTrack("Social click", { network, action: label.includes("follow") ? "follow" : "visit" });
+    const network = link.dataset.network
+      || (href.includes("youtube.com") ? "youtube"
+        : href.includes("instagram.com") ? "instagram"
+        : href.includes("x.com") || href.includes("twitter.com") ? "x"
+        : "other");
+    window.ddTrack("Social click", { network, action: "profile" });
   });
 
   document.addEventListener("submit", async event => {
