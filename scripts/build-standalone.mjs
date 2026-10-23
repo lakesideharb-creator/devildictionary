@@ -15,6 +15,8 @@ const standalone = html
   .replace('./assets/devil-engraving.png', `data:image/png;base64,${engraving}`)
   .replace('    <link rel="stylesheet" href="./styles.css" />', `    <style>\n${css}\n    </style>`)
   .replace(/        <nav class="colophon-links"[\s\S]*?<\/nav>\n/, "")
+  .replace(/\s*<form class="subscribe"[\s\S]*?<\/form>\n/, "\n")
+  .replace(/\s*<script src="\/analytics\.js"><\/script>\n/, "\n")
   .replace('    <script src="./app.js"></script>', `    <script>\n${js}\n    </script>`)
   .replace("<title>", "<!-- Standalone offline edition: just double-click to run -->\n    <title>");
 

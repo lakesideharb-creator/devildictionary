@@ -3,5 +3,22 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "cleanUrls": true,
-  "trailingSlash": false
+  "trailingSlash": false,
+  "redirects": [
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "www.devildictionary.com" }],
+      "destination": "https://devildictionary.com/",
+      "permanent": true
+    },
+    {
+      "source": "/:path+",
+      "has": [{ "type": "host", "value": "www.devildictionary.com" }],
+      "destination": "https://devildictionary.com/:path+",
+      "permanent": true
+    }
+  ],
+  "rewrites": [
+    { "source": "/daily", "destination": "/api/daily" }
+  ]
 }

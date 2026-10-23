@@ -165,12 +165,30 @@ $("more").onclick = async () => {
   await list();
   $("more").disabled = false;
 };
+function communityShareText() {
+  const url = `https://devildictionary.com/community?entry=${encodeURIComponent(current.id)}&utm_source=x&utm_medium=share&utm_campaign=game`;
+  return `${current.word}: ${current.definition}\n— ${current.author} · Community Edition\n${url}`;
+}
+function communityIntent(text) {
+  const url = new URL("https://x.com/intent/post");
+  url.searchParams.set("text", text);
+  url.searchParams.set("via", "Lakesideobhj");
+  url.searchParams.set("utm_source", "x");
+  url.searchParams.set("utm_medium", "share");
+  url.searchParams.set("utm_campaign", "game");
+  return url.toString();
+}
+$("share").onclick = () => {
+  const intent = communityIntent(communityShareText());
+  window.ddTrack?.("Share", { method: "x", place: "community" });
+  const popup = window.open(intent, "_blank", "noopener,noreferrer");
+  if (!popup) window.location.assign(intent);
+};
 $("copy").onclick = async () => {
   try {
-    await navigator.clipboard.writeText(
-      `${current.word}: ${current.definition}\n— ${current.author} · Community Edition\nhttps://devildictionary.com/community?entry=${current.id}`,
-    );
-    $("puzzle-status").textContent = "Copied. Ready for X.";
+    await navigator.clipboard.writeText(communityShareText());
+    window.ddTrack?.("Share", { method: "copy", place: "community" });
+    $("puzzle-status").textContent = "Copied. Ready to paste.";
   } catch {
     $("puzzle-status").textContent =
       "Could not copy. You can copy this page’s link from your browser.";

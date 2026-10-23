@@ -332,7 +332,7 @@
     "definitionReveal", "judgmentPrompt", "definitionChoices", "judgmentFeedback", "readerNote",
     "newEntryBadge", "modalProgress", "nextButton", "coinCelebration", "coinMilestone", "stageCurtain",
     "curtainSigil", "curtainKicker", "curtainName", "curtainNote",
-    "toast", "coinVault", "soundToggle", "resetButton", "gestureNote", "saveCardButton", "shareWordButton"
+    "toast", "coinVault", "soundToggle", "resetButton", "gestureNote", "saveCardButton", "shareWordButton", "copyWordButton"
   ].map(id => [id, document.getElementById(id)]));
 
   let save = loadSave();
@@ -606,7 +606,7 @@
     const stage = getStage();
     els.board.style.setProperty("--size", round.size);
     els.board.innerHTML = round.letters.map((letter, index) =>
-      `<button class="letter" type="button" role="gridcell" data-cell="${index}" data-index="${String(index + 1).padStart(2, "0")}" aria-label="${letter}">${letter}</button>`
+      `<button class="letter" type="button" data-cell="${index}" data-index="${String(index + 1).padStart(2, "0")}" aria-label="${letter}">${letter}</button>`
     ).join("");
     els.folio.textContent = `ENTRY № ${String(save.completed.length + 1).padStart(3, "0")}`;
     els.targetWord.innerHTML = stage.tier === 1
@@ -719,6 +719,7 @@
     const currentCoins = Math.floor(save.completed.length / 5);
     persist();
     updateHUD();
+    window.ddTrack?.("Word complete", { word: round.entry.word, tier: round.entry.tier, fresh: isNew });
     return { isNew, previousCoins, currentCoins };
   }
 
@@ -878,15 +879,41 @@
     window.setTimeout(() => { makeBoard(next); els.board.querySelector(".letter")?.focus(); }, 250);
   }
 
+  const X_SHARE_URL = "https://devildictionary.com/?utm_source=x&utm_medium=share&utm_campaign=game";
+
+  function wordShareText(entry) {
+    return `${entry.word}, ${entry.pos}\n\n${entry.en}\n\nFind the word. Face the truth.\n${X_SHARE_URL}`;
+  }
+
+  function xIntentUrl(text) {
+    const url = new URL("https://x.com/intent/post");
+    url.searchParams.set("text", text);
+    url.searchParams.set("via", "Lakesideobhj");
+    url.searchParams.set("utm_source", "x");
+    url.searchParams.set("utm_medium", "share");
+    url.searchParams.set("utm_campaign", "game");
+    return url.toString();
+  }
+
+  function shareOnX() {
+    if (els.definitionReveal.hidden) return;
+    const intent = xIntentUrl(wordShareText(round.entry));
+    window.ddTrack?.("Share", { method: "x", place: "game" });
+    const popup = window.open(intent, "_blank", "noopener,noreferrer");
+    if (!popup) window.location.assign(intent);
+  }
+
   async function copyWord() {
     if (els.definitionReveal.hidden) return;
-    const text = `${round.entry.word}, ${round.entry.pos}\n\n${round.entry.en}\n\nFind the word. Face the truth.\nhttps://devildictionary.com`;
+    const text = wordShareText(round.entry);
     try {
       if (!navigator.clipboard?.writeText) throw new Error("Clipboard unavailable");
       await navigator.clipboard.writeText(text);
+      window.ddTrack?.("Share", { method: "copy", place: "game" });
       showToast("Copied. Paste it into your next post.");
     } catch {
       // Offline files and some embedded browsers do not expose the Clipboard API.
+      window.ddTrack?.("Share", { method: "copy", place: "game" });
       window.prompt("Copy this word for your post:", text);
     }
   }
@@ -976,7 +1003,11 @@
     els.progressFill.style.width = `${Math.min(100, count / ENTRIES.length * 100)}%`;
     els.stageName.textContent = getStage(count).name;
     els.coinRuleText.textContent = count === ENTRIES.length ? "The whole dictionary has been conquered" : `${remaining} ${remaining === 1 ? "word" : "words"} to go`;
-    els.coinPips.innerHTML = Array.from({ length: 5 }, (_, index) => `<i class="pip ${index < within ? "filled" : ""}"></i>`).join("");
+    els.coinPips.innerHTML = Array.from({ length: 5 }, (_, index) => `<i class="pip ${index < within ? "filled" : ""}" aria-hidden="true"></i>`).join("");
+    els.coinPips.setAttribute("aria-label", count === ENTRIES.length ? "Dictionary complete" : `${within} of 5 words toward the next coin`);
+    const played = count > 0;
+    document.body.classList.toggle("has-played", played);
+    document.querySelectorAll(".shop-deferred").forEach(element => { element.hidden = !played; });
     els.coinVault.setAttribute("aria-label", `${coins} Devil Coins held. One coin is minted for every 5 different entries completed.`);
     const soundOn = save.sound !== false;
     els.soundToggle.classList.toggle("muted", !soundOn);
@@ -1087,13 +1118,16 @@
   function init() {
     els.totalCount.textContent = ENTRIES.length;
     updateHUD();
+    const requestedWord = new URLSearchParams(location.search).get("word");
+    const requested = requestedWord ? ENTRIES.find(entry => entry.word === requestedWord.toUpperCase()) : null;
     const current = ENTRIES.find(entry => entry.word === save.current && !save.completed.includes(entry.word));
-    makeBoard(current || pickEntry());
+    makeBoard(requested || current || pickEntry());
     els.hintButton.addEventListener("click", showHint);
     els.shuffleButton.addEventListener("click", () => { sound.shuffle(); makeBoard(round.entry, true); showToast("Same word. The lies have been rearranged."); });
     els.nextButton.addEventListener("click", nextRound);
     els.saveCardButton.addEventListener("click", saveWordCard);
-    els.shareWordButton.addEventListener("click", copyWord);
+    els.shareWordButton.addEventListener("click", shareOnX);
+    els.copyWordButton.addEventListener("click", copyWord);
     els.coinVault.addEventListener("click", () => { sound.coinTap(); showToast("Every 5 different entries completed resets the count and mints one more coin."); });
     els.soundToggle.addEventListener("click", toggleSound);
     els.resetButton.addEventListener("click", resetProgress);
@@ -1116,6 +1150,7 @@
       reset: () => { localStorage.removeItem(STORAGE_KEY); location.reload(); }
     };
     configureNativeChrome();
+    window.ddTrack?.("Game start");
   }
 
   init();

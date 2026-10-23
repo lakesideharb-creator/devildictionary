@@ -8,6 +8,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { loadEntries, slugFor } from "../lib/landing.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const dist = path.join(root, "dist");
@@ -24,7 +25,14 @@ const PAGES = [
   { url: "/community-policy", file: "community-policy.html", priority: "0.3", changefreq: "yearly" },
   { url: "/privacy", file: "privacy.html", priority: "0.3", changefreq: "yearly" },
   { url: "/terms", file: "terms.html", priority: "0.3", changefreq: "yearly" },
-  { url: "/refund", file: "refund.html", priority: "0.3", changefreq: "yearly" }
+  { url: "/refund", file: "refund.html", priority: "0.3", changefreq: "yearly" },
+  { url: "/daily", file: "app.js", priority: "0.8", changefreq: "daily" },
+  ...loadEntries().map(entry => ({
+    url: `/word/${slugFor(entry.word)}`,
+    file: "app.js",
+    priority: "0.4",
+    changefreq: "monthly"
+  }))
 ];
 
 const isoDate = (file) => {
@@ -68,6 +76,7 @@ ${urls}
 
 for (const [src, out] of [
   ["assets/icon.svg", "favicon.svg"],
+  ["assets/favicon.ico", "favicon.ico"],
   ["assets/favicon.png", "favicon.png"],
   ["assets/apple-touch-icon.png", "apple-touch-icon.png"],
   ["assets/og.png", "og.png"]

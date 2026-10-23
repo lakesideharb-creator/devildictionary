@@ -9,7 +9,7 @@ const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
 const script = fs.readFileSync(path.join(root, "app.js"), "utf8");
 
 function boot(storage, options = {}) {
-  const window = new Window({ url: "http://127.0.0.1:4173/" });
+  const window = new Window({ url: options.url || "http://127.0.0.1:4173/" });
   window.document.write(html.replace(/<script src="\.\/app\.js"><\/script>/, ""));
   window.document.close();
   window.Element.prototype.setPointerCapture = () => {};
@@ -72,6 +72,20 @@ async function swipeCurrent(window) {
 const window = boot();
 const { document } = window;
 assert.equal(document.querySelector("h1").textContent, "The Devil’s Dictionary");
+assert.equal(document.querySelector(".subtitle").textContent, "Find the word. Face the truth.");
+assert.equal(document.querySelector(".devil-engraving").getAttribute("fetchpriority"), "high");
+assert.equal(document.querySelector(".devil-engraving").getAttribute("width"), "240");
+assert.equal(document.querySelector(".devil-engraving").getAttribute("height"), "120");
+assert.equal(document.getElementById("board").getAttribute("role"), "group");
+assert.equal(document.querySelector("[role=grid]"), null);
+assert.equal(document.querySelector("[role=gridcell]"), null);
+assert.equal(document.getElementById("coinPips").getAttribute("role"), "img");
+assert.match(document.getElementById("coinPips").getAttribute("aria-label"), /0 of 5 words toward the next coin/);
+assert.equal(document.querySelector(".shop-banner").hidden, true, "pay banner stays hidden until a word is finished");
+assert.equal(document.querySelector(".shop-mobile").hidden, true, "mobile pay bar stays hidden until a word is finished");
+assert.ok(document.querySelector('a[href="https://x.com/Lakesideobhj"]'));
+assert.ok(document.querySelector('a[href="https://www.youtube.com/@DevilsDictionary"]'));
+assert.ok(document.querySelector('a[href="https://www.instagram.com/lakesideharb/"]'));
 assert.equal(document.querySelectorAll(".letter").length, 25, "beginner stage renders a 5×5 board");
 assert.equal(window.__DEVILS_GAME__.entries.length, 100, "expanded dictionary loads");
 
@@ -97,11 +111,25 @@ for (let solved = 1; solved <= 5; solved += 1) {
   if (solved === 1) {
     assert.equal(document.querySelector(".shell").inert, true, "open definition keeps keyboard focus out of the background");
     const copied = [];
+    const opened = [];
     Object.defineProperty(window.navigator, "clipboard", { configurable: true, value: { writeText: async text => copied.push(text) } });
+    window.open = url => { opened.push(url); return { closed: false }; };
     document.getElementById("shareWordButton").click();
+    const intent = new URL(opened[0]);
+    assert.equal(intent.origin + intent.pathname, "https://x.com/intent/post");
+    assert.equal(intent.searchParams.get("via"), "Lakesideobhj");
+    assert.equal(intent.searchParams.get("utm_source"), "x");
+    assert.equal(intent.searchParams.get("utm_medium"), "share");
+    assert.equal(intent.searchParams.get("utm_campaign"), "game");
+    const shared = intent.searchParams.get("text");
+    assert.ok(shared.includes(window.__DEVILS_GAME__.getState().round.entry.en), "X intent includes the unlocked definition");
+    assert.ok(shared.includes("utm_source=x&utm_medium=share&utm_campaign=game"), "shared link carries the game campaign");
+    assert.ok(shared.includes("Find the word. Face the truth."));
+    document.getElementById("copyWordButton").click();
     await sleep(0);
-    assert.ok(copied[0].includes(window.__DEVILS_GAME__.getState().round.entry.en), "share copies the actual unlocked definition");
-    assert.ok(copied[0].endsWith("https://devildictionary.com"), "share includes the canonical game link");
+    assert.ok(copied[0].includes(window.__DEVILS_GAME__.getState().round.entry.en), "copy keeps the definition as a fallback");
+    assert.ok(copied[0].includes("https://devildictionary.com/?utm_source=x&utm_medium=share&utm_campaign=game"));
+    assert.equal(document.querySelector(".shop-banner").hidden, false, "pay banner can appear after the first word");
     document.getElementById("nextButton").focus();
     document.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Tab", bubbles: true, cancelable: true }));
     assert.equal(document.activeElement.id, "saveCardButton", "Tab wraps to the first modal action");
@@ -192,6 +220,10 @@ const finished = boot({ completed: everyWord, order: everyWord.slice(-5), curren
 assert.equal(finished.document.querySelectorAll(".letter").length, 64, "a finished dictionary deals an 8×8 replay");
 assert.equal(finished.document.getElementById("completedCount").textContent, "100");
 
+const deep = boot(null, { url: "http://127.0.0.1:4173/?word=HOPE" });
+assert.equal(deep.__DEVILS_GAME__.getState().round.entry.word, "HOPE", "daily and word pages can open a specific entry");
+
+deep.close();
 window.close();
 unlock.close();
 stageFour.close();
