@@ -83,9 +83,17 @@ assert.equal(document.getElementById("coinPips").getAttribute("role"), "img");
 assert.match(document.getElementById("coinPips").getAttribute("aria-label"), /0 of 5 words toward the next coin/);
 assert.equal(document.querySelector(".shop-banner").hidden, true, "pay banner stays hidden until a word is finished");
 assert.equal(document.querySelector(".shop-mobile").hidden, true, "mobile pay bar stays hidden until a word is finished");
-assert.ok(document.querySelector('a[href="https://x.com/Lakesideobhj"]'));
-assert.ok(document.querySelector('a[href="https://www.youtube.com/@DevilsDictionary"]'));
-assert.ok(document.querySelector('a[href="https://www.instagram.com/lakesideharb/"]'));
+assert.equal(document.querySelectorAll(".social-links").length, 3);
+for (const nav of document.querySelectorAll(".social-links")) {
+  assert.equal(nav.querySelectorAll("a").length, 3, "one icon for X, YouTube, and Instagram");
+  assert.equal(nav.querySelectorAll("svg").length, 3);
+}
+assert.equal(document.querySelector('.social-links a[data-network="x"]').getAttribute("href"), "https://x.com/Lakesideobhj");
+assert.equal(document.querySelector('.social-links a[data-network="x"]').getAttribute("aria-label"), "Follow on X");
+assert.equal(document.querySelector('.social-links a[data-network="youtube"]').getAttribute("aria-label"), "YouTube: Devil's Dictionary");
+assert.equal(document.querySelector('.social-links a[data-network="instagram"]').getAttribute("aria-label"), "Instagram @lakesideharb");
+assert.equal(document.querySelector('a[href*="intent/follow"]'), null);
+assert.equal(document.body.textContent.includes("Visit @Lakesideobhj"), false);
 assert.equal(document.querySelectorAll(".letter").length, 25, "beginner stage renders a 5×5 board");
 assert.equal(window.__DEVILS_GAME__.entries.length, 100, "expanded dictionary loads");
 

@@ -603,32 +603,42 @@ h1 { margin-top: 8px; font-size: clamp(28px, 4vw, 37px); font-weight: 700; lette
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 8px;
-  margin: 12px 0 0;
+  align-items: center;
+  gap: 12px;
+  margin: 14px 0 0;
 }
 .social-links a {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 36px;
-  padding: 6px 10px;
-  border: 1px solid #782d2955;
-  border-radius: 3px;
-  background: #fff5df55;
-  color: var(--blood);
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid rgba(120, 45, 41, 0.45);
+  border-radius: 50%;
+  background: rgba(255, 245, 223, 0.35);
+  color: #5c3428;
   text-decoration: none;
-  font: 600 12px/1.2 Arial, sans-serif;
 }
-.social-links a:hover { background: #fff9eb; }
-.social-links a:focus-visible { outline: 3px solid var(--blood); outline-offset: 2px; }
-.social-links-modal { margin-top: 16px; }
+.social-links a svg { width: 18px; height: 18px; display: block; fill: currentColor; }
+.social-links a:hover {
+  color: #782d29;
+  border-color: #8d6a32;
+  background: rgba(216, 166, 58, 0.34);
+}
+.social-links a:focus-visible { outline: 3px solid #b0893e; outline-offset: 3px; }
+.social-links-modal { margin-top: 18px; }
 .social-links-footer { margin: 4px 0 0; }
 .colophon .social-links a {
-  color: #f5e5c9;
-  border-color: #c6aa7e;
-  background: #382b21;
+  color: #f0ddba;
+  border-color: rgba(198, 170, 126, 0.75);
+  background: transparent;
 }
-.colophon .social-links a:hover { filter: brightness(1.08); }
+.colophon .social-links a:hover {
+  color: #fff8e8;
+  border-color: #f3d99c;
+  background: rgba(243, 217, 156, 0.2);
+}
 
 .colophon .subscribe {
   width: min(460px, 100%);

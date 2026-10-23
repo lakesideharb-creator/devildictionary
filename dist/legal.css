@@ -203,15 +203,30 @@
 .legal-social {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px 16px;
+  align-items: center;
+  gap: 12px;
   margin: 8px 0 18px;
 }
 .legal-social a {
-  color: var(--paper-light);
-  font: 12px/1.4 Arial, Helvetica, sans-serif;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid rgba(198, 170, 126, 0.75);
+  border-radius: 50%;
+  background: transparent;
+  color: #f0ddba;
   text-decoration: none;
-  border-bottom: 1px solid rgba(189, 164, 119, 0.45);
 }
+.legal-social a svg { width: 18px; height: 18px; display: block; fill: currentColor; }
+.legal-social a:hover {
+  color: #fff8e8;
+  border-color: #f3d99c;
+  background: rgba(243, 217, 156, 0.2);
+}
+.legal-social a:focus-visible { outline: 3px solid #f3d99c; outline-offset: 3px; }
 
 .legal-card a.legal-button:hover {
   color: var(--paper-light);

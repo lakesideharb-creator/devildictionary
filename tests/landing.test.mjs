@@ -50,6 +50,12 @@ test("word and daily pages expose OG tags, the slogan, and a play link", () => {
   assert.match(daily, /https:\/\/www\.youtube\.com\/@DevilsDictionary/);
   assert.match(daily, /https:\/\/www\.instagram\.com\/lakesideharb\//);
   assert.match(daily, /https:\/\/x\.com\/Lakesideobhj/);
+  assert.match(daily, /aria-label="Follow on X"/);
+  assert.match(daily, /aria-label="YouTube: Devil's Dictionary"/);
+  assert.match(daily, /aria-label="Instagram @lakesideharb"/);
+  assert.doesNotMatch(daily, /intent\/follow|Visit @|Follow on YouTube|Follow on Instagram/);
+  const social = daily.match(/<nav class="social-links"[\s\S]*?<\/nav>/);
+  assert.equal((social[0].match(/<a /g) || []).length, 3);
 });
 
 test("X intent uses @Lakesideobhj and the game campaign", () => {
