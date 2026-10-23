@@ -92,9 +92,10 @@ test("/daily returns 200 HTML with OG tags", () => {
   assert.match(html, /Find the word\. Face the truth\./);
   assert.match(html, /action="\/api\/subscribe"/);
   assert.match(html, /src="\/analytics\.js"/);
+  assert.match(html, /This joins the waitlist\. It does not send the day’s word\./);
   assert.match(html, /An address is saved only after the list accepts it/);
-  assert.match(html, /Join the list/);
-  assert.doesNotMatch(html, /you(?:’|')re subscribed|api[_-]?key|RESEND|buttondown/i);
+  assert.match(html, /Join the waitlist/);
+  assert.doesNotMatch(html, /The day’s word, by email|you(?:’|')re subscribed|api[_-]?key|RESEND|buttondown/i);
 });
 
 const AUDIENCE = "78261eea-8f8b-4381-83c6-79fa7120f1cf";
@@ -160,7 +161,8 @@ test("subscribe stores an address with Resend and never echoes or logs it", asyn
     assert.equal(res.statusCode, 200);
     assert.equal(json.ok, true);
     assert.equal(json.status, "subscribed");
-    assert.match(json.message, /on the list/i);
+    assert.match(json.message, /on the waitlist/i);
+    assert.match(json.message, /No daily letter yet/);
     assert.equal(res.headers["Cache-Control"], "no-store");
     assert.doesNotMatch(payload, /person@example\.com/i);
     assert.equal(calls.length, 1);
@@ -194,7 +196,7 @@ test("subscribe stores an address with Resend and never echoes or logs it", asyn
   assert.equal(missing.statusCode, 503);
   assert.equal(missing.json().status, "not_configured");
   assert.match(missing.json().message, /not configured/i);
-  assert.doesNotMatch(missing.json().message, /on the list/i);
+  assert.doesNotMatch(missing.json().message, /waitlist|on the list/i);
   assert.doesNotMatch(missing.text(), /person@example\.com/i);
   assert.equal(fetched, false);
 
@@ -237,7 +239,7 @@ test("subscribe stores an address with Resend and never echoes or logs it", asyn
     await subscribe(postRequest({ email: "person@example.com" }), res);
     assert.equal(res.statusCode, 502);
     assert.equal(res.json().status, "upstream_error");
-    assert.doesNotMatch(res.json().message, /on the list/i);
+    assert.doesNotMatch(res.json().message, /waitlist|on the list/i);
     assert.doesNotMatch(res.text(), /person@example\.com/i);
   });
 });
@@ -249,9 +251,18 @@ test("privacy names Vercel Web Analytics and Resend, and the homepage keeps the 
   assert.match(privacy, /third-party cookies/);
   assert.match(privacy, /Resend/);
   assert.match(privacy, /unsubscribe/i);
+  assert.match(privacy, /No daily letter is sent yet/);
+  assert.doesNotMatch(privacy, /sends the day’s word/);
   assert.match(privacy, /support@devildictionary\.com/);
   assert.doesNotMatch(privacy, /does not store the address|list is not open yet|no analytics/i);
+  const faq = fs.readFileSync(path.join(root, "faq.html"), "utf8");
+  assert.match(faq, /joins a waitlist only/);
+  assert.match(faq, /no daily letter is sent yet/);
+  assert.doesNotMatch(faq, /does not save the address/);
   assert.match(index, /Find the word\. Face the truth\./);
+  assert.match(index, /Join the waitlist/);
+  assert.match(index, /does not send the day’s word/);
+  assert.doesNotMatch(index, /The day’s word, by email/);
   assert.match(index, /action="\/api\/subscribe"/);
   assert.match(index, /src="\/analytics\.js"/);
   assert.match(fs.readFileSync(path.join(root, "app.js"), "utf8"), /ddTrack\?\.\("Game start"\)/);
