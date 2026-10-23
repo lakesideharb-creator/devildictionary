@@ -24,7 +24,8 @@ for (const file of [
   "terms.html",
   "support.html",
   "faq.html",
-  "landing.css"
+  "landing.css",
+  "analytics.js"
 ]) {
   fs.copyFileSync(path.join(root, file), path.join(dist, file));
 }

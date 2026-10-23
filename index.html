@@ -205,6 +205,16 @@
           <a href="https://www.instagram.com/lakesideharb/" target="_blank" rel="me noopener noreferrer">Follow on Instagram</a>
           <a href="https://www.instagram.com/lakesideharb/" target="_blank" rel="noopener noreferrer">Visit @lakesideharb</a>
         </nav>
+        <form class="subscribe" data-subscribe action="/api/subscribe" method="post">
+          <p class="subscribe-kicker">Daily word</p>
+          <label for="subscribe-email">Email for the day’s word</label>
+          <div class="subscribe-row">
+            <input id="subscribe-email" name="email" type="email" inputmode="email" autocomplete="email" required maxlength="254" placeholder="you@example.com" />
+            <button type="submit">Request the list</button>
+          </div>
+          <p class="subscribe-status" data-subscribe-status role="status">The list is not open yet. Nothing you type is saved.</p>
+          <p class="subscribe-note"><a href="/privacy">Privacy</a></p>
+        </form>
         <nav class="colophon-links" aria-label="Policies and pricing">
           <a href="/daily">Today’s word</a>
           <a href="/pricing">Pricing</a>
@@ -270,6 +280,7 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+    <script src="/analytics.js"></script>
     <script src="./app.js"></script>
   <script src="/shop.js" defer></script><div class="shop-mobile shop-deferred" hidden><a href="/print-play" data-shop-open>Get Printable Cards <span>from $2.99 ↗</span></a></div></body>
 </html>

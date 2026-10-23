@@ -4,6 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import handler from "../api/daily.mjs";
+import subscribe from "../api/subscribe.mjs";
 import {
   dailyEntry,
   entryBySlug,
@@ -83,7 +84,61 @@ test("/daily returns 200 HTML with OG tags", () => {
   assert.match(html, /property="og:image"/);
   assert.match(html, /name="twitter:card"/);
   assert.match(html, /Find the word\. Face the truth\./);
-  assert.doesNotMatch(html, /email/i);
+  assert.match(html, /action="\/api\/subscribe"/);
+  assert.match(html, /src="\/analytics\.js"/);
+  assert.match(html, /Nothing you type is saved/);
+  assert.doesNotMatch(html, /you(?:’|')re subscribed|api[_-]?key|RESEND|buttondown/i);
+});
+
+test("the subscribe stub does not store or echo an address", () => {
+  const chunks = [];
+  const req = {
+    method: "POST",
+    on(event, fn) {
+      if (event === "data") fn(Buffer.from(JSON.stringify({ email: "person@example.com" })));
+      if (event === "end") fn();
+    }
+  };
+  const res = {
+    statusCode: 0,
+    headers: {},
+    setHeader(key, value) { this.headers[key] = value; },
+    end(body) { chunks.push(body); }
+  };
+  subscribe(req, res);
+  const payload = chunks.join("");
+  const json = JSON.parse(payload);
+  assert.equal(res.statusCode, 501);
+  assert.equal(json.ok, false);
+  assert.equal(json.status, "coming_soon");
+  assert.match(json.message, /not saved/i);
+  assert.equal(res.headers["Cache-Control"], "no-store");
+  assert.doesNotMatch(payload, /person@example\.com/);
+
+  const refused = [];
+  const other = {
+    statusCode: 0,
+    headers: {},
+    setHeader(key, value) { this.headers[key] = value; },
+    end(body) { refused.push(body); }
+  };
+  subscribe({ method: "GET" }, other);
+  assert.equal(other.statusCode, 405);
+  assert.equal(JSON.parse(refused.join("")).status, "method_not_allowed");
+});
+
+test("privacy names Vercel Web Analytics and the homepage keeps the slogan", () => {
+  const privacy = fs.readFileSync(path.join(root, "privacy.html"), "utf8");
+  const index = fs.readFileSync(path.join(root, "index.html"), "utf8");
+  assert.match(privacy, /Vercel Web Analytics/);
+  assert.match(privacy, /third-party cookies/);
+  assert.match(privacy, /does not store the address/);
+  assert.doesNotMatch(privacy, /no analytics/i);
+  assert.match(index, /Find the word\. Face the truth\./);
+  assert.match(index, /action="\/api\/subscribe"/);
+  assert.match(index, /src="\/analytics\.js"/);
+  assert.match(fs.readFileSync(path.join(root, "app.js"), "utf8"), /ddTrack\?\.\("Game start"\)/);
+  assert.doesNotMatch(fs.readFileSync(path.join(root, "editor.html"), "utf8"), /analytics\.js/);
 });
 
 test("the header engraving is a small 480px asset with webp and avif siblings", () => {

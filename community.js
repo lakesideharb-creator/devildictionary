@@ -180,12 +180,14 @@ function communityIntent(text) {
 }
 $("share").onclick = () => {
   const intent = communityIntent(communityShareText());
+  window.ddTrack?.("Share", { method: "x", place: "community" });
   const popup = window.open(intent, "_blank", "noopener,noreferrer");
   if (!popup) window.location.assign(intent);
 };
 $("copy").onclick = async () => {
   try {
     await navigator.clipboard.writeText(communityShareText());
+    window.ddTrack?.("Share", { method: "copy", place: "community" });
     $("puzzle-status").textContent = "Copied. Ready to paste.";
   } catch {
     $("puzzle-status").textContent =

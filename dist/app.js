@@ -719,6 +719,7 @@
     const currentCoins = Math.floor(save.completed.length / 5);
     persist();
     updateHUD();
+    window.ddTrack?.("Word complete", { word: round.entry.word, tier: round.entry.tier, fresh: isNew });
     return { isNew, previousCoins, currentCoins };
   }
 
@@ -897,6 +898,7 @@
   function shareOnX() {
     if (els.definitionReveal.hidden) return;
     const intent = xIntentUrl(wordShareText(round.entry));
+    window.ddTrack?.("Share", { method: "x", place: "game" });
     const popup = window.open(intent, "_blank", "noopener,noreferrer");
     if (!popup) window.location.assign(intent);
   }
@@ -907,9 +909,11 @@
     try {
       if (!navigator.clipboard?.writeText) throw new Error("Clipboard unavailable");
       await navigator.clipboard.writeText(text);
+      window.ddTrack?.("Share", { method: "copy", place: "game" });
       showToast("Copied. Paste it into your next post.");
     } catch {
       // Offline files and some embedded browsers do not expose the Clipboard API.
+      window.ddTrack?.("Share", { method: "copy", place: "game" });
       window.prompt("Copy this word for your post:", text);
     }
   }
@@ -1146,6 +1150,7 @@
       reset: () => { localStorage.removeItem(STORAGE_KEY); location.reload(); }
     };
     configureNativeChrome();
+    window.ddTrack?.("Game start");
   }
 
   init();
