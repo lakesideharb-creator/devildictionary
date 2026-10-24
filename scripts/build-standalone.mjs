@@ -17,14 +17,12 @@ const standalone = html
   .replace(/    <script>\n      if \(!window\.Capacitor && location\.hostname === "www\.devildictionary\.com"\) \{[\s\S]*?    <\/script>\n/, "")
   .replace('./assets/devil-engraving.png', `data:image/png;base64,${engraving}`)
   .replace('    <link rel="stylesheet" href="./styles.css" />', `    <style>\n${css}\n${hwCss}\n    </style>`)
-  .replace(/\n\s*<link rel="stylesheet" href="\.\/halloween-intro\.css" \/>/, "")
-  .replace(/\n\s*<script src="\.\/halloween-intro\.js"><\/script>/, "")
   .replace(/        <nav class="colophon-links"[\s\S]*?<\/nav>\n/, "")
   .replace(/\s*<form class="subscribe"[\s\S]*?<\/form>\n/, "\n")
-  .replace(/\s*<script src="\/analytics\.js"><\/script>\n/, "\n")
+  .replace(/\s*<script src="\/analytics\.js"(?: defer)?><\/script>\n/, "\n")
   .replace(/<script src="\/shop\.js" defer><\/script>/, "")
   .replace(/\s*<link rel="stylesheet" href="\/shop\.css" \/>\n?/, "\n")
-  .replace('    <script src="./app.js"></script>', `    <script>\n${hwJs}\n${js}\n    </script>`)
+  .replace(/<script src="\.\/app\.js"(?: defer)?><\/script>/, `<script>\n${hwJs}\n${js}\n    </script>`)
   .replace("<title>", "<!-- Standalone offline edition: just double-click to run -->\n    <title>");
 
 const output = path.join(root, "The-Devils-Dictionary.html");

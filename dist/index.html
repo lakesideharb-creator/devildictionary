@@ -48,10 +48,39 @@
         var day = Math.floor(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) / 86400000);
         document.documentElement.dataset.houseBook = day % 2 ? "defines" : "dictionary";
       })();
+      // Decorative Halloween intro. Same local window as inSeason() in
+      // halloween-intro.js: 24 October through 2 November.
+      // ?halloween=1 loads it anyway. ?halloween=0 never loads it.
+      // The stylesheet is inserted from script, so it does not block first paint.
+      // document.write during parse inserts a real deferred script: the file
+      // starts downloading here, runs only after the document is parsed, and
+      // stays ahead of analytics and the game.
+      (function () {
+        var flag = null;
+        try {
+          flag = new URLSearchParams(location.search).get("halloween");
+        } catch (e) {
+          flag = null;
+        }
+        if (flag === "0") return;
+        var now = new Date();
+        var month = now.getMonth();
+        var day = now.getDate();
+        var inSeason = (month === 9 && day >= 24) || (month === 10 && day <= 2);
+        if (flag !== "1" && !inSeason) return;
+        var css = document.createElement("link");
+        css.rel = "stylesheet";
+        css.href = "./halloween-intro.css";
+        css.setAttribute("data-halloween-css", "pending");
+        css.onload = css.onerror = function () {
+          css.setAttribute("data-halloween-css", "ready");
+        };
+        document.head.appendChild(css);
+        document.write('<script src="./halloween-intro.js" defer><\/script>');
+      })();
     </script>
     <title>The Devil's Dictionary — A Word-Sliding Game</title>
     <link rel="stylesheet" href="./styles.css" />
-    <link rel="stylesheet" href="./halloween-intro.css" />
     <link rel="stylesheet" href="/shop.css" />
 
     <script type="application/ld+json">
@@ -438,8 +467,7 @@
       </div>
     </div>
 
-    <script src="/analytics.js"></script>
-    <script src="./halloween-intro.js"></script>
-    <script src="./app.js"></script>
+    <script src="/analytics.js" defer></script>
+    <script src="./app.js" defer></script>
   <script src="/shop.js" defer></script><div class="shop-mobile shop-deferred" hidden><a href="/print-play" data-shop-open>Get Printable Cards <span>from $2.99 ↗</span></a></div></body>
 </html>

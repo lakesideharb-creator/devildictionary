@@ -11,8 +11,7 @@ const script = fs.readFileSync(path.join(root, "app.js"), "utf8");
 function boot(storage, options = {}) {
   const window = new Window({ url: options.url || "http://127.0.0.1:4173/" });
   window.document.write(html
-    .replace(/<script src="\.\/halloween-intro\.js"><\/script>\s*/, "")
-    .replace(/<script src="\.\/app\.js"><\/script>/, ""));
+    .replace(/<script src="\.\/app\.js"(?: defer)?><\/script>/, ""));
   window.document.close();
   window.Element.prototype.setPointerCapture = () => {};
   window.Element.prototype.animate = () => ({ finished: Promise.resolve() });
