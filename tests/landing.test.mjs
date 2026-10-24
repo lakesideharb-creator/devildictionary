@@ -142,7 +142,7 @@ test("the daily page publishes JSON-LD and more crawlable copy without dropping 
   assert.match(daily, /Send me the letter/);
   const index = fs.readFileSync(path.join(root, "index.html"), "utf8");
   const home = jsonLd(index)["@graph"].map(node => node["@type"]);
-  assert.deepEqual(home, ["WebSite", "Organization", "VideoGame"]);
+  assert.deepEqual(home, ["WebSite", "Organization", "WebPage", "VideoGame"]);
 });
 
 test("X intent uses @Lakesideobhj and the game campaign", () => {
@@ -387,6 +387,50 @@ test("house-ad covers live in the repo and the game page points at them", () => 
     assert.ok(webp.size < 40 * 1024, `${name} webp is ${webp.size} bytes`);
     assert.ok(webp.size < png.size);
   }
+});
+
+test("the homepage carries static copy and real internal links", () => {
+  const index = fs.readFileSync(path.join(root, "index.html"), "utf8");
+  const css = fs.readFileSync(path.join(root, "styles.css"), "utf8");
+  assert.match(index, /<h1>The Devil’s Dictionary<\/h1>/);
+  assert.match(index, /<p class="subtitle">Find the word\. Face the truth\.<\/p>/);
+  assert.match(index, /name="description" content="Slide a word out of a grid of letters, then let the dictionary define you back\. A free pocket game of cynical definitions in the voice of Ambrose Bierce\."/);
+  const body = index.split("<body>")[1].split("</body>")[0].replace(/<script[\s\S]*?<\/script>/gi, "");
+  const note = body.match(/<section class="edition-note"[\s\S]*?<\/section>/);
+  assert.ok(note, "edition note is in the initial body HTML");
+  assert.match(note[0], /Guess the word\. Survive the definition\./);
+  assert.match(note[0], /Ambrose Bierce/);
+  assert.match(note[0], /1911/);
+  assert.match(note[0], /fifty-five of the definitions/);
+  const hrefs = [...note[0].matchAll(/href="([^"]+)"/g)].map(match => match[1]);
+  assert.deepEqual(hrefs, [
+    "/faq",
+    "/word/lawyer",
+    "/word/politics",
+    "/word/telephone",
+    "/daily",
+    "/promo",
+    "/print-play",
+    "/community"
+  ]);
+  for (const word of ["LAWYER", "POLITICS", "TELEPHONE"]) {
+    assert.ok(loadEntries().some(entry => entry.word === word), `${word} is a real entry`);
+  }
+  const graph = jsonLd(index)["@graph"];
+  assert.equal(graph.filter(node => node["@type"] === "WebSite").length, 1);
+  assert.equal(graph.filter(node => node["@type"] === "VideoGame").length, 1);
+  assert.equal(graph.filter(node => node["@type"] === "WebApplication").length, 0);
+  const game = graph.find(node => node["@type"] === "VideoGame");
+  assert.equal(game["@id"], "https://devildictionary.com/#game");
+  assert.equal(game.isBasedOn.name, "The Devil's Dictionary");
+  assert.equal(game.isBasedOn.author.name, "Ambrose Bierce");
+  assert.equal(game.isBasedOn.datePublished, "1911");
+  const page = graph.find(node => node["@type"] === "WebPage");
+  assert.deepEqual([...page.significantLink].sort(), hrefs.map(href => `https://devildictionary.com${href}`).sort());
+  assert.match(css, /\.edition-note \{[\s\S]*?user-select: text/);
+  assert.doesNotMatch(css, /\.edition-note[\s\S]*?position:\s*(?:fixed|absolute)/);
+  assert.match(css, /\.house-rail \{ display: none; \}/);
+  assert.match(css, /min-width:\s*1100px\) and \(hover: hover\) and \(pointer: fine\)/);
 });
 
 test("the header engraving is a small 480px asset with webp and avif siblings", () => {
