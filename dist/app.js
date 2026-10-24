@@ -332,7 +332,8 @@
     "definitionReveal", "judgmentPrompt", "definitionChoices", "judgmentFeedback", "readerNote",
     "newEntryBadge", "modalProgress", "nextButton", "coinCelebration", "coinMilestone", "stageCurtain",
     "curtainSigil", "curtainKicker", "curtainName", "curtainNote",
-    "toast", "coinVault", "soundToggle", "resetButton", "gestureNote", "saveCardButton", "shareWordButton", "copyWordButton"
+    "toast", "coinVault", "soundToggle", "resetButton", "gestureNote", "saveCardButton", "shareWordButton", "copyWordButton",
+    "emberLayer", "wordTriumph", "wordTriumphText"
   ].map(id => [id, document.getElementById(id)]));
 
   let save = loadSave();
@@ -352,7 +353,23 @@
   let candidateIndex = -1;
   let swallowClick = false;
   let clearTimer = null;
+  let triumphToken = 0;
   let layout = { ready: false, pitch: 0, centers: [], boardBox: null };
+  const sparks = [];
+  let sparkLoop = 0;
+  let emberCtx = null;
+
+  function motionReduced() {
+    try {
+      return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    } catch {
+      return false;
+    }
+  }
+
+  function triumphDelay() {
+    return motionReduced() ? 220 : 920;
+  }
   const sound = createSoundEngine();
 
   function loadSave() {
@@ -611,6 +628,8 @@
   }
 
   function renderRound() {
+    triumphToken += 1;
+    hideWordTriumph();
     clearSelection();
     hideHint();
     solvedLock = false;
@@ -1040,11 +1059,32 @@
     drawPath(selection, false);
   }
 
+  function showWordTriumph(word) {
+    if (!els.wordTriumph || !els.wordTriumphText) return;
+    els.wordTriumphText.textContent = word;
+    els.wordTriumph.hidden = false;
+    els.wordTriumph.setAttribute("aria-hidden", "true");
+    void els.wordTriumph.offsetWidth;
+    els.wordTriumph.classList.add("show");
+  }
+
+  function hideWordTriumph() {
+    if (!els.wordTriumph) return;
+    els.wordTriumph.classList.remove("show");
+    els.wordTriumph.hidden = true;
+    els.wordTriumph.setAttribute("aria-hidden", "true");
+  }
+
   function finishSelection() {
     const attempt = selection.map(index => round.letters[index]).join("");
     if (attempt === round.entry.word) {
       solvedLock = true;
-      window.setTimeout(solveRound, 230);
+      const token = ++triumphToken;
+      showWordTriumph(round.entry.word);
+      window.setTimeout(() => {
+        if (token !== triumphToken || !solvedLock) return;
+        solveRound();
+      }, triumphDelay());
     } else if (selection.length) {
       sound.invalid();
       els.board.animate([
@@ -1206,6 +1246,7 @@
   }
 
   function openModal(focusTarget) {
+    hideWordTriumph();
     document.querySelector(".shell").inert = true;
     els.definitionModal.classList.add("open");
     els.definitionModal.setAttribute("aria-hidden", "false");
@@ -1439,14 +1480,113 @@
 
   function ensureInkNodes() {
     const svg = els.pathLayer;
+    let glow = svg.querySelector(".path-glow");
     let under = svg.querySelector(".path-under");
     let line = svg.querySelector(".path-line:not(.hint)");
-    if (!under || !line) {
-      svg.innerHTML = '<polyline class="path-under"></polyline><polyline class="path-line"></polyline>';
+    if (!glow || !under || !line) {
+      svg.innerHTML = '<polyline class="path-glow"></polyline><polyline class="path-under"></polyline><polyline class="path-line"></polyline>';
+      glow = svg.querySelector(".path-glow");
       under = svg.querySelector(".path-under");
       line = svg.querySelector(".path-line");
     }
-    return { under, line, finger: svg.querySelector(".path-finger") };
+    return { glow, under, line, finger: svg.querySelector(".path-finger") };
+  }
+
+  function resizeEmber() {
+    const canvas = els.emberLayer;
+    if (!canvas) return;
+    const svg = els.pathLayer;
+    canvas.style.left = svg.style.left;
+    canvas.style.top = svg.style.top;
+    canvas.style.width = svg.style.width;
+    canvas.style.height = svg.style.height;
+    const width = Math.max(1, Math.round(parseFloat(svg.style.width) || 0));
+    const height = Math.max(1, Math.round(parseFloat(svg.style.height) || 0));
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const bufferWidth = Math.round(width * dpr);
+    const bufferHeight = Math.round(height * dpr);
+    if (canvas.width !== bufferWidth || canvas.height !== bufferHeight) {
+      canvas.width = bufferWidth;
+      canvas.height = bufferHeight;
+    }
+    try {
+      emberCtx = canvas.getContext("2d");
+      if (emberCtx) emberCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    } catch {
+      emberCtx = null;
+    }
+  }
+
+  function clearSparks() {
+    sparks.length = 0;
+    if (sparkLoop) {
+      cancelAnimationFrame(sparkLoop);
+      sparkLoop = 0;
+    }
+    if (!emberCtx || !els.emberLayer) return;
+    try {
+      emberCtx.save();
+      emberCtx.setTransform(1, 0, 0, 1, 0, 0);
+      emberCtx.clearRect(0, 0, els.emberLayer.width, els.emberLayer.height);
+      emberCtx.restore();
+    } catch { /* canvas is optional */ }
+  }
+
+  function spawnSparks(x, y) {
+    if (motionReduced() || !els.emberLayer) return;
+    resizeEmber();
+    if (!emberCtx) return;
+    for (let i = 0; i < 3; i += 1) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 0.35 + Math.random() * 1.35;
+      sparks.push({
+        x,
+        y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 0.2,
+        life: 1,
+        decay: 0.045 + Math.random() * 0.05,
+        r: 0.7 + Math.random() * 1.4,
+        hot: Math.random() > 0.4
+      });
+    }
+    if (sparks.length > 48) sparks.splice(0, sparks.length - 48);
+    if (!sparkLoop) sparkLoop = requestAnimationFrame(stepSparks);
+  }
+
+  function stepSparks() {
+    sparkLoop = 0;
+    if (!emberCtx) {
+      sparks.length = 0;
+      return;
+    }
+    try {
+      const width = parseFloat(els.pathLayer.style.width) || els.emberLayer.clientWidth || 1;
+      const height = parseFloat(els.pathLayer.style.height) || els.emberLayer.clientHeight || 1;
+      emberCtx.clearRect(0, 0, width, height);
+      for (let i = sparks.length - 1; i >= 0; i -= 1) {
+        const spark = sparks[i];
+        spark.x += spark.vx;
+        spark.y += spark.vy;
+        spark.vy += 0.015;
+        spark.vx *= 0.98;
+        spark.life -= spark.decay;
+        if (spark.life <= 0) {
+          sparks.splice(i, 1);
+          continue;
+        }
+        emberCtx.globalAlpha = Math.max(0, spark.life);
+        emberCtx.fillStyle = spark.hot ? "#fff6d2" : "#ff9a3a";
+        emberCtx.beginPath();
+        emberCtx.arc(spark.x, spark.y, spark.r * (0.45 + spark.life), 0, Math.PI * 2);
+        emberCtx.fill();
+      }
+      emberCtx.globalAlpha = 1;
+    } catch {
+      sparks.length = 0;
+      return;
+    }
+    if (sparks.length) sparkLoop = requestAnimationFrame(stepSparks);
   }
 
   function drawPath(indices, hint) {
@@ -1479,6 +1619,8 @@
     const width = Math.max(4.5, Math.min(11, cell * 0.16));
     const end = points[points.length - 1];
     const nodes = ensureInkNodes();
+    nodes.glow.setAttribute("points", serialized);
+    nodes.glow.setAttribute("stroke-width", String(round1(width * 3.15)));
     nodes.under.setAttribute("points", serialized);
     nodes.under.setAttribute("stroke-width", String(round1(width * 1.85)));
     nodes.line.setAttribute("points", serialized);
@@ -1492,8 +1634,9 @@
       }
       finger.setAttribute("cx", String(round1(end.x)));
       finger.setAttribute("cy", String(round1(end.y)));
-      finger.setAttribute("r", String(round1(Math.max(3.5, width * 0.62))));
+      finger.setAttribute("r", String(round1(Math.max(4.2, width * 0.78))));
       finger.setAttribute("stroke-width", String(round1(Math.max(1.25, width * 0.18))));
+      spawnSparks(end.x, end.y);
     } else if (nodes.finger) {
       nodes.finger.remove();
     }
@@ -1509,6 +1652,7 @@
     svg.style.height = `${Math.max(box.height, 0)}px`;
     svg.setAttribute("viewBox", `0 0 ${Math.max(box.width, 1)} ${Math.max(box.height, 1)}`);
     svg.setAttribute("preserveAspectRatio", "none");
+    resizeEmber();
   }
 
   function clearSelection() {
@@ -1520,6 +1664,7 @@
     els.board?.classList.remove("is-drawing");
     els.board?.querySelectorAll(".letter").forEach(cell => cell.classList.remove("selected", "is-head", "candidate"));
     els.pathLayer.innerHTML = "";
+    clearSparks();
   }
 
   function celebrateCoin(total) {

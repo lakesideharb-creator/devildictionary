@@ -114,7 +114,13 @@ async function swipeCurrent(window, pointerType = "touch") {
     dispatchPointer(window, board, "pointermove", last, pointerType);
   }
   dispatchPointer(window, board, "pointerup", last, pointerType);
-  await sleep(270);
+  const word = window.__DEVILS_GAME__.getState().round.entry.word;
+  assert.equal(document.getElementById("selectionText").textContent, word, "a finished stroke spells the hidden word");
+  assert.equal(document.getElementById("definitionModal").classList.contains("open"), false, "the definition waits while the word is shown");
+  assert.equal(document.getElementById("wordTriumph").hidden, false, "the completed word flashes over the board");
+  assert.equal(document.getElementById("wordTriumphText").textContent, word, "the flash spells the finished word");
+  await sleep(1100);
+  assert.equal(document.getElementById("wordTriumph").hidden, true, "the flash leaves as the definition opens");
 }
 
 const window = boot();
@@ -532,6 +538,35 @@ assert.equal(stageOne.document.querySelectorAll(".letter").length, 25, "stage I 
 await swipeCurrent(dense, "mouse");
 assert.ok(dense.document.getElementById("definitionModal").classList.contains("open"), "a mouse stroke of the real word still submits on release");
 
+const calm = boot({ sound: false });
+calm.matchMedia = query => ({
+  matches: String(query).includes("prefers-reduced-motion"),
+  media: String(query),
+  addEventListener() {},
+  removeEventListener() {},
+  addListener() {},
+  removeListener() {},
+  dispatchEvent() { return false; }
+});
+{
+  const { document } = calm;
+  const geom = stubBoardGeometry(document);
+  const pathIndices = calm.__DEVILS_GAME__.getState().round.path;
+  const board = document.getElementById("board");
+  let last = centerOf(geom, pathIndices[0]);
+  dispatchPointer(calm, document.querySelector(`[data-cell="${pathIndices[0]}"]`), "pointerdown", last, "touch");
+  for (const index of pathIndices.slice(1)) {
+    last = centerOf(geom, index);
+    dispatchPointer(calm, board, "pointermove", last, "touch");
+  }
+  dispatchPointer(calm, board, "pointerup", last, "touch");
+  assert.equal(document.getElementById("wordTriumph").hidden, false, "reduced motion still shows the finished word");
+  assert.equal(document.getElementById("emberLayer").getAttribute("aria-hidden"), "true");
+  await sleep(400);
+  assert.ok(document.getElementById("definitionModal").classList.contains("open"), "reduced motion opens the definition without the long hold");
+  assert.equal(document.getElementById("wordTriumph").hidden, true, "reduced motion clears the flash as the definition opens");
+}
+
 deep.close();
 window.close();
 unlock.close();
@@ -542,4 +577,5 @@ finished.close();
 dense.close();
 eight.close();
 stageOne.close();
-console.log("DOM E2E OK: stage II and IV unlocks, swipe, hint, three-way judgment, reader note, progress, coin boundaries, dense-grid touch lanes, desktop mouse aim, and no paywall anywhere");
+calm.close();
+console.log("DOM E2E OK: stage II and IV unlocks, swipe, hint, three-way judgment, reader note, progress, coin boundaries, dense-grid touch lanes, desktop mouse aim, success flash, reduced motion, and no paywall anywhere");

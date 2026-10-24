@@ -156,8 +156,18 @@
         </div>
 
         <div class="board-frame">
-          <div class="board" id="board" role="group" aria-label="Letter grid"></div>
-          <svg class="path-layer" id="pathLayer" aria-hidden="true"></svg>
+          <div class="board-well">
+            <span class="rivet rivet-nw" aria-hidden="true"></span>
+            <span class="rivet rivet-ne" aria-hidden="true"></span>
+            <span class="rivet rivet-sw" aria-hidden="true"></span>
+            <span class="rivet rivet-se" aria-hidden="true"></span>
+            <div class="board" id="board" role="group" aria-label="Letter grid"></div>
+            <svg class="path-layer" id="pathLayer" aria-hidden="true"></svg>
+            <canvas class="ember-layer" id="emberLayer" width="2" height="2" aria-hidden="true"></canvas>
+            <div class="word-triumph" id="wordTriumph" hidden>
+              <p class="word-triumph-text" id="wordTriumphText"></p>
+            </div>
+          </div>
           <p class="gesture-note" id="gestureNote">Hold the first letter and slide · rows, columns and diagonals all work</p>
         </div>
 
@@ -219,6 +229,8 @@
       <div class="modal-backdrop"></div>
       <article class="definition-card">
         <div class="flash-rays" aria-hidden="true"></div>
+        <div class="folio-bracket folio-bracket-top" aria-hidden="true"></div>
+        <div class="folio-bracket folio-bracket-bottom" aria-hidden="true"></div>
         <p class="definition-kicker">THE DEVIL DEFINES</p>
         <h2 id="definitionWord">AMBITION</h2>
         <div class="definition-rule"><span>◆</span></div>

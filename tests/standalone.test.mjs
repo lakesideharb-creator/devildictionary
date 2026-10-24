@@ -25,7 +25,7 @@ assert.equal(window.__DEVILS_GAME__.entries.length, 100);
 window.document.getElementById("hintButton").click();
 assert.ok(window.document.querySelector(".path-line.hint"));
 window.__DEVILS_GAME__.solveCurrent();
-await new Promise(resolve => setTimeout(resolve, 270));
+await new Promise(resolve => setTimeout(resolve, 1100));
 assert.ok(window.document.getElementById("definitionModal").classList.contains("open"));
 assert.equal(window.document.getElementById("completedCount").textContent, "1");
 window.__HALLOWEEN_INTRO__?.stop?.();
