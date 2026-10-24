@@ -9,7 +9,7 @@ const css = fs.readFileSync(path.join(root, "styles.css"), "utf8");
 const js = fs.readFileSync(path.join(root, "app.js"), "utf8");
 
 test("page contains all playable surfaces", () => {
-  for (const id of ["board", "pathLayer", "hintButton", "soundToggle", "definitionModal", "definitionChoices", "judgmentFeedback", "stageCurtain", "coinCount", "coinCelebration", "progressFill"]) {
+  for (const id of ["board", "pathLayer", "emberLayer", "wordTriumph", "hintButton", "soundToggle", "definitionModal", "definitionChoices", "judgmentFeedback", "stageCurtain", "coinCount", "coinCelebration", "progressFill"]) {
     assert.match(html, new RegExp(`id="${id}"`));
   }
   assert.match(html, /<script src="\.\/app\.js"><\/script>/);
