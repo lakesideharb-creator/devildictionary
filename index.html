@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#17120e" />
-    <meta name="description" content="Slide a word out of a grid of letters, then let the dictionary define you back. A pocket edition of cynical definitions." />
+    <meta name="description" content="Slide a word out of a grid of letters, then let the dictionary define you back. A free pocket game of cynical definitions in the voice of Ambrose Bierce." />
     <link rel="canonical" href="https://devildictionary.com/" />
 
     <!-- Auto-translation wrecks the letter grid (tiles are English words), so
@@ -65,7 +65,8 @@
             "name": "The Devil's Dictionary",
             "description": "A word-sliding game built on 100 cynical definitions: 45 original, 55 from Ambrose Bierce's 1911 public-domain classic.",
             "inLanguage": "en",
-            "publisher": { "@id": "https://devildictionary.com/#organization" }
+            "publisher": { "@id": "https://devildictionary.com/#organization" },
+            "mainEntity": { "@id": "https://devildictionary.com/#game" }
           },
           {
             "@type": "Organization",
@@ -85,7 +86,28 @@
             }
           },
           {
+            "@type": "WebPage",
+            "@id": "https://devildictionary.com/#webpage",
+            "url": "https://devildictionary.com/",
+            "name": "The Devil's Dictionary — A Word-Sliding Game",
+            "description": "Slide a word out of a grid of letters, then let the dictionary define you back. A free pocket game of cynical definitions in the voice of Ambrose Bierce.",
+            "inLanguage": "en",
+            "isPartOf": { "@id": "https://devildictionary.com/#website" },
+            "about": { "@id": "https://devildictionary.com/#game" },
+            "significantLink": [
+              "https://devildictionary.com/daily",
+              "https://devildictionary.com/word/lawyer",
+              "https://devildictionary.com/word/politics",
+              "https://devildictionary.com/word/telephone",
+              "https://devildictionary.com/print-play",
+              "https://devildictionary.com/promo",
+              "https://devildictionary.com/community",
+              "https://devildictionary.com/faq"
+            ]
+          },
+          {
             "@type": "VideoGame",
+            "@id": "https://devildictionary.com/#game",
             "name": "The Devil's Dictionary",
             "url": "https://devildictionary.com/",
             "description": "Slide a word out of a grid of letters in four stages, then face the dictionary's judgment. 100 words, free, no ads, no paywall.",
@@ -96,6 +118,13 @@
             "inLanguage": "en",
             "isAccessibleForFree": true,
             "author": { "@id": "https://devildictionary.com/#organization" },
+            "isBasedOn": {
+              "@type": "Book",
+              "name": "The Devil's Dictionary",
+              "author": { "@type": "Person", "name": "Ambrose Bierce" },
+              "datePublished": "1911",
+              "inLanguage": "en"
+            },
             "offers": {
               "@type": "Offer",
               "price": "0",
@@ -236,6 +265,13 @@
           <span class="house-cta">Shop Print &amp; Play</span>
         </a>
       </aside>
+
+      <section class="edition-note" aria-labelledby="about-game">
+        <h2 id="about-game">Guess the word. Survive the definition.</h2>
+        <p>The Devil’s Dictionary is a free word game. One entry hides in a grid of letters. Hold the first letter and slide — along a row, a column, or a diagonal — until the word is spelled. The dictionary then reads its definition back, and it is rarely the comfortable one.</p>
+        <p>The title, and fifty-five of the definitions, come from Ambrose Bierce’s <em>The Devil’s Dictionary</em> (1911), a public-domain book of cynical definitions. Forty-five more were written for this edition in that same voice. One hundred entries, four stages, and no account to open. <a href="/faq">Where the definitions come from</a>.</p>
+        <p>A few of the entries are already written out: <a href="/word/lawyer">Lawyer</a>, <a href="/word/politics">Politics</a>, and <a href="/word/telephone">Telephone</a>. <a href="/daily">Today’s word</a> changes with the date. There is also a <a href="/promo">short promo</a>, <a href="/print-play">printable cards</a> for the table, and a <a data-community href="/community">community edition</a> for lines written by readers.</p>
+      </section>
 
       <footer class="colophon">
         <div class="colophon-row">
