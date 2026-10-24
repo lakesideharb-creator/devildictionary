@@ -7,6 +7,7 @@ const dist = path.join(root, "dist");
 fs.rmSync(dist, { recursive: true, force: true });
 fs.mkdirSync(dist, { recursive: true });
 fs.mkdirSync(path.join(dist, "assets"), { recursive: true });
+fs.cpSync(path.join(root, "assets/house"), path.join(dist, "assets/house"), { recursive: true });
 for (const name of ["devil-engraving.png", "devil-engraving.webp", "devil-engraving.avif"]) {
   fs.copyFileSync(path.join(root, "assets", name), path.join(dist, "assets", name));
 }

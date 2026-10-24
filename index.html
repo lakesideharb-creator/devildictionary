@@ -41,6 +41,13 @@
       if (!window.Capacitor && location.hostname === "www.devildictionary.com") {
         location.replace(`https://devildictionary.com${location.pathname}${location.search}${location.hash}`);
       }
+      // Which paperback the left rail features. Local calendar day, so a refresh
+      // does not swap the cover. The other book is still in the page.
+      (function () {
+        var now = new Date();
+        var day = Math.floor(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) / 86400000);
+        document.documentElement.dataset.houseBook = day % 2 ? "defines" : "dictionary";
+      })();
     </script>
     <title>The Devil's Dictionary — A Word-Sliding Game</title>
     <link rel="stylesheet" href="./styles.css" />
@@ -190,6 +197,44 @@
       <p class="edition-signoff"><span aria-hidden="true">✦</span> A little wiser. A little less innocent. <span aria-hidden="true">✦</span></p>
       <div class="shop-banner shop-deferred" hidden><span>Take the game to your table.</span><a href="/print-play" data-shop-open>Get Printable Cards ↗</a><small>From $2.99 · one-time purchase</small></div>
       </article>
+
+      <aside class="house-rail house-rail-left" aria-label="Paperback editions">
+        <a class="house-ad house-book house-book-dictionary" href="https://www.amazon.com/dp/B0HLN1S6V6" target="_blank" rel="noopener noreferrer" data-house-ad data-house-placement="left" data-house-target="B0HLN1S6V6">
+          <picture>
+            <source srcset="/assets/house/devils-dictionary-card-book.webp" type="image/webp" />
+            <img src="/assets/house/devils-dictionary-card-book.png" width="640" height="920" alt="Cover of The Devil’s Dictionary card-book edition" decoding="async" fetchpriority="low" />
+          </picture>
+          <p class="house-kicker">Paperback</p>
+          <p class="house-line">100 words. No innocent definitions.</p>
+          <span class="house-cta">View on Amazon <span class="house-sr"> (opens in a new tab)</span>↗</span>
+        </a>
+        <a class="house-ad house-book house-book-defines" href="https://www.amazon.com/dp/B0HLMKP8K8" target="_blank" rel="noopener noreferrer" data-house-ad data-house-placement="left" data-house-target="B0HLMKP8K8">
+          <picture>
+            <source srcset="/assets/house/the-devil-defines.webp" type="image/webp" />
+            <img src="/assets/house/the-devil-defines.png" width="640" height="932" alt="Cover of The Devil Defines by Lakeside Harb" decoding="async" fetchpriority="low" />
+          </picture>
+          <p class="house-kicker">Paperback</p>
+          <p class="house-line">100 words the way they really are.</p>
+          <span class="house-cta">View on Amazon <span class="house-sr"> (opens in a new tab)</span>↗</span>
+        </a>
+      </aside>
+
+      <aside class="house-rail house-rail-right" aria-label="Print and play">
+        <a class="house-ad house-ad-print" href="/print-play" data-house-ad data-house-placement="right" data-house-target="print-play">
+          <span class="house-pack" aria-hidden="true">
+            <span class="house-pack-sheet house-pack-back"></span>
+            <span class="house-pack-sheet house-pack-mid"></span>
+            <span class="house-pack-sheet house-pack-front">
+              <span class="house-pack-mark">✦</span>
+              <strong>Cards</strong>
+              <em>for the table</em>
+            </span>
+          </span>
+          <p class="house-kicker">Print &amp; Play</p>
+          <p class="house-line">A little paper. A lot to talk about.</p>
+          <span class="house-cta">Shop Print &amp; Play</span>
+        </a>
+      </aside>
 
       <footer class="colophon">
         <div class="colophon-row">
