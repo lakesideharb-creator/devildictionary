@@ -249,6 +249,10 @@ test("privacy names Vercel Web Analytics and Resend, and the homepage keeps the 
   const privacy = fs.readFileSync(path.join(root, "privacy.html"), "utf8");
   const index = fs.readFileSync(path.join(root, "index.html"), "utf8");
   assert.match(privacy, /Vercel Web Analytics/);
+  assert.match(privacy, /PostHog/);
+  assert.match(privacy, /https:\/\/us\.i\.posthog\.com/);
+  assert.match(privacy, /subscribe_success/);
+  assert.doesNotMatch(privacy, /eu\.i\.posthog\.com/);
   assert.match(privacy, /third-party cookies/);
   assert.match(privacy, /Meta Pixel/);
   assert.match(privacy, /1832150057779347/);
