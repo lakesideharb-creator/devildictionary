@@ -777,6 +777,440 @@ h1 { margin-top: 8px; font-size: clamp(28px, 4vw, 37px); font-weight: 700; lette
   .letter:hover:not(.selected):not(.candidate):not(.is-head) { transform: none; }
 }
 
+/* Seasonal homepage intro. The letter grid underneath is the game;
+   this layer only covers it until the visitor skips or the scene ends. */
+
+.hw {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  overflow: hidden;
+  color: #f4e4c4;
+  background: #120c12;
+  isolation: isolate;
+}
+
+.hw-sky {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 50% 112%, rgba(255, 122, 28, 0.38), transparent 34%),
+    radial-gradient(ellipse at 82% 10%, rgba(255, 214, 150, 0.16), transparent 16%),
+    radial-gradient(ellipse at 50% 0%, rgba(86, 42, 92, 0.55), transparent 46%),
+    linear-gradient(180deg, #18111f 0%, #1a1016 50%, #140c0e 100%);
+}
+
+.hw-stars {
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 12% 18%, rgba(255, 244, 220, 0.85), transparent),
+    radial-gradient(1.5px 1.5px at 28% 10%, rgba(255, 220, 160, 0.9), transparent),
+    radial-gradient(1px 1px at 46% 16%, rgba(255, 255, 255, 0.55), transparent),
+    radial-gradient(1px 1px at 63% 8%, rgba(255, 236, 200, 0.7), transparent),
+    radial-gradient(1.5px 1.5px at 74% 22%, rgba(255, 244, 220, 0.8), transparent),
+    radial-gradient(1px 1px at 88% 14%, rgba(255, 255, 255, 0.5), transparent),
+    radial-gradient(1px 1px at 18% 32%, rgba(255, 244, 220, 0.45), transparent),
+    radial-gradient(1px 1px at 92% 36%, rgba(255, 220, 170, 0.45), transparent);
+}
+
+.hw-moon {
+  position: absolute;
+  top: calc(6vh + env(safe-area-inset-top));
+  right: max(8vw, 24px);
+  width: clamp(42px, 7vw, 68px);
+  height: auto;
+  filter: drop-shadow(0 0 18px rgba(255, 214, 150, 0.45));
+}
+
+.hw-mist {
+  position: absolute;
+  left: -15%;
+  right: -15%;
+  bottom: -8%;
+  height: 42%;
+  background: radial-gradient(ellipse at 50% 100%, rgba(214, 196, 214, 0.28), rgba(90, 60, 80, 0.05) 48%, transparent 72%);
+}
+
+.hw-mist-2 {
+  height: 28%;
+  bottom: 0;
+  opacity: 0.7;
+  background: radial-gradient(ellipse at 30% 100%, rgba(255, 186, 120, 0.16), transparent 55%);
+}
+
+.hw-pumpkins {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(6px + env(safe-area-inset-bottom));
+  z-index: 3;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: clamp(10px, 3vw, 32px);
+}
+
+.hw-pumpkin { width: clamp(62px, 14vw, 96px); height: auto; display: block; }
+.hw-pumpkin:nth-child(2) { width: clamp(76px, 18vw, 118px); }
+
+.hw-bats svg,
+.hw-swarm svg { display: block; color: #0c0710; overflow: visible; }
+
+.hw-bats svg { position: absolute; width: clamp(18px, 3vw, 28px); height: auto; }
+.hw-bats svg:nth-child(1) { top: 14%; left: 8%; }
+.hw-bats svg:nth-child(2) { top: 22%; left: 22%; width: 16px; }
+.hw-bats svg:nth-child(3) { top: 11%; right: 28%; left: auto; }
+.hw-bats svg:nth-child(4) { top: 26%; right: 12%; left: auto; width: 22px; }
+.hw-bats svg:nth-child(5) { top: 18%; left: 48%; width: 14px; }
+
+.hw-swarm { position: absolute; inset: 0; z-index: 4; }
+.hw-swarm svg {
+  position: absolute;
+  left: 50%;
+  top: 48%;
+  width: 26px;
+  height: auto;
+  opacity: 0;
+}
+
+.hw-flash {
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  top: 28%;
+  bottom: 28%;
+  z-index: 4;
+  opacity: 0;
+  background: radial-gradient(circle, rgba(255, 196, 90, 0.85), rgba(255, 90, 16, 0.2) 42%, transparent 70%);
+  pointer-events: none;
+}
+
+.hw-sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+.hw-stage {
+  position: relative;
+  z-index: 5;
+  box-sizing: border-box;
+  width: min(760px, 100%);
+  height: 100%;
+  min-height: 0;
+  margin: 0 auto;
+  padding:
+    calc(58px + env(safe-area-inset-top))
+    22px
+    calc(112px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  overflow: auto;
+  pointer-events: none;
+}
+
+.hw-castle {
+  width: min(420px, 72vw);
+  height: auto;
+  display: block;
+  flex: 0 0 auto;
+}
+
+.hw-brand { text-align: center; }
+
+.hw-kicker {
+  margin: 0 0 6px;
+  color: #e7b15a;
+  font: 700 11px/1.2 Arial, Helvetica, sans-serif;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.hw-title {
+  margin: 0;
+  color: #ff9440;
+  font: 500 clamp(32px, 6vw, 68px)/0.95 Georgia, "Times New Roman", serif;
+  letter-spacing: -0.03em;
+  filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.55)) drop-shadow(0 0 16px rgba(255, 120, 30, 0.28));
+}
+
+@supports ((background-clip: text) or (-webkit-background-clip: text)) {
+  .hw-title {
+    background-image: linear-gradient(180deg, #ffe0a0 0%, #ff7a18 52%, #c43320 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+.hw-slogan {
+  margin: 8px 0 0;
+  color: #ead8b6;
+  font-size: clamp(14px, 2vw, 16px);
+  font-style: italic;
+}
+
+.hw-frame {
+  width: min(460px, 100%);
+  display: grid;
+  place-items: center;
+  min-height: 0;
+}
+
+.hw-grid,
+.hw-scroll { grid-area: 1 / 1; }
+
+.hw-grid {
+  width: min(420px, 100%);
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+  padding: 8px;
+  background: linear-gradient(180deg, rgba(255, 130, 36, 0.42), rgba(255, 80, 12, 0.12));
+  box-shadow: 0 0 22px rgba(255, 110, 24, 0.22), inset 0 0 0 1px rgba(255, 170, 70, 0.45);
+  opacity: 0;
+  visibility: hidden;
+}
+
+.hw-cell {
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  color: #cbb892;
+  background: linear-gradient(165deg, #3c342c, #1c1714 74%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), inset 0 0 0 1px rgba(70, 42, 24, 0.9);
+  font: 700 clamp(11px, 2.6vw, 18px)/1 Georgia, "Times New Roman", serif;
+}
+
+.hw-cell.lit {
+  color: #fff8e8;
+  background: radial-gradient(circle at 50% 42%, #ffe08a, #ff8a1e 46%, #a32010 82%);
+  box-shadow: 0 0 12px rgba(255, 140, 40, 0.9);
+}
+
+.hw-scroll {
+  width: min(520px, 100%);
+  margin: 0;
+  padding: 26px 28px 22px;
+  text-align: center;
+  pointer-events: auto;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255, 196, 110, 0.16), transparent 56%),
+    linear-gradient(180deg, #2c231a 0%, #17120e 100%);
+  border: 1px solid rgba(216, 166, 58, 0.85);
+  box-shadow:
+    0 0 0 6px rgba(18, 12, 10, 0.55),
+    0 0 0 7px rgba(216, 166, 58, 0.4),
+    0 24px 60px rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  visibility: hidden;
+}
+
+.hw-word {
+  margin: 0;
+  color: #ffe1a6;
+  font: 500 clamp(34px, 7vw, 58px)/1 Georgia, "Times New Roman", serif;
+  letter-spacing: 0.14em;
+}
+
+.hw-def {
+  margin: 14px auto 0;
+  max-width: 34em;
+  color: #f6e7c4;
+  font-size: clamp(16px, 2.4vw, 20px);
+  line-height: 1.45;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.hw-url {
+  margin: 0;
+  color: #f0d7a4;
+  font: 500 clamp(16px, 3vw, 28px)/1.2 Georgia, "Times New Roman", serif;
+  letter-spacing: 0.04em;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.65);
+  opacity: 0;
+}
+
+.hw.scene-grid .hw-grid,
+.hw.scene-fire .hw-grid {
+  opacity: 1;
+  visibility: visible;
+}
+
+.hw.scene-scroll .hw-scroll,
+.hw.scene-scroll .hw-url,
+.hw.scene-bats .hw-url {
+  opacity: 1;
+  visibility: visible;
+}
+
+.hw.scene-bats .hw-brand,
+.hw.scene-bats .hw-castle,
+.hw.scene-bats .hw-frame {
+  opacity: 0;
+}
+
+.hw.scene-bats .hw-url {
+  font-size: clamp(22px, 4vw, 40px);
+}
+
+.hw.scene-out { opacity: 0; }
+
+.hw-skip {
+  position: absolute;
+  z-index: 6;
+  top: calc(12px + env(safe-area-inset-top));
+  right: calc(12px + env(safe-area-inset-right));
+  min-width: 44px;
+  min-height: 44px;
+  padding: 10px 16px;
+  color: #f3e2bc;
+  background: rgba(12, 8, 10, 0.55);
+  border: 1px solid rgba(216, 166, 58, 0.75);
+  font: 700 12px/1 Arial, Helvetica, sans-serif;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.hw-skip:hover,
+.hw-skip:focus-visible { color: #fff6df; border-color: #ffe09a; background: rgba(40, 22, 12, 0.78); }
+.hw-skip:focus-visible { outline: 3px solid #ffe09a; outline-offset: 3px; }
+
+#halloweenReplay { letter-spacing: 0.12em; }
+
+body.hw-lock { overflow: hidden; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .hw { transition: opacity 0.6s ease; }
+
+  .hw-brand,
+  .hw-castle,
+  .hw-grid,
+  .hw-scroll,
+  .hw-url,
+  .hw-frame {
+    transition: opacity 0.5s ease, visibility 0.5s ease, transform 0.5s ease;
+  }
+
+  .hw-grid { transform: translateY(10px); }
+  .hw.scene-grid .hw-grid,
+  .hw.scene-fire .hw-grid { transform: none; }
+  .hw-scroll { transform: scale(0.97); }
+  .hw.scene-scroll .hw-scroll { transform: none; }
+
+  .hw-mist { animation: hw-drift 9s ease-in-out infinite alternate; }
+  .hw-mist-2 { animation: hw-drift 7s ease-in-out infinite alternate-reverse; }
+
+  .hw-bats svg { animation: hw-fly 8.5s linear infinite; }
+  .hw-bats svg:nth-child(2) { animation-duration: 11s; animation-delay: -2s; }
+  .hw-bats svg:nth-child(3) { animation-duration: 9s; animation-delay: -4s; }
+  .hw-bats svg:nth-child(4) { animation-duration: 12s; animation-delay: -1s; }
+  .hw-bats svg:nth-child(5) { animation-duration: 10s; animation-delay: -6s; }
+
+  .hw-pumpkin { animation: hw-flicker 1.35s ease-in-out infinite alternate; }
+  .hw-pumpkin:nth-child(2) { animation-delay: -0.55s; }
+  .hw-pumpkin:nth-child(3) { animation-duration: 1.1s; animation-delay: -0.9s; }
+
+  .hw-windows rect { animation: hw-window 2.6s ease-in-out infinite; }
+  .hw-windows rect:nth-child(2n) { animation-delay: -1.2s; }
+  .hw-windows rect:nth-child(3n) { animation-delay: -1.8s; }
+
+  .hw-cell.lit { animation: hw-ember 0.22s ease-in-out infinite alternate; }
+
+  .hw.scene-scroll .hw-flash { animation: hw-flash 0.7s ease-out; }
+
+  .hw.scene-bats .hw-swarm svg { animation: hw-swarm 0.9s ease-in forwards; }
+  .hw-swarm svg:nth-child(1) { --dx: -38vw; --dy: -30vh; --rot: -28deg; animation-delay: 0ms; }
+  .hw-swarm svg:nth-child(2) { --dx: 36vw; --dy: -26vh; --rot: 24deg; animation-delay: 40ms; }
+  .hw-swarm svg:nth-child(3) { --dx: -18vw; --dy: -38vh; --rot: -8deg; animation-delay: 20ms; }
+  .hw-swarm svg:nth-child(4) { --dx: 14vw; --dy: -36vh; --rot: 12deg; animation-delay: 70ms; }
+  .hw-swarm svg:nth-child(5) { --dx: -46vw; --dy: -6vh; --rot: -40deg; animation-delay: 10ms; }
+  .hw-swarm svg:nth-child(6) { --dx: 48vw; --dy: -4vh; --rot: 36deg; animation-delay: 50ms; }
+  .hw-swarm svg:nth-child(7) { --dx: -28vw; --dy: 18vh; --rot: -16deg; animation-delay: 80ms; }
+  .hw-swarm svg:nth-child(8) { --dx: 30vw; --dy: 16vh; --rot: 18deg; animation-delay: 30ms; }
+}
+
+@media (max-width: 640px) {
+  .hw-kicker { font-size: 10px; letter-spacing: 0.16em; }
+  .hw-scroll { padding: 18px 16px 16px; }
+  .hw-word { letter-spacing: 0.08em; }
+  .hw-moon { right: 16px; }
+}
+
+@media (max-height: 740px) {
+  .hw-castle { width: min(280px, 52vw); }
+  .hw-stage { gap: 8px; padding-bottom: calc(88px + env(safe-area-inset-bottom)); }
+}
+
+@media (max-height: 560px) {
+  .hw-castle,
+  .hw-pumpkins { display: none; }
+  .hw-stage {
+    justify-content: flex-start;
+    padding-bottom: calc(24px + env(safe-area-inset-bottom));
+  }
+}
+
+@media (forced-colors: active) {
+  .hw { background: Canvas; color: CanvasText; }
+  .hw-title {
+    filter: none;
+    background: none;
+    color: CanvasText;
+    -webkit-text-fill-color: CanvasText;
+  }
+  .hw-scroll,
+  .hw-skip { background: Canvas; color: CanvasText; border-color: CanvasText; }
+  .hw-def,
+  .hw-word,
+  .hw-slogan,
+  .hw-url,
+  .hw-cell { color: CanvasText; }
+}
+
+@keyframes hw-drift {
+  from { transform: translateX(-3%); }
+  to { transform: translateX(4%); }
+}
+
+@keyframes hw-fly {
+  0% { transform: translateX(0); }
+  50% { transform: translateX(18px) translateY(4px); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes hw-flicker {
+  from { filter: drop-shadow(0 0 4px rgba(255, 140, 20, 0.35)); opacity: 0.88; }
+  to { filter: drop-shadow(0 0 14px rgba(255, 176, 48, 0.95)); opacity: 1; }
+}
+
+@keyframes hw-window {
+  0%, 100% { opacity: 0.35; }
+  45% { opacity: 1; }
+  70% { opacity: 0.55; }
+}
+
+@keyframes hw-ember {
+  from { filter: brightness(0.94); }
+  to { filter: brightness(1.18); }
+}
+
+@keyframes hw-flash {
+  0% { opacity: 0.9; transform: scale(0.7); }
+  100% { opacity: 0; transform: scale(1.35); }
+}
+
+@keyframes hw-swarm {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(0.25) rotate(var(--rot, 0deg)); }
+  100% { opacity: 0; transform: translate(calc(-50% + var(--dx, 20vw)), calc(-50% + var(--dy, -20vh))) scale(2.2) rotate(var(--rot, 0deg)); }
+}
+
     </style>
 
     <script type="application/ld+json">
@@ -918,6 +1352,7 @@ h1 { margin-top: 8px; font-size: clamp(28px, 4vw, 37px); font-weight: 700; lette
           <p>“Common sense is prejudice that finally reached retirement age.”</p>
           <button id="resetButton" class="text-button" type="button">RESET MY PROGRESS</button>
         </div>
+        <button id="halloweenReplay" class="text-button" type="button" hidden>REPLAY THE HALLOWEEN INTRO</button>
         <nav class="colophon-actions" aria-label="Community and printable cards">
           <a data-community href="/community.html">Join the Community ↗</a>
           <a href="/print-play">Shop Printable Cards ↗</a>
@@ -972,7 +1407,351 @@ h1 { margin-top: 8px; font-size: clamp(28px, 4vw, 37px); font-weight: 700; lette
     </div>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <div id="halloweenIntro" class="hw" role="dialog" aria-modal="true" aria-labelledby="halloweenTitle" hidden>
+      <button type="button" class="hw-skip" id="halloweenSkip" aria-label="Skip the Halloween introduction">Skip</button>
+      <div class="hw-sky" aria-hidden="true">
+        <div class="hw-stars"></div>
+        <svg class="hw-moon" viewBox="0 0 80 80">
+          <defs>
+            <mask id="hwMoonMask">
+              <rect width="80" height="80" fill="#000"/>
+              <circle cx="36" cy="40" r="20" fill="#fff"/>
+              <circle cx="48" cy="34" r="16" fill="#000"/>
+            </mask>
+          </defs>
+          <circle cx="36" cy="40" r="20" fill="#ffe1a6" mask="url(#hwMoonMask)"/>
+        </svg>
+        <svg class="hw-sprite" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <symbol id="hw-bat" viewBox="0 0 64 32">
+            <path fill="currentColor" d="M32 18c-1-6-6-10-12-8 2 4 2 6 0 10-4 1-8-1-12-6 4 8 10 12 16 8 1 4 3 6 8 6s7-2 8-6c6 4 12 0 16-8-4 5-8 7-12 6-2-4-2-6 0-10-6-2-11 2-12 8z"/>
+          </symbol>
+          <symbol id="hw-pumpkin" viewBox="0 0 100 84">
+            <path d="M50 16c2 6 1 10 0 12" stroke="#2f6a32" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <path d="M50 18c8-10 18-8 20-2" stroke="#3f8a3e" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <ellipse cx="34" cy="52" rx="15" ry="22" fill="#e45309"/>
+            <ellipse cx="66" cy="52" rx="15" ry="22" fill="#f26512"/>
+            <ellipse cx="50" cy="50" rx="18" ry="24" fill="#ff8a1f"/>
+            <ellipse cx="50" cy="50" rx="8" ry="16" fill="#ffb347" opacity=".4"/>
+            <path fill="#1a0a06" d="M34 46l8 7-9 3zM66 46l-8 7 9 3zM46 60h8l-1.5 5h-5z"/>
+          </symbol>
+        </svg>
+        <div class="hw-bats">
+          <svg viewBox="0 0 64 32"><use href="#hw-bat" xlink:href="#hw-bat"/></svg>
+          <svg viewBox="0 0 64 32"><use href="#hw-bat" xlink:href="#hw-bat"/></svg>
+          <svg viewBox="0 0 64 32"><use href="#hw-bat" xlink:href="#hw-bat"/></svg>
+          <svg viewBox="0 0 64 32"><use href="#hw-bat" xlink:href="#hw-bat"/></svg>
+          <svg viewBox="0 0 64 32"><use href="#hw-bat" xlink:href="#hw-bat"/></svg>
+        </div>
+        <div class="hw-mist"></div>
+        <div class="hw-mist hw-mist-2"></div>
+        <div class="hw-pumpkins">
+          <svg class="hw-pumpkin" viewBox="0 0 100 84"><use href="#hw-pumpkin" xlink:href="#hw-pumpkin"/></svg>
+          <svg class="hw-pumpkin" viewBox="0 0 100 84"><use href="#hw-pumpkin" xlink:href="#hw-pumpkin"/></svg>
+          <svg class="hw-pumpkin" viewBox="0 0 100 84"><use href="#hw-pumpkin" xlink:href="#hw-pumpkin"/></svg>
+        </div>
+        <div class="hw-swarm">
+          <svg viewBox="0 0 64 32"><use href="#hw-bat" xlink:href="#hw-bat"/></svg>
+          <svg viewBox="0 0 64 32"><use href="#hw-bat" xlink:href="#hw-bat"/></svg>
+          <svg viewBox="0 0 64 32"><use href="#hw-bat" xlink:href="#hw-bat"/></svg>
+          <svg viewBox="0 0 64 32"><use href="#hw-bat" xlink:href="#hw-bat"/></svg>
+          <svg viewBox="0 0 64 32"><use href="#hw-bat" xlink:href="#hw-bat"/></svg>
+          <svg viewBox="0 0 64 32"><use href="#hw-bat" xlink:href="#hw-bat"/></svg>
+          <svg viewBox="0 0 64 32"><use href="#hw-bat" xlink:href="#hw-bat"/></svg>
+          <svg viewBox="0 0 64 32"><use href="#hw-bat" xlink:href="#hw-bat"/></svg>
+        </div>
+        <div class="hw-flash"></div>
+      </div>
+      <div class="hw-stage">
+        <svg class="hw-castle" viewBox="0 0 360 140" aria-hidden="true">
+          <ellipse cx="180" cy="128" rx="168" ry="14" fill="#0c070e"/>
+          <path fill="#140c16" d="M40 128V86h18V72h14V58h10v14h14v14h28v8h22V70h12V52h10V36l14-14 14 14v16h10v18h22v8h36v-8h12V78h12V62h12v16h12v8h28v42H40z"/>
+          <g class="hw-windows" fill="#ffd48a">
+            <rect x="68" y="64" width="5" height="7"/>
+            <rect x="148" y="56" width="5" height="8"/>
+            <rect x="164" y="56" width="5" height="8"/>
+            <rect x="242" y="74" width="5" height="7"/>
+            <rect x="278" y="84" width="4" height="6"/>
+            <rect x="126" y="98" width="4" height="6"/>
+          </g>
+        </svg>
+        <div class="hw-brand">
+          <p class="hw-kicker">A Halloween edition</p>
+          <p class="hw-title" id="halloweenTitle">The Devil’s Dictionary</p>
+          <p class="hw-slogan">Find the word. Face the truth.</p>
+        </div>
+        <div class="hw-frame">
+          <div class="hw-grid" id="halloweenGrid" aria-hidden="true"></div>
+          <article class="hw-scroll" id="halloweenScroll">
+            <p class="hw-word">DESTINY</p>
+            <p class="hw-def" id="halloweenDef">“A tyrant’s authority for crime and fool’s excuse for failure.”</p>
+          </article>
+        </div>
+        <p class="hw-url">devildictionary.com</p>
+      </div>
+    </div>
     <script>
+/* Halloween homepage intro.
+ *
+ * Covers the game homepage for one short beat, then reveals the normal
+ * play UI. It does not touch the letter grid, subscribe form, or /api.
+ *
+ * Season, in the visitor's local calendar: 24 October through 2 November
+ * (the week of Halloween through All Souls' Day). Outside that window
+ * nothing is shown.
+ *
+ *   ?halloween=1  play even after it has been seen, including outside the season
+ *   ?halloween=0  never play, and hide the replay control
+ *
+ * Skip, Escape, or letting the scene finish stores
+ * dd-halloween-intro-YYYY=seen for that calendar year. The colophon
+ * control "Replay the Halloween intro" clears the flag and plays it again.
+ *
+ * prefers-reduced-motion skips the grid, fire, and bats and holds the
+ * definition card briefly. The card quotes only the real DESTINY entry
+ * from app.js: “A tyrant’s authority for crime and fool’s excuse for failure.”
+ */
+(() => {
+  "use strict";
+
+  if (window.__HALLOWEEN_INTRO__) return;
+
+  const ROWS = ["WITCHES", "FORESTS", "DESTINY", "PUMPKIN", "SPIRITS"];
+  const FULL = [
+    ["grid", 800],
+    ["fire", 1600],
+    ["scroll", 3200],
+    ["bats", 6300]
+  ];
+  const FULL_END = 7100;
+  const REDUCED_END = 1800;
+
+  const root = document.getElementById("halloweenIntro");
+  const grid = document.getElementById("halloweenGrid");
+  const skipBtn = document.getElementById("halloweenSkip");
+  const replayBtn = document.getElementById("halloweenReplay");
+  const defEl = document.getElementById("halloweenDef");
+  if (!root) return;
+
+  let mode = "idle";
+  let timers = [];
+
+  function inSeason(now = new Date()) {
+    const month = now.getMonth();
+    const day = now.getDate();
+    return (month === 9 && day >= 24) || (month === 10 && day <= 2);
+  }
+
+  function storageKey(now = new Date()) {
+    return `dd-halloween-intro-${now.getFullYear()}`;
+  }
+
+  function flag() {
+    try {
+      return new URLSearchParams(location.search).get("halloween");
+    } catch {
+      return null;
+    }
+  }
+
+  function readSeen(now) {
+    try {
+      return localStorage.getItem(storageKey(now));
+    } catch {
+      return null;
+    }
+  }
+
+  function markSeen(now = new Date()) {
+    try {
+      localStorage.setItem(storageKey(now), "seen");
+    } catch {
+      /* Private mode and blocked storage still get the intro; it just won't be remembered. */
+    }
+  }
+
+  function openingChoice(now = new Date()) {
+    const forced = flag();
+    if (forced === "0") return "off";
+    if (forced !== "1" && !inSeason(now)) return "off";
+    if (forced !== "1" && readSeen(now) === "seen") return "seen";
+    return "play";
+  }
+
+  function replayVisible(now = new Date()) {
+    const forced = flag();
+    if (forced === "0") return false;
+    if (forced === "1") return true;
+    return inSeason(now);
+  }
+
+  function prefersReduced() {
+    try {
+      return window.matchMedia("(prefers-reduced-motion: reduce)").matches === true;
+    } catch {
+      return false;
+    }
+  }
+
+  function later(fn, ms) {
+    const id = setTimeout(fn, ms);
+    timers.push(id);
+    return id;
+  }
+
+  function clearTimers() {
+    for (const id of timers) clearTimeout(id);
+    timers = [];
+  }
+
+  function syncReplay() {
+    if (!replayBtn) return;
+    replayBtn.hidden = !replayVisible();
+  }
+
+  function lockShell() {
+    const shell = document.querySelector(".shell");
+    if (!shell) return;
+    shell.setAttribute("aria-hidden", "true");
+    try { shell.inert = true; } catch { /* ignore */ }
+  }
+
+  function releaseShell() {
+    const shell = document.querySelector(".shell");
+    if (!shell) return;
+    shell.removeAttribute("aria-hidden");
+    try { shell.inert = false; } catch { /* ignore */ }
+  }
+
+  function buildGrid() {
+    if (!grid) return;
+    grid.replaceChildren();
+    ROWS.forEach((row, rowIndex) => {
+      for (const letter of row) {
+        const cell = document.createElement("span");
+        cell.className = "hw-cell";
+        cell.textContent = letter;
+        if (rowIndex === 2) cell.dataset.destiny = "1";
+        grid.appendChild(cell);
+      }
+    });
+  }
+
+  function announceDef() {
+    if (!defEl || defEl.dataset.announced === "1") return;
+    defEl.dataset.announced = "1";
+    const text = defEl.textContent;
+    defEl.textContent = "";
+    defEl.textContent = text;
+  }
+
+  function setScene(name) {
+    if (mode !== "playing" || !root.isConnected) return;
+    root.classList.remove("scene-night", "scene-grid", "scene-fire", "scene-scroll", "scene-bats");
+    root.classList.add(`scene-${name}`);
+    if (name === "fire" && grid) {
+      grid.querySelectorAll("[data-destiny]").forEach((cell, index) => {
+        later(() => cell.classList.add("lit"), index * 140);
+      });
+    }
+    if (name === "scroll") announceDef();
+  }
+
+  function focusSkip() {
+    if (!skipBtn) return;
+    try {
+      skipBtn.focus({ preventScroll: true });
+    } catch {
+      try { skipBtn.focus(); } catch { /* ignore */ }
+    }
+  }
+
+  function finish() {
+    if (mode !== "playing" || !root.isConnected) return;
+    mode = "closing";
+    clearTimers();
+    markSeen();
+    root.classList.add("scene-out");
+    const delay = root.classList.contains("hw-reduce") ? 40 : 640;
+    later(() => {
+      if (mode !== "closing" || !root.isConnected) return;
+      root.hidden = true;
+      root.className = "hw";
+      document.body.classList.remove("hw-lock");
+      releaseShell();
+      mode = "idle";
+      syncReplay();
+    }, delay);
+  }
+
+  function play() {
+    if (!root.isConnected || mode === "playing") return;
+    clearTimers();
+    mode = "playing";
+    const reduce = prefersReduced();
+    buildGrid();
+    if (defEl) delete defEl.dataset.announced;
+    root.className = reduce ? "hw hw-reduce scene-scroll" : "hw scene-night";
+    root.hidden = false;
+    document.body.classList.add("hw-lock");
+    lockShell();
+    if (reduce) announceDef();
+    if (!reduce) {
+      for (const [name, at] of FULL) later(() => setScene(name), at);
+    }
+    later(() => finish(), reduce ? REDUCED_END : FULL_END);
+    focusSkip();
+  }
+
+  function replay() {
+    if (mode === "playing") return;
+    try { localStorage.removeItem(storageKey()); } catch { /* ignore */ }
+    play();
+  }
+
+  function stop() {
+    clearTimers();
+    mode = "idle";
+    if (root.isConnected) {
+      root.hidden = true;
+      root.className = "hw";
+    }
+    document.body.classList.remove("hw-lock");
+    releaseShell();
+  }
+
+  function onKey(event) {
+    if (mode !== "playing") return;
+    if (event.key === "Escape") {
+      event.preventDefault();
+      event.stopPropagation();
+      finish();
+      return;
+    }
+    if (event.key === "Tab") {
+      event.preventDefault();
+      event.stopPropagation();
+      focusSkip();
+    }
+  }
+
+  skipBtn?.addEventListener("click", () => finish());
+  replayBtn?.addEventListener("click", () => replay());
+  document.addEventListener("keydown", onKey, true);
+
+  window.__HALLOWEEN_INTRO__ = {
+    inSeason,
+    openingChoice,
+    storageKey,
+    replay,
+    play,
+    stop
+  };
+
+  syncReplay();
+  if (openingChoice() === "play") play();
+})();
+
 (() => {
   "use strict";
 

@@ -44,6 +44,7 @@
     </script>
     <title>The Devil's Dictionary — A Word-Sliding Game</title>
     <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./halloween-intro.css" />
     <link rel="stylesheet" href="/shop.css" />
 
     <script type="application/ld+json">
@@ -185,6 +186,7 @@
           <p>“Common sense is prejudice that finally reached retirement age.”</p>
           <button id="resetButton" class="text-button" type="button">RESET MY PROGRESS</button>
         </div>
+        <button id="halloweenReplay" class="text-button" type="button" hidden>REPLAY THE HALLOWEEN INTRO</button>
         <nav class="colophon-actions" aria-label="Community and printable cards">
           <a data-community href="/community.html">Join the Community ↗</a>
           <a href="/print-play">Shop Printable Cards ↗</a>
@@ -259,7 +261,91 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+    <div id="halloweenIntro" class="hw" role="dialog" aria-modal="true" aria-labelledby="halloweenTitle" hidden>
+      <button type="button" class="hw-skip" id="halloweenSkip" aria-label="Skip the Halloween introduction">Skip</button>
+      <div class="hw-sky" aria-hidden="true">
+        <div class="hw-stars"></div>
+        <svg class="hw-moon" viewBox="0 0 80 80">
+          <defs>
+            <mask id="hwMoonMask">
+              <rect width="80" height="80" fill="#000"/>
+              <circle cx="36" cy="40" r="20" fill="#fff"/>
+              <circle cx="48" cy="34" r="16" fill="#000"/>
+            </mask>
+          </defs>
+          <circle cx="36" cy="40" r="20" fill="#ffe1a6" mask="url(#hwMoonMask)"/>
+        </svg>
+        <svg class="hw-sprite" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <symbol id="hw-bat" viewBox="0 0 64 32">
+            <path fill="currentColor" d="M32 18c-1-6-6-10-12-8 2 4 2 6 0 10-4 1-8-1-12-6 4 8 10 12 16 8 1 4 3 6 8 6s7-2 8-6c6 4 12 0 16-8-4 5-8 7-12 6-2-4-2-6 0-10-6-2-11 2-12 8z"/>
+          </symbol>
+          <symbol id="hw-pumpkin" viewBox="0 0 100 84">
+            <path d="M50 16c2 6 1 10 0 12" stroke="#2f6a32" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <path d="M50 18c8-10 18-8 20-2" stroke="#3f8a3e" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <ellipse cx="34" cy="52" rx="15" ry="22" fill="#e45309"/>
+            <ellipse cx="66" cy="52" rx="15" ry="22" fill="#f26512"/>
+            <ellipse cx="50" cy="50" rx="18" ry="24" fill="#ff8a1f"/>
+            <ellipse cx="50" cy="50" rx="8" ry="16" fill="#ffb347" opacity=".4"/>
+            <path fill="#1a0a06" d="M34 46l8 7-9 3zM66 46l-8 7 9 3zM46 60h8l-1.5 5h-5z"/>
+          </symbol>
+        </svg>
+        <div class="hw-bats">
+          <svg viewBox="0 0 64 32"><use href="#hw-bat" xlink:href="#hw-bat"/></svg>
+          <svg viewBox="0 0 64 32"><use href="#hw-bat" xlink:href="#hw-bat"/></svg>
+          <svg viewBox="0 0 64 32"><use href="#hw-bat" xlink:href="#hw-bat"/></svg>
+          <svg viewBox="0 0 64 32"><use href="#hw-bat" xlink:href="#hw-bat"/></svg>
+          <svg viewBox="0 0 64 32"><use href="#hw-bat" xlink:href="#hw-bat"/></svg>
+        </div>
+        <div class="hw-mist"></div>
+        <div class="hw-mist hw-mist-2"></div>
+        <div class="hw-pumpkins">
+          <svg class="hw-pumpkin" viewBox="0 0 100 84"><use href="#hw-pumpkin" xlink:href="#hw-pumpkin"/></svg>
+          <svg class="hw-pumpkin" viewBox="0 0 100 84"><use href="#hw-pumpkin" xlink:href="#hw-pumpkin"/></svg>
+          <svg class="hw-pumpkin" viewBox="0 0 100 84"><use href="#hw-pumpkin" xlink:href="#hw-pumpkin"/></svg>
+        </div>
+        <div class="hw-swarm">
+          <svg viewBox="0 0 64 32"><use href="#hw-bat" xlink:href="#hw-bat"/></svg>
+          <svg viewBox="0 0 64 32"><use href="#hw-bat" xlink:href="#hw-bat"/></svg>
+          <svg viewBox="0 0 64 32"><use href="#hw-bat" xlink:href="#hw-bat"/></svg>
+          <svg viewBox="0 0 64 32"><use href="#hw-bat" xlink:href="#hw-bat"/></svg>
+          <svg viewBox="0 0 64 32"><use href="#hw-bat" xlink:href="#hw-bat"/></svg>
+          <svg viewBox="0 0 64 32"><use href="#hw-bat" xlink:href="#hw-bat"/></svg>
+          <svg viewBox="0 0 64 32"><use href="#hw-bat" xlink:href="#hw-bat"/></svg>
+          <svg viewBox="0 0 64 32"><use href="#hw-bat" xlink:href="#hw-bat"/></svg>
+        </div>
+        <div class="hw-flash"></div>
+      </div>
+      <div class="hw-stage">
+        <svg class="hw-castle" viewBox="0 0 360 140" aria-hidden="true">
+          <ellipse cx="180" cy="128" rx="168" ry="14" fill="#0c070e"/>
+          <path fill="#140c16" d="M40 128V86h18V72h14V58h10v14h14v14h28v8h22V70h12V52h10V36l14-14 14 14v16h10v18h22v8h36v-8h12V78h12V62h12v16h12v8h28v42H40z"/>
+          <g class="hw-windows" fill="#ffd48a">
+            <rect x="68" y="64" width="5" height="7"/>
+            <rect x="148" y="56" width="5" height="8"/>
+            <rect x="164" y="56" width="5" height="8"/>
+            <rect x="242" y="74" width="5" height="7"/>
+            <rect x="278" y="84" width="4" height="6"/>
+            <rect x="126" y="98" width="4" height="6"/>
+          </g>
+        </svg>
+        <div class="hw-brand">
+          <p class="hw-kicker">A Halloween edition</p>
+          <p class="hw-title" id="halloweenTitle">The Devil’s Dictionary</p>
+          <p class="hw-slogan">Find the word. Face the truth.</p>
+        </div>
+        <div class="hw-frame">
+          <div class="hw-grid" id="halloweenGrid" aria-hidden="true"></div>
+          <article class="hw-scroll" id="halloweenScroll">
+            <p class="hw-word">DESTINY</p>
+            <p class="hw-def" id="halloweenDef">“A tyrant’s authority for crime and fool’s excuse for failure.”</p>
+          </article>
+        </div>
+        <p class="hw-url">devildictionary.com</p>
+      </div>
+    </div>
+
     <script src="/analytics.js"></script>
+    <script src="./halloween-intro.js"></script>
     <script src="./app.js"></script>
   <script src="/shop.js" defer></script><div class="shop-mobile shop-deferred" hidden><a href="/print-play" data-shop-open>Get Printable Cards <span>from $2.99 ↗</span></a></div></body>
 </html>

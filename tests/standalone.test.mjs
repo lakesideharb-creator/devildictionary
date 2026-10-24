@@ -28,5 +28,6 @@ window.__DEVILS_GAME__.solveCurrent();
 await new Promise(resolve => setTimeout(resolve, 270));
 assert.ok(window.document.getElementById("definitionModal").classList.contains("open"));
 assert.equal(window.document.getElementById("completedCount").textContent, "1");
+window.__HALLOWEEN_INTRO__?.stop?.();
 window.close();
 console.log("Standalone HTML OK: offline load, grid, hint, solve, definition and progress");

@@ -16,6 +16,8 @@ for (const file of [
   "shop.css", "shop.js", "print-play.html", "print-play.css", "community.html", "community.css", "community.js", "editor.html", "editor.js", "community-policy.html",
   "index.html",
   "styles.css",
+  "halloween-intro.css",
+  "halloween-intro.js",
   "app.js",
   "legal.css",
   "privacy.html",
