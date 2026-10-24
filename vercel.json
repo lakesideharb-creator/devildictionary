@@ -20,5 +20,11 @@
   ],
   "rewrites": [
     { "source": "/daily", "destination": "/api/daily" }
+  ],
+  "crons": [
+    {
+      "path": "/api/send-daily",
+      "schedule": "0 15 * * *"
+    }
   ]
 }

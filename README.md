@@ -66,6 +66,8 @@ App 图标上传 `assets/icon.png`：1024×1024、无 alpha、无预置圆角（
 
 Vercel 已连接本仓库：推送到 `main` 会自动更新生产部署，其他分支和 Pull Request 会生成预览部署。构建命令和输出目录由 `vercel.json` 管理。
 
+每日晨信由 `api/send-daily.mjs` 发给 Resend 分段里的订阅者。调度、环境变量和单地址试发见 `docs/daily-email.md`。`devildictionary.com` 在 Resend 完成域名验证之前，信发不出去。
+
 ## 本地开发
 
 ### 复古纸卡界面
