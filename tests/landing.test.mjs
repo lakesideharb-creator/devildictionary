@@ -368,6 +368,27 @@ test("privacy names Vercel Web Analytics and Resend, and the homepage keeps the 
   assert.doesNotMatch(fs.readFileSync(path.join(root, "editor.html"), "utf8"), /analytics\.js/);
 });
 
+test("house-ad covers live in the repo and the game page points at them", () => {
+  const index = fs.readFileSync(path.join(root, "index.html"), "utf8");
+  const css = fs.readFileSync(path.join(root, "styles.css"), "utf8");
+  assert.match(index, /\/assets\/house\/devils-dictionary-card-book\.webp/);
+  assert.match(index, /\/assets\/house\/the-devil-defines\.webp/);
+  assert.match(index, /https:\/\/www\.amazon\.com\/dp\/B0HLN1S6V6/);
+  assert.match(index, /https:\/\/www\.amazon\.com\/dp\/B0HLMKP8K8/);
+  assert.match(index, /rel="noopener noreferrer"/);
+  assert.match(index, /data-house-target="print-play"/);
+  assert.match(index, /href="\/print-play"/);
+  assert.match(css, /min-width:\s*1100px\) and \(hover: hover\) and \(pointer: fine\)/);
+  assert.match(css, /\.house-rail \{ display: none; \}/);
+  for (const name of ["devils-dictionary-card-book", "the-devil-defines"]) {
+    const png = fs.statSync(path.join(root, "assets/house", `${name}.png`));
+    const webp = fs.statSync(path.join(root, "assets/house", `${name}.webp`));
+    assert.ok(png.size < 120 * 1024, `${name} png is ${png.size} bytes`);
+    assert.ok(webp.size < 40 * 1024, `${name} webp is ${webp.size} bytes`);
+    assert.ok(webp.size < png.size);
+  }
+});
+
 test("the header engraving is a small 480px asset with webp and avif siblings", () => {
   const png = fs.statSync(path.join(root, "assets/devil-engraving.png"));
   const webp = fs.statSync(path.join(root, "assets/devil-engraving.webp"));

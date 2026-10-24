@@ -20,7 +20,8 @@
   const META_PIXEL_ID = "1832150057779347";
   const META_CUSTOM_EVENTS = {
     "Game start": "StartPlay",
-    "Word complete": "CompleteWord"
+    "Word complete": "CompleteWord",
+    "house_ad_click": "house_ad_click"
   };
   const POSTHOG_KEY = "phc_yEVJFtudPsoM57mHjf9MgFontV6iZNptaDjCUBDD5Puh";
   const POSTHOG_HOST = "https://us.i.posthog.com";
@@ -188,6 +189,15 @@
   document.addEventListener("click", event => {
     const link = event.target.closest?.("a");
     if (!link) return;
+    // First-party gutter ads on the game page. ddTrack no-ops in the native
+    // shell and skips Meta or PostHog when those stubs are missing.
+    if (link.matches("[data-house-ad]")) {
+      window.ddTrack("house_ad_click", {
+        placement: link.dataset.housePlacement || "",
+        target: link.dataset.houseTarget || ""
+      });
+      return;
+    }
     if (link.dataset.track === "share") {
       window.ddTrack("Share", {
         method: link.dataset.shareMethod || "x",

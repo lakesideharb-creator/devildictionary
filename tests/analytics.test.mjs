@@ -245,6 +245,44 @@ test("before_send strips email, address, and definition text", () => {
   window.happyDOM.close();
 });
 
+test("a house ad click is a light custom event and does not throw without the SDKs", () => {
+  const window = boot("https://devildictionary.com/");
+  window.document.body.innerHTML = `<a data-house-ad data-house-placement="left" data-house-target="B0HLN1S6V6" href="https://www.amazon.com/dp/B0HLN1S6V6">View on Amazon</a>`;
+  window.document.querySelector("a").dispatchEvent(new window.MouseEvent("click", { bubbles: true, cancelable: true }));
+  const custom = calls(window).filter(entry => entry[0] === "trackCustom");
+  assert.equal(custom.at(-1)[0], "trackCustom");
+  assert.equal(custom.at(-1)[1], "house_ad_click");
+  assert.equal(custom.at(-1)[2].placement, "left");
+  assert.equal(custom.at(-1)[2].target, "B0HLN1S6V6");
+  assert.equal(calls(window).some(entry => entry[1] === "Purchase"), false);
+  const queued = captures(window);
+  assert.deepEqual(queued.at(-1), ["capture", "house_ad_click", { placement: "left", target: "B0HLN1S6V6" }]);
+  const vercel = [...window.vaq].map(entry => Array.from(entry));
+  assert.equal(vercel.at(-1)[1].name, "house_ad_click");
+  assert.equal(vercel.at(-1)[1].data.placement, "left");
+  assert.equal(vercel.at(-1)[1].data.target, "B0HLN1S6V6");
+  window.happyDOM.close();
+
+  const bare = boot("https://devildictionary.com/");
+  bare.fbq = undefined;
+  bare.posthog = undefined;
+  bare.document.body.innerHTML = `<a data-house-ad data-house-placement="right" data-house-target="print-play" href="/print-play">Shop Print & Play</a>`;
+  assert.doesNotThrow(() => {
+    bare.document.querySelector("a").dispatchEvent(new bare.MouseEvent("click", { bubbles: true, cancelable: true }));
+  });
+  bare.happyDOM.close();
+
+  const native = boot("https://devildictionary.com/", page => {
+    page.Capacitor = { isNativePlatform: () => true };
+  });
+  native.document.body.innerHTML = `<a data-house-ad data-house-placement="left" data-house-target="B0HLMKP8K8" href="https://www.amazon.com/dp/B0HLMKP8K8">View on Amazon</a>`;
+  assert.doesNotThrow(() => {
+    native.document.querySelector("a").dispatchEvent(new native.MouseEvent("click", { bubbles: true, cancelable: true }));
+  });
+  assert.equal(native.fbq, undefined);
+  native.happyDOM.close();
+});
+
 test("the private editor does not load analytics, the pixel, or the PostHog token", () => {
   const editor = fs.readFileSync(new URL("../editor.html", import.meta.url), "utf8");
   assert.doesNotMatch(editor, /analytics\.js|posthog|phc_yEVJ|fbevents|fbq\(|1832150057779347/);
