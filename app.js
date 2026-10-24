@@ -346,6 +346,9 @@
   let dragPointerId = null;
   let lastPoint = null;
   let trailPoint = null;
+  let trailSamples = [];
+  let trailAnchor = -1;
+  let paintSuspended = false;
   let candidateIndex = -1;
   let swallowClick = false;
   let clearTimer = null;
@@ -648,7 +651,34 @@
     if (round && round.size > 1 && centers.length > 1 && centers[0].w > 0) {
       pitch = Math.hypot(centers[1].x - centers[0].x, centers[1].y - centers[0].y);
     }
-    layout = { ready: pitch > 1, pitch, centers, boardBox };
+    const widths = centers.map(center => center.w).filter(width => width > 0).sort((a, b) => a - b);
+    const tile = widths.length ? widths[Math.floor((widths.length - 1) / 2)] : 0;
+    layout = { ready: pitch > 1, pitch, centers, boardBox, tile };
+  }
+
+  // One board read per move. Remeasuring every letter forces layout and makes the
+  // ink trail lag a frame behind a mouse. Widths stay on the resting tile so a
+  // pressed or previewed letter cannot change its own hit box.
+  function refreshBoardOrigin() {
+    const box = els.board.getBoundingClientRect();
+    const prev = layout.boardBox;
+    const moved = !layout.ready || !prev
+      || Math.abs(box.left - prev.left) > 0.5
+      || Math.abs(box.top - prev.top) > 0.5
+      || Math.abs(box.width - prev.width) > 0.5
+      || Math.abs(box.height - prev.height) > 0.5;
+    if (!moved) return;
+    const dx = prev ? box.left - prev.left : 0;
+    const dy = prev ? box.top - prev.top : 0;
+    measureBoard();
+    // Trail samples are board-local. A scrollbar or font swap slides the board
+    // in the viewport; shift the ink with it instead of chopping the curve.
+    if (prev) {
+      for (const sample of trailSamples) {
+        sample.x -= dx;
+        sample.y -= dy;
+      }
+    }
   }
 
   function gestureProfile() {
@@ -657,6 +687,13 @@
     // A 6×6 on a phone is about 50px a tile with a 3px gutter. The same stage
     // on a laptop is still under 90px, so the lane stays in force for a mouse too.
     const dense = pitch > 0 && (pitch < 64 || (round.size >= 6 && pitch < 88));
+    // A mouse cursor is a point aimed at the glyph, not a thumb on the centerline.
+    // On a 6×6 or tighter board the letter locks when that point is inside the
+    // disk that touches the middle of each edge. The corner stays out, so a
+    // diagonal clip, or the corner of the tile beside it, still misses.
+    if (!touch && round.size >= 6) {
+      return { preview: 0.2, backtrack: 0.62, undoSlack: 0.08, aim: true, corner: 0.78, previewBand: 0.52 };
+    }
     if (dense && touch) return { commit: 0.64, preview: 0.4, lateral: 0.24, backtrack: 0.38, reach: 0.58, lateralMin: 13 };
     if (dense) return { commit: 0.6, preview: 0.38, lateral: 0.28, backtrack: 0.4, reach: 0.62, lateralMin: 10 };
     if (touch) return { commit: 0.58, preview: 0.36, lateral: 0.3, backtrack: 0.42, reach: 0.66, lateralMin: 12 };
@@ -707,6 +744,34 @@
     if (cell && els.board.contains(cell)) addCell(Number(cell.dataset.cell));
   }
 
+  // Where the pointer sits on a tile: fully inside, and how deep into a corner.
+  // The preview ring stays off a corner graze. The lock itself uses the inscribed disk.
+  function tilePlacement(center, x, y) {
+    const half = (layout.tile || center.w) / 2;
+    if (!(half > 0)) return { inside: false, corner: 1 };
+    const nx = Math.abs(x - center.x) / half;
+    const ny = Math.abs(y - center.y) / half;
+    return { inside: nx <= 1 && ny <= 1, corner: Math.min(nx, ny) };
+  }
+
+  function aimLock(headIndex, x, y) {
+    const half = (layout.tile || 0) / 2;
+    if (!(half > 0)) return -1;
+    let best = -1;
+    let bestDist = Infinity;
+    for (const index of neighborIndexes(headIndex)) {
+      if (selection.includes(index)) continue;
+      const center = layout.centers[index];
+      const dist = Math.hypot(center.x - x, center.y - y);
+      if (dist > half) continue;
+      if (dist < bestDist) {
+        best = index;
+        bestDist = dist;
+      }
+    }
+    return best;
+  }
+
   function considerPoint(x, y) {
     if (!selection.length) return;
     const profile = gestureProfile();
@@ -717,10 +782,16 @@
       const prev = layout.centers[prevIndex];
       const distPrev = Math.hypot(prev.x - x, prev.y - y);
       const distHead = Math.hypot(head.x - x, head.y - y);
-      if (distPrev <= layout.pitch * profile.backtrack && distPrev + layout.pitch * 0.12 < distHead) {
+      const undoSlack = profile.undoSlack ?? 0.12;
+      if (distPrev <= layout.pitch * profile.backtrack && distPrev + layout.pitch * undoSlack < distHead) {
         addCell(prevIndex);
         return;
       }
+    }
+    if (profile.aim) {
+      const aimed = aimLock(headIndex, x, y);
+      if (aimed >= 0) addCell(aimed);
+      return;
     }
     let best = -1;
     let bestLateral = Infinity;
@@ -743,11 +814,18 @@
       return;
     }
     const distance = Math.hypot(to.x - from.x, to.y - from.y);
-    const step = Math.max(3, layout.pitch * 0.16);
+    // Mouse moves are sampled a little finer so a fast flick still lands inside
+    // the aimed tile instead of skipping its body. Touch keeps its coarser step.
+    const step = Math.max(3, layout.pitch * (pointerType === "mouse" ? 0.1 : 0.16));
     const steps = Math.max(1, Math.ceil(distance / step));
-    for (let i = 1; i <= steps; i += 1) {
-      const t = i / steps;
-      considerPoint(from.x + (to.x - from.x) * t, from.y + (to.y - from.y) * t);
+    paintSuspended = true;
+    try {
+      for (let i = 1; i <= steps; i += 1) {
+        const t = i / steps;
+        considerPoint(from.x + (to.x - from.x) * t, from.y + (to.y - from.y) * t);
+      }
+    } finally {
+      paintSuspended = false;
     }
   }
 
@@ -758,6 +836,40 @@
     if (index >= 0) els.board.children[index]?.classList.add("candidate");
   }
 
+  // The corner square, plus a couple of pixels outside it. A graze there is not
+  // an aim, so the ring must not sit on that diagonal and wait.
+  function inCornerZone(center, x, y, profile) {
+    const half = (layout.tile || center.w) / 2;
+    if (!(half > 0)) return false;
+    const nx = Math.abs(x - center.x) / half;
+    const ny = Math.abs(y - center.y) / half;
+    return nx >= profile.corner && ny >= profile.corner && nx <= 1.25 && ny <= 1.25;
+  }
+
+  function aimCandidate(head, headIndex, x, y, profile) {
+    let best = -1;
+    let bestLateral = Infinity;
+    let bestRatio = -Infinity;
+    const band = Math.max((layout.tile || head.w) * profile.previewBand, 12);
+    for (const index of neighborIndexes(headIndex)) {
+      if (selection.includes(index)) continue;
+      const center = layout.centers[index];
+      const hit = tilePlacement(center, x, y);
+      // On the tile the letter is either locked or a corner miss. Don't leave a ring there.
+      if (hit.inside || inCornerZone(center, x, y, profile)) continue;
+      const lane = laneMetrics(head, center, x, y);
+      if (lane.ratio < profile.preview || lane.ratio > 1.02 || lane.lateral > band) continue;
+      const closerLane = lane.lateral < bestLateral - 0.5;
+      const sameLane = Math.abs(lane.lateral - bestLateral) <= 0.5 && lane.ratio > bestRatio;
+      if (closerLane || sameLane) {
+        best = index;
+        bestLateral = lane.lateral;
+        bestRatio = lane.ratio;
+      }
+    }
+    return best;
+  }
+
   function updateCandidate(x, y) {
     if (!dragging || !layout.ready || !selection.length) {
       setCandidate(-1);
@@ -766,6 +878,10 @@
     const profile = gestureProfile();
     const headIndex = selection.at(-1);
     const head = layout.centers[headIndex];
+    if (profile.aim) {
+      setCandidate(aimCandidate(head, headIndex, x, y, profile));
+      return;
+    }
     const limit = lateralLimit(profile, 1.25);
     let best = -1;
     let bestScore = Infinity;
@@ -788,7 +904,9 @@
     dragPointerId = null;
     lastPoint = null;
     trailPoint = null;
-    els.board.classList.remove("is-drawing");
+    trailSamples = [];
+    trailAnchor = -1;
+    els.board.classList.remove("is-drawing", "is-pointer");
     setCandidate(-1);
     if (commit) {
       paintSelection();
@@ -812,9 +930,12 @@
         clearSelection();
         dragging = true;
         els.board.classList.add("is-drawing");
+        els.board.classList.toggle("is-pointer", pointerType === "mouse");
         measureBoard();
         lastPoint = { x: event.clientX, y: event.clientY };
         trailPoint = layout.ready ? clientToBoard(event.clientX, event.clientY) : null;
+        trailSamples = [];
+        trailAnchor = -1;
         addCell(Number(cell.dataset.cell));
         try { els.board.setPointerCapture(event.pointerId); } catch { /* pointer capture is optional */ }
       });
@@ -834,7 +955,7 @@
     els.board.onpointermove = event => {
       if (!dragging || solvedLock) return;
       if (dragPointerId != null && event.pointerId != null && event.pointerId !== dragPointerId) return;
-      measureBoard();
+      refreshBoardOrigin();
       const coalesced = typeof event.getCoalescedEvents === "function" ? event.getCoalescedEvents() : null;
       const samples = coalesced && coalesced.length ? coalesced : [event];
       for (const sample of samples) {
@@ -842,6 +963,7 @@
         if (lastPoint) walkSegment(lastPoint, point);
         else if (!layout.ready) legacyPick(point.x, point.y);
         lastPoint = point;
+        rememberTrail(point.x, point.y);
       }
       const latest = samples.at(-1);
       trailPoint = layout.ready ? clientToBoard(latest.clientX, latest.clientY) : null;
@@ -868,11 +990,30 @@
     return Math.max(Math.abs(ar - br), Math.abs(ac - bc)) === 1;
   }
 
+  function rememberTrail(clientX, clientY) {
+    if (pointerType !== "mouse" || !layout.ready) return;
+    if (trailAnchor !== selection.length) {
+      trailSamples = [];
+      trailAnchor = selection.length;
+    }
+    const local = clientToBoard(clientX, clientY);
+    const last = trailSamples[trailSamples.length - 1];
+    if (last && Math.hypot(local.x - last.x, local.y - last.y) < 1.25) {
+      last.x = local.x;
+      last.y = local.y;
+      return;
+    }
+    trailSamples.push(local);
+    if (trailSamples.length > 80) trailSamples.shift();
+  }
+
   function addCell(index) {
     if (selection.includes(index)) {
       if (selection.length > 1 && selection.at(-2) === index) {
         selection.pop();
-        paintSelection();
+        trailSamples = [];
+        trailAnchor = selection.length;
+        if (!paintSuspended) paintSelection();
       }
       return;
     }
@@ -880,7 +1021,9 @@
     selection.push(index);
     sound.letter(selection.length);
     haptic("LIGHT");
-    paintSelection();
+    trailSamples = [];
+    trailAnchor = selection.length;
+    if (!paintSuspended) paintSelection();
     if (!dragging && selection.length === round.entry.word.length) finishSelection();
   }
 
@@ -1265,35 +1408,95 @@
     els.hintButton.innerHTML = '<span aria-hidden="true">⌁</span> SHOW THE DOTTED TRAIL';
   }
 
-  function drawPath(indices, hint) {
+  function liveCenters(indices) {
+    const cached = dragging && layout.ready && layout.boardBox && layout.centers.length === els.board.children.length;
+    const boardBox = cached ? layout.boardBox : els.board.getBoundingClientRect();
+    return indices.map(index => {
+      if (cached) {
+        const center = layout.centers[index];
+        return { x: center.x - boardBox.left, y: center.y - boardBox.top, w: layout.tile || center.w };
+      }
+      const box = els.board.children[index].getBoundingClientRect();
+      return {
+        x: box.left - boardBox.left + box.width / 2,
+        y: box.top - boardBox.top + box.height / 2,
+        w: box.width
+      };
+    });
+  }
+
+  function ensurePathFrame() {
+    const box = layout.boardBox;
+    if (!box) {
+      resizeSvg();
+      return;
+    }
+    const key = `${Math.round(box.left)}:${Math.round(box.top)}:${Math.round(box.width)}:${Math.round(box.height)}`;
+    if (els.pathLayer.dataset.frame === key) return;
     resizeSvg();
-    const finger = !hint && dragging && layout.ready ? trailPoint : null;
-    if ((hint && indices.length < 2) || (!hint && indices.length + (finger ? 1 : 0) < 2)) {
+    els.pathLayer.dataset.frame = key;
+  }
+
+  function ensureInkNodes() {
+    const svg = els.pathLayer;
+    let under = svg.querySelector(".path-under");
+    let line = svg.querySelector(".path-line:not(.hint)");
+    if (!under || !line) {
+      svg.innerHTML = '<polyline class="path-under"></polyline><polyline class="path-line"></polyline>';
+      under = svg.querySelector(".path-under");
+      line = svg.querySelector(".path-line");
+    }
+    return { under, line, finger: svg.querySelector(".path-finger") };
+  }
+
+  function drawPath(indices, hint) {
+    if (hint || !dragging || !layout.ready) resizeSvg();
+    else ensurePathFrame();
+    const round1 = value => Math.round(value * 10) / 10;
+    if (hint) {
+      if (indices.length < 2) {
+        els.pathLayer.innerHTML = "";
+        return;
+      }
+      const hinted = liveCenters(indices);
+      const hintedPoints = hinted.map(point => `${round1(point.x)},${round1(point.y)}`).join(" ");
+      els.pathLayer.innerHTML = `<polyline class="path-line hint" points="${hintedPoints}"></polyline>`;
+      return;
+    }
+    const points = liveCenters(indices);
+    const followCursor = dragging && layout.ready && pointerType === "mouse" && trailSamples.length;
+    if (followCursor) {
+      for (const sample of trailSamples) points.push({ x: sample.x, y: sample.y, w: points[0]?.w || 0 });
+    } else if (dragging && layout.ready && trailPoint) {
+      points.push({ x: trailPoint.x, y: trailPoint.y, w: points[0]?.w || 0 });
+    }
+    if (points.length < 2) {
       els.pathLayer.innerHTML = "";
       return;
     }
-    const boardBox = els.board.getBoundingClientRect();
-    const round1 = value => Math.round(value * 10) / 10;
-    const points = indices.map(index => {
-      const box = els.board.children[index].getBoundingClientRect();
-      return { x: box.left - boardBox.left + box.width / 2, y: box.top - boardBox.top + box.height / 2, w: box.width };
-    });
-    if (finger) points.push({ x: finger.x, y: finger.y, w: points[0]?.w || 0 });
     const serialized = points.map(point => `${round1(point.x)},${round1(point.y)}`).join(" ");
-    if (hint) {
-      els.pathLayer.innerHTML = `<polyline class="path-line hint" points="${serialized}"></polyline>`;
-      return;
-    }
     const cell = points[0]?.w || 32;
     const width = Math.max(4.5, Math.min(11, cell * 0.16));
     const end = points[points.length - 1];
-    const head = finger
-      ? `<circle class="path-finger" cx="${round1(end.x)}" cy="${round1(end.y)}" r="${round1(Math.max(3.5, width * 0.62))}" stroke-width="${round1(Math.max(1.25, width * 0.18))}"></circle>`
-      : "";
-    els.pathLayer.innerHTML =
-      `<polyline class="path-under" points="${serialized}" stroke-width="${round1(width * 1.85)}"></polyline>` +
-      `<polyline class="path-line" points="${serialized}" stroke-width="${round1(width)}"></polyline>` +
-      head;
+    const nodes = ensureInkNodes();
+    nodes.under.setAttribute("points", serialized);
+    nodes.under.setAttribute("stroke-width", String(round1(width * 1.85)));
+    nodes.line.setAttribute("points", serialized);
+    nodes.line.setAttribute("stroke-width", String(round1(width)));
+    if (dragging && layout.ready) {
+      let finger = nodes.finger;
+      if (!finger) {
+        finger = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        finger.setAttribute("class", "path-finger");
+        els.pathLayer.appendChild(finger);
+      }
+      finger.setAttribute("cx", String(round1(end.x)));
+      finger.setAttribute("cy", String(round1(end.y)));
+      finger.setAttribute("r", String(round1(Math.max(3.5, width * 0.62))));
+      finger.setAttribute("stroke-width", String(round1(Math.max(1.25, width * 0.18))));
+    } else if (nodes.finger) {
+      nodes.finger.remove();
+    }
   }
 
   function resizeSvg() {
@@ -1311,6 +1514,8 @@
   function clearSelection() {
     selection = [];
     candidateIndex = -1;
+    trailSamples = [];
+    trailAnchor = -1;
     els.selectionText.textContent = "—";
     els.board?.classList.remove("is-drawing");
     els.board?.querySelectorAll(".letter").forEach(cell => cell.classList.remove("selected", "is-head", "candidate"));
