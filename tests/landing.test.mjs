@@ -9,6 +9,7 @@ import {
   dailyEntry,
   entryBySlug,
   loadEntries,
+  relatedEntries,
   renderDailyHtml,
   renderNotFoundHtml,
   renderWordHtml,
@@ -56,6 +57,92 @@ test("word and daily pages expose OG tags, the slogan, and a play link", () => {
   assert.doesNotMatch(daily, /intent\/follow|Visit @|Follow on YouTube|Follow on Instagram/);
   const social = daily.match(/<nav class="social-links"[\s\S]*?<\/nav>/);
   assert.equal((social[0].match(/<a /g) || []).length, 3);
+});
+
+function visibleWords(html) {
+  const body = html.split("<body>")[1].split("</body>")[0];
+  const text = body
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&(?:#\d+|#x[\da-f]+|[a-z]+);/gi, " ");
+  return text.split(/\s+/).filter(Boolean);
+}
+
+function jsonLd(html) {
+  const match = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
+  assert.ok(match, "JSON-LD script");
+  return JSON.parse(match[1]);
+}
+
+test("word pages carry a source note, related entries, and DefinedTerm JSON-LD", () => {
+  const entries = loadEntries();
+  const slugs = new Set(entries.map(entry => slugFor(entry.word)));
+  for (const entry of entries) {
+    const html = renderWordHtml(entry);
+    const related = relatedEntries(entry);
+    assert.ok(related.length >= 2 && related.length <= 4, entry.word);
+    assert.equal(new Set(related.map(item => item.word)).size, related.length);
+    assert.ok(related.filter(item => item.tier === entry.tier).length >= 2, entry.word);
+    const relatedNav = html.match(/<nav class="related"[\s\S]*?<\/nav>/);
+    assert.ok(relatedNav, entry.word);
+    const links = relatedNav[0].match(/href="\/word\/([a-z]+)"/g) || [];
+    assert.equal(links.length, related.length);
+    for (const item of related) {
+      assert.notEqual(item.word, entry.word);
+      assert.ok(slugs.has(slugFor(item.word)));
+      assert.match(relatedNav[0], new RegExp(`href="/word/${slugFor(item.word)}"`));
+    }
+    assert.doesNotMatch(relatedNav[0], new RegExp(`href="/word/${slugFor(entry.word)}"`));
+    const graph = jsonLd(html)["@graph"];
+    const term = graph.find(node => node["@type"] === "DefinedTerm");
+    const page = graph.find(node => node["@type"] === "WebPage");
+    assert.equal(term.name, entry.word);
+    assert.equal(term.description, entry.en);
+    assert.equal(term.url, `https://devildictionary.com/word/${slugFor(entry.word)}`);
+    assert.equal(page.url, term.url);
+    assert.equal(page.name, `${entry.word} — The Devil’s Dictionary`);
+    assert.match(html, /55 definitions in this edition are quoted from Ambrose Bierce/);
+    assert.match(html, /1911/);
+    assert.match(html, /The other 45 were written for this game/);
+    assert.doesNotMatch(html, new RegExp(`${entry.word} (is quoted|was written|comes from Ambrose|is from Ambrose)`, "i"));
+    assert.match(html, /rel="canonical" href="https:\/\/devildictionary\.com\/word\//);
+    assert.match(html, /property="og:title"/);
+    assert.match(html, /property="og:description"/);
+    assert.match(html, /name="description"/);
+  }
+  const ambition = renderWordHtml(entryBySlug("ambition"));
+  const words = visibleWords(ambition);
+  assert.ok(words.length > 160, `ambition page has ${words.length} visible words`);
+  assert.match(ambition, /tier 3/);
+  assert.match(ambition, /Stage III · The Accomplice/);
+  assert.match(ambition, /eight letters/);
+  assert.match(ambition, /href="\/faq"/);
+});
+
+test("the daily page publishes JSON-LD and more crawlable copy without dropping the letter form", () => {
+  const entry = entryBySlug("ambition");
+  const daily = renderDailyHtml(entry, new Date("2026-10-22T12:00:00Z"));
+  const graph = jsonLd(daily)["@graph"];
+  const page = graph.find(node => node["@type"] === "WebPage");
+  const term = graph.find(node => node["@type"] === "DefinedTerm");
+  assert.equal(page.name, "Today’s word: AMBITION — The Devil’s Dictionary");
+  assert.equal(page.url, "https://devildictionary.com/daily");
+  assert.match(page.description, /22 October 2026 \(UTC\)/);
+  assert.match(page.description, /AMBITION, noun\./);
+  assert.equal(page.dateModified, "2026-10-22");
+  assert.equal(term.name, "AMBITION");
+  assert.equal(term.description, entry.en);
+  assert.equal(term.url, "https://devildictionary.com/word/ambition");
+  assert.match(daily, /midnight UTC/);
+  assert.match(daily, /href="\/word\/ambition"/);
+  assert.match(daily, /<nav class="related"/);
+  assert.match(daily, /55 definitions in this edition are quoted from Ambrose Bierce/);
+  assert.ok(visibleWords(daily).length > 180, `daily page has ${visibleWords(daily).length} visible words`);
+  assert.match(daily, /action="\/api\/subscribe"/);
+  assert.match(daily, /Send me the letter/);
+  const index = fs.readFileSync(path.join(root, "index.html"), "utf8");
+  const home = jsonLd(index)["@graph"].map(node => node["@type"]);
+  assert.deepEqual(home, ["WebSite", "Organization", "VideoGame"]);
 });
 
 test("X intent uses @Lakesideobhj and the game campaign", () => {

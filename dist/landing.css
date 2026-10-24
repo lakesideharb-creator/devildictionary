@@ -18,7 +18,7 @@ main {
 }
 img { width: 160px; height: 80px; object-fit: contain; }
 .home-link { margin: 0 0 8px; font: 12px/1.4 Arial, sans-serif; }
-.home-link a, .more a, .note a { color: #782d29; }
+.home-link a, .more a, .note a, .source a, .related a { color: #782d29; }
 .kicker {
   margin: 14px 0 0;
   color: #782d29;
@@ -41,6 +41,45 @@ blockquote {
 }
 .slogan { margin: 22px 0 0; font-style: italic; color: #782d29; }
 .note { margin: 18px auto 0; max-width: 36rem; font-size: 16px; }
+.lede, .source, .play-note {
+  margin: 16px auto 0;
+  max-width: 38rem;
+  font-size: 17px;
+}
+.lede { margin-top: 18px; }
+.source, .play-note { text-align: left; font-size: 16px; }
+.source { color: #3c3128; }
+.related {
+  margin: 22px auto 0;
+  max-width: 38rem;
+  padding: 16px 16px 6px;
+  border: 1px solid #782d2955;
+  background: #fff5df;
+  text-align: left;
+}
+.related h2 {
+  margin: 0;
+  color: #782d29;
+  font: 700 12px/1.4 Arial, sans-serif;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  text-align: center;
+}
+.related .rel-intro {
+  margin: 6px 0 0;
+  text-align: center;
+  font: italic 15px/1.45 Georgia, "Noto Serif", serif;
+}
+.related ul { list-style: none; margin: 10px 0 0; padding: 0; }
+.related li {
+  margin: 0;
+  padding: 12px 0;
+  border-top: 1px solid #782d2933;
+  font-size: 16px;
+}
+.related a { font-weight: 700; }
+.rel-pos { margin-left: .35em; color: #782d29; font-style: italic; }
+.rel-def { display: block; margin-top: 4px; }
 .actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 22px; }
 .actions a {
   display: inline-flex;
