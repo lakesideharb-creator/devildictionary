@@ -34,11 +34,22 @@
   letter-spacing: 0.22em;
 }
 
-.legal-masthead h1 {
+.legal-masthead h1,
+.legal-masthead .legal-brand {
   margin: 0;
   font-size: 24px;
   font-weight: 400;
   letter-spacing: 0.01em;
+}
+
+/* Page title. Sized like the kicker so the game stylesheet’s large h1
+   does not take over the policy card. One h1 per page. */
+.legal-card h1 {
+  margin: 0 0 5px;
+  color: var(--blood);
+  font: 12px/1.3 Arial, Helvetica, sans-serif;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
 }
 
 .legal-nav {
@@ -311,7 +322,8 @@
     padding-top: 22px;
   }
 
-  .legal-masthead h1 {
+  .legal-masthead h1,
+  .legal-masthead .legal-brand {
     font-size: 20px;
   }
 
