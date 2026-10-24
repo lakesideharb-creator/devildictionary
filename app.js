@@ -333,7 +333,7 @@
     "newEntryBadge", "modalProgress", "nextButton", "coinCelebration", "coinMilestone", "stageCurtain",
     "curtainSigil", "curtainKicker", "curtainName", "curtainNote",
     "toast", "coinVault", "soundToggle", "resetButton", "gestureNote", "saveCardButton", "shareWordButton", "copyWordButton",
-    "emberLayer", "wordTriumph", "wordTriumphText"
+    "emberLayer", "wordTriumph", "wordTriumphText", "triumphBurst"
   ].map(id => [id, document.getElementById(id)]));
 
   let save = loadSave();
@@ -358,6 +358,11 @@
   const sparks = [];
   let sparkLoop = 0;
   let emberCtx = null;
+  const fireworks = [];
+  let fireworkLoop = 0;
+  let fireworkCtx = null;
+  let fireworkToken = 0;
+  const fireworkTimers = [];
 
   function motionReduced() {
     try {
@@ -1066,6 +1071,7 @@
     els.wordTriumph.setAttribute("aria-hidden", "true");
     void els.wordTriumph.offsetWidth;
     els.wordTriumph.classList.add("show");
+    launchTriumphFireworks();
   }
 
   function hideWordTriumph() {
@@ -1073,6 +1079,7 @@
     els.wordTriumph.classList.remove("show");
     els.wordTriumph.hidden = true;
     els.wordTriumph.setAttribute("aria-hidden", "true");
+    clearFireworks();
   }
 
   function finishSelection() {
@@ -1517,45 +1524,90 @@
     }
   }
 
+  function wipeCanvas(ctx, canvas) {
+    if (!ctx || !canvas) return;
+    try {
+      ctx.save();
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.restore();
+    } catch { /* canvas is optional */ }
+  }
+
   function clearSparks() {
     sparks.length = 0;
     if (sparkLoop) {
       cancelAnimationFrame(sparkLoop);
       sparkLoop = 0;
     }
-    if (!emberCtx || !els.emberLayer) return;
-    try {
-      emberCtx.save();
-      emberCtx.setTransform(1, 0, 0, 1, 0, 0);
-      emberCtx.clearRect(0, 0, els.emberLayer.width, els.emberLayer.height);
-      emberCtx.restore();
-    } catch { /* canvas is optional */ }
+    wipeCanvas(emberCtx, els.emberLayer);
+  }
+
+  // The ink is a wide white stroke with an orange blur. A few sub-3px specks
+  // vanish into that glow, so each ember keeps a bright core and a soft halo.
+  function paintEmber(ctx, spark) {
+    const alpha = Math.max(0, Math.min(1, spark.life));
+    const glow = Math.max(16, spark.r * 3.8);
+    const core = Math.max(4.2, spark.r * 0.9);
+    ctx.globalAlpha = 1;
+    let glowDrawn = false;
+    if (typeof ctx.createRadialGradient === "function") {
+      const gradient = ctx.createRadialGradient(spark.x, spark.y, core * 0.15, spark.x, spark.y, glow);
+      gradient.addColorStop(0, `rgba(255, 252, 236, ${alpha})`);
+      gradient.addColorStop(0.2, spark.hot ? `rgba(255, 214, 128, ${0.95 * alpha})` : `rgba(255, 186, 90, ${0.9 * alpha})`);
+      gradient.addColorStop(0.48, `rgba(255, 132, 36, ${0.62 * alpha})`);
+      gradient.addColorStop(0.75, `rgba(255, 78, 16, ${0.24 * alpha})`);
+      gradient.addColorStop(1, "rgba(255, 50, 8, 0)");
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.arc(spark.x, spark.y, glow, 0, Math.PI * 2);
+      ctx.fill();
+      glowDrawn = true;
+    }
+    if (!glowDrawn) {
+      ctx.globalAlpha = 0.5 * alpha;
+      ctx.fillStyle = spark.hot ? "#ffc56a" : "#ff8a2a";
+      ctx.beginPath();
+      ctx.arc(spark.x, spark.y, glow, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = spark.hot ? "#fffaf2" : "#ffe1ae";
+    ctx.beginPath();
+    ctx.arc(spark.x, spark.y, core, 0, Math.PI * 2);
+    ctx.fill();
   }
 
   function spawnSparks(x, y) {
     if (motionReduced() || !els.emberLayer) return;
     resizeEmber();
     if (!emberCtx) return;
-    for (let i = 0; i < 3; i += 1) {
+    for (let i = 0; i < 9; i += 1) {
+      const flare = i < 3;
       const angle = Math.random() * Math.PI * 2;
-      const speed = 0.35 + Math.random() * 1.35;
+      const speed = (flare ? 2.2 : 2.8) + Math.random() * (flare ? 2.4 : 3.1);
       sparks.push({
         x,
         y,
         vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed - 0.2,
+        vy: Math.sin(angle) * speed - 0.9,
         life: 1,
-        decay: 0.045 + Math.random() * 0.05,
-        r: 0.7 + Math.random() * 1.4,
-        hot: Math.random() > 0.4
+        decay: flare ? 0.016 + Math.random() * 0.012 : 0.026 + Math.random() * 0.018,
+        r: flare ? 6.2 + Math.random() * 2.4 : 4.2 + Math.random() * 2.2,
+        hot: flare || Math.random() > 0.42
       });
     }
-    if (sparks.length > 48) sparks.splice(0, sparks.length - 48);
-    if (!sparkLoop) sparkLoop = requestAnimationFrame(stepSparks);
+    if (sparks.length > 108) sparks.splice(0, sparks.length - 108);
+    if (!sparkLoop) stepSparks();
   }
 
   function stepSparks() {
     sparkLoop = 0;
+    if (motionReduced()) {
+      sparks.length = 0;
+      wipeCanvas(emberCtx, els.emberLayer);
+      return;
+    }
     if (!emberCtx) {
       sparks.length = 0;
       return;
@@ -1564,22 +1616,16 @@
       const width = parseFloat(els.pathLayer.style.width) || els.emberLayer.clientWidth || 1;
       const height = parseFloat(els.pathLayer.style.height) || els.emberLayer.clientHeight || 1;
       emberCtx.clearRect(0, 0, width, height);
+      emberCtx.globalCompositeOperation = "source-over";
       for (let i = sparks.length - 1; i >= 0; i -= 1) {
         const spark = sparks[i];
+        paintEmber(emberCtx, spark);
         spark.x += spark.vx;
         spark.y += spark.vy;
-        spark.vy += 0.015;
-        spark.vx *= 0.98;
+        spark.vy += 0.03;
+        spark.vx *= 0.988;
         spark.life -= spark.decay;
-        if (spark.life <= 0) {
-          sparks.splice(i, 1);
-          continue;
-        }
-        emberCtx.globalAlpha = Math.max(0, spark.life);
-        emberCtx.fillStyle = spark.hot ? "#fff6d2" : "#ff9a3a";
-        emberCtx.beginPath();
-        emberCtx.arc(spark.x, spark.y, spark.r * (0.45 + spark.life), 0, Math.PI * 2);
-        emberCtx.fill();
+        if (spark.life <= 0) sparks.splice(i, 1);
       }
       emberCtx.globalAlpha = 1;
     } catch {
@@ -1587,6 +1633,160 @@
       return;
     }
     if (sparks.length) sparkLoop = requestAnimationFrame(stepSparks);
+  }
+
+  function clearFireworks() {
+    fireworks.length = 0;
+    fireworkToken += 1;
+    while (fireworkTimers.length) clearTimeout(fireworkTimers.pop());
+    if (fireworkLoop) {
+      cancelAnimationFrame(fireworkLoop);
+      fireworkLoop = 0;
+    }
+    wipeCanvas(fireworkCtx, els.triumphBurst);
+  }
+
+  function resizeTriumphBurst() {
+    const canvas = els.triumphBurst;
+    const host = els.wordTriumph;
+    if (!canvas || !host) return { width: 0, height: 0 };
+    const board = els.board?.getBoundingClientRect?.() || { width: 0, height: 0 };
+    const width = Math.max(1, Math.round(host.clientWidth || board.width || parseFloat(els.pathLayer?.style.width) || 0));
+    const height = Math.max(1, Math.round(host.clientHeight || board.height || parseFloat(els.pathLayer?.style.height) || 0));
+    canvas.style.left = "0px";
+    canvas.style.top = "0px";
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const bufferWidth = Math.max(1, Math.round(width * dpr));
+    const bufferHeight = Math.max(1, Math.round(height * dpr));
+    if (canvas.width !== bufferWidth || canvas.height !== bufferHeight) {
+      canvas.width = bufferWidth;
+      canvas.height = bufferHeight;
+    }
+    try {
+      fireworkCtx = canvas.getContext("2d");
+      if (fireworkCtx) fireworkCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    } catch {
+      fireworkCtx = null;
+    }
+    return { width, height };
+  }
+
+  function pushFirework(x, y, vx, vy, flare) {
+    fireworks.push({
+      x: x + vx * 1.6,
+      y: y + vy * 1.6,
+      px: x,
+      py: y,
+      vx,
+      vy,
+      life: 1,
+      decay: flare ? 0.012 + Math.random() * 0.008 : 0.016 + Math.random() * 0.012,
+      r: flare ? 5.4 + Math.random() * 2.2 : 3.2 + Math.random() * 2,
+      hot: flare || Math.random() > 0.38
+    });
+  }
+
+  function burstFireworks(x, y, count, minSpeed, maxSpeed) {
+    for (let i = 0; i < count; i += 1) {
+      const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.45;
+      const speed = minSpeed + Math.random() * (maxSpeed - minSpeed);
+      pushFirework(x, y, Math.cos(angle) * speed, Math.sin(angle) * speed, i % 5 === 0);
+    }
+  }
+
+  function ringFireworks(cx, cy, radius, count) {
+    for (let i = 0; i < count; i += 1) {
+      const angle = (Math.PI * 2 * i) / count;
+      const speed = 1.7 + Math.random() * 2.1;
+      pushFirework(
+        cx + Math.cos(angle) * radius,
+        cy + Math.sin(angle) * radius,
+        Math.cos(angle) * speed,
+        Math.sin(angle) * speed,
+        i % 2 === 0
+      );
+    }
+  }
+
+  function paintStreak(ctx, spark) {
+    const alpha = Math.max(0, spark.life);
+    ctx.globalAlpha = alpha * 0.9;
+    ctx.strokeStyle = spark.hot ? "rgba(255, 244, 214, 0.95)" : "rgba(255, 176, 72, 0.9)";
+    ctx.lineWidth = Math.max(1.6, spark.r * 0.4);
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.moveTo(spark.px, spark.py);
+    ctx.lineTo(spark.x, spark.y);
+    ctx.stroke();
+  }
+
+  function stepFireworks() {
+    fireworkLoop = 0;
+    if (motionReduced()) {
+      fireworks.length = 0;
+      wipeCanvas(fireworkCtx, els.triumphBurst);
+      return;
+    }
+    if (!fireworkCtx) {
+      fireworks.length = 0;
+      return;
+    }
+    try {
+      const width = parseFloat(els.triumphBurst.style.width) || els.wordTriumph.clientWidth || 1;
+      const height = parseFloat(els.triumphBurst.style.height) || els.wordTriumph.clientHeight || 1;
+      fireworkCtx.clearRect(0, 0, width, height);
+      fireworkCtx.globalCompositeOperation = "source-over";
+      for (let i = fireworks.length - 1; i >= 0; i -= 1) {
+        const spark = fireworks[i];
+        paintStreak(fireworkCtx, spark);
+        paintEmber(fireworkCtx, spark);
+        spark.px = spark.x;
+        spark.py = spark.y;
+        spark.x += spark.vx;
+        spark.y += spark.vy;
+        spark.vy += 0.042;
+        spark.vx *= 0.992;
+        spark.vy *= 0.992;
+        spark.life -= spark.decay;
+        if (spark.life <= 0) fireworks.splice(i, 1);
+      }
+      fireworkCtx.globalAlpha = 1;
+    } catch {
+      fireworks.length = 0;
+      return;
+    }
+    if (fireworks.length) fireworkLoop = requestAnimationFrame(stepFireworks);
+  }
+
+  function launchTriumphFireworks() {
+    if (motionReduced() || !els.triumphBurst) return;
+    clearFireworks();
+    const token = fireworkToken;
+    const { width, height } = resizeTriumphBurst();
+    if (!fireworkCtx || width < 8 || height < 8) return;
+    const cx = width / 2;
+    // The flash pads the word upward; burst from that center so sparks ring the letters.
+    const cy = height * 0.47;
+    const reach = Math.min(width, height);
+    burstFireworks(cx, cy, 28, 2.6, 6.4);
+    burstFireworks(cx, cy, 10, 0.8, 1.8);
+    ringFireworks(cx, cy, Math.max(28, reach * 0.22), 16);
+    if (fireworks.length > 160) fireworks.splice(0, fireworks.length - 160);
+    const timer = window.setTimeout(() => {
+      if (token !== fireworkToken || motionReduced()) return;
+      const sized = resizeTriumphBurst();
+      if (!fireworkCtx || sized.width < 8 || sized.height < 8) return;
+      const arm = Math.min(sized.width, sized.height) * 0.28;
+      burstFireworks(cx - arm * 0.75, cy + sized.height * 0.05, 14, 1.6, 4.1);
+      burstFireworks(cx + arm * 0.8, cy - sized.height * 0.03, 14, 1.6, 4.1);
+      burstFireworks(cx, cy - arm * 0.62, 12, 1.5, 3.6);
+      if (fireworks.length > 160) fireworks.splice(0, fireworks.length - 160);
+      if (!fireworkLoop) stepFireworks();
+    }, 170);
+    fireworkTimers.push(timer);
+    if (!fireworkLoop) stepFireworks();
   }
 
   function drawPath(indices, hint) {

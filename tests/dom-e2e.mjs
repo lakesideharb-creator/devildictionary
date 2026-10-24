@@ -86,6 +86,67 @@ function centerOf(geom, index) {
   };
 }
 
+function motionQuery(reduced) {
+  return query => ({
+    matches: reduced && String(query).includes("prefers-reduced-motion"),
+    media: String(query),
+    addEventListener() {},
+    removeEventListener() {},
+    addListener() {},
+    removeListener() {},
+    dispatchEvent() { return false; }
+  });
+}
+
+function installCanvasProbe(window) {
+  const arcs = [];
+  window.HTMLCanvasElement.prototype.getContext = function () {
+    const canvas = this;
+    return {
+      setTransform() {},
+      clearRect() {},
+      beginPath() {},
+      moveTo() {},
+      lineTo() {},
+      closePath() {},
+      rect() {},
+      ellipse() {},
+      arc(x, y, r) { arcs.push({ id: canvas.id, r, x, y }); },
+      fill() {},
+      stroke() {},
+      save() {},
+      restore() {},
+      clip() {},
+      createRadialGradient() { return { addColorStop() {} }; },
+      measureText() { return { width: 40 }; },
+      fillRect() {},
+      strokeRect() {},
+      fillText() {},
+      roundRect() {},
+      drawImage() {},
+      quadraticCurveTo() {},
+      bezierCurveTo() {},
+      set fillStyle(_value) {},
+      get fillStyle() { return "#000"; },
+      set strokeStyle(_value) {},
+      get strokeStyle() { return "#000"; },
+      set globalAlpha(_value) {},
+      get globalAlpha() { return 1; },
+      set lineWidth(_value) {},
+      get lineWidth() { return 1; },
+      set lineCap(_value) {},
+      get lineCap() { return "butt"; },
+      set globalCompositeOperation(_value) {},
+      get globalCompositeOperation() { return "source-over"; },
+      set font(_value) {},
+      get font() { return "16px serif"; },
+      set textAlign(_value) {},
+      get textAlign() { return "start"; }
+    };
+  };
+  return arcs;
+}
+
 function dispatchPointer(window, target, type, point, pointerType = "touch") {
   target.dispatchEvent(new window.PointerEvent(type, {
     bubbles: true,
@@ -538,17 +599,42 @@ assert.equal(stageOne.document.querySelectorAll(".letter").length, 25, "stage I 
 await swipeCurrent(dense, "mouse");
 assert.ok(dense.document.getElementById("definitionModal").classList.contains("open"), "a mouse stroke of the real word still submits on release");
 
-const calm = boot({ sound: false });
-calm.matchMedia = query => ({
-  matches: String(query).includes("prefers-reduced-motion"),
-  media: String(query),
-  addEventListener() {},
-  removeEventListener() {},
-  addListener() {},
-  removeListener() {},
-  dispatchEvent() { return false; }
-});
+const vivid = boot({ sound: false });
+vivid.matchMedia = motionQuery(false);
 {
+  const arcs = installCanvasProbe(vivid);
+  const { document } = vivid;
+  const geom = stubBoardGeometry(document);
+  const pathIndices = vivid.__DEVILS_GAME__.getState().round.path;
+  const board = document.getElementById("board");
+  const word = vivid.__DEVILS_GAME__.getState().round.entry.word;
+  document.querySelector(`[data-cell="${pathIndices[0]}"]`).click();
+  document.querySelector(`[data-cell="${pathIndices[1]}"]`).click();
+  assert.equal(arcs.filter(arc => arc.id === "emberLayer").length, 0, "sparks stay off until the finger is dragging");
+  assert.equal(arcs.filter(arc => arc.id === "triumphBurst").length, 0, "fireworks wait for the solved word");
+  let last = centerOf(geom, pathIndices[0]);
+  dispatchPointer(vivid, document.querySelector(`[data-cell="${pathIndices[0]}"]`), "pointerdown", last, "touch");
+  const trail = arcs.filter(arc => arc.id === "emberLayer");
+  assert.ok(trail.length >= 10, "dragging sprays a readable handful of trail sparks");
+  assert.ok(trail.some(arc => arc.r >= 16), "trail sparks draw a glow large enough to see beside the path");
+  for (const index of pathIndices.slice(1)) {
+    last = centerOf(geom, index);
+    dispatchPointer(vivid, board, "pointermove", last, "touch");
+  }
+  dispatchPointer(vivid, board, "pointerup", last, "touch");
+  assert.equal(document.getElementById("wordTriumph").hidden, false, "the solved word still flashes");
+  assert.equal(document.getElementById("wordTriumphText").textContent, word, "the flash spells the solved word");
+  const burst = arcs.filter(arc => arc.id === "triumphBurst");
+  assert.ok(burst.length >= 20, "a solved word bursts fireworks around the flash");
+  assert.ok(burst.some(arc => arc.r >= 16), "triumph fireworks are large enough to read around the word");
+  await sleep(1100);
+  assert.equal(document.getElementById("wordTriumph").hidden, true, "fireworks leave with the flash");
+}
+
+const calm = boot({ sound: false });
+calm.matchMedia = motionQuery(true);
+{
+  const arcs = installCanvasProbe(calm);
   const { document } = calm;
   const geom = stubBoardGeometry(document);
   const pathIndices = calm.__DEVILS_GAME__.getState().round.path;
@@ -562,7 +648,10 @@ calm.matchMedia = query => ({
   dispatchPointer(calm, board, "pointerup", last, "touch");
   assert.equal(document.getElementById("wordTriumph").hidden, false, "reduced motion still shows the finished word");
   assert.equal(document.getElementById("emberLayer").getAttribute("aria-hidden"), "true");
+  assert.equal(document.getElementById("triumphBurst").getAttribute("aria-hidden"), "true");
   await sleep(400);
+  assert.equal(arcs.filter(arc => arc.id === "emberLayer").length, 0, "reduced motion draws no trail sparks");
+  assert.equal(arcs.filter(arc => arc.id === "triumphBurst").length, 0, "reduced motion draws no triumph fireworks");
   assert.ok(document.getElementById("definitionModal").classList.contains("open"), "reduced motion opens the definition without the long hold");
   assert.equal(document.getElementById("wordTriumph").hidden, true, "reduced motion clears the flash as the definition opens");
 }
@@ -577,5 +666,6 @@ finished.close();
 dense.close();
 eight.close();
 stageOne.close();
+vivid.close();
 calm.close();
-console.log("DOM E2E OK: stage II and IV unlocks, swipe, hint, three-way judgment, reader note, progress, coin boundaries, dense-grid touch lanes, desktop mouse aim, success flash, reduced motion, and no paywall anywhere");
+console.log("DOM E2E OK: stage II and IV unlocks, swipe, hint, three-way judgment, reader note, progress, coin boundaries, dense-grid touch lanes, desktop mouse aim, success flash, trail sparks, triumph fireworks, reduced motion, and no paywall anywhere");

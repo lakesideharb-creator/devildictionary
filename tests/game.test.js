@@ -9,7 +9,7 @@ const css = fs.readFileSync(path.join(root, "styles.css"), "utf8");
 const js = fs.readFileSync(path.join(root, "app.js"), "utf8");
 
 test("page contains all playable surfaces", () => {
-  for (const id of ["board", "pathLayer", "emberLayer", "wordTriumph", "hintButton", "soundToggle", "definitionModal", "definitionChoices", "judgmentFeedback", "stageCurtain", "coinCount", "coinCelebration", "progressFill"]) {
+  for (const id of ["board", "pathLayer", "emberLayer", "wordTriumph", "triumphBurst", "hintButton", "soundToggle", "definitionModal", "definitionChoices", "judgmentFeedback", "stageCurtain", "coinCount", "coinCelebration", "progressFill"]) {
     assert.match(html, new RegExp(`id="${id}"`));
   }
   assert.match(html, /<script src="\.\/app\.js"><\/script>/);
@@ -39,6 +39,14 @@ test("coin balance is derived from unique completed count", () => {
   assert.match(js, /\[\.\.\.new Set\(/);
   assert.equal(Math.floor(24 / 5), 4);
   assert.equal(Math.floor(25 / 5), 5);
+});
+
+test("reduced motion suppresses trail sparks and the success burst", () => {
+  assert.match(html, /id="triumphBurst"/);
+  assert.match(css, /@media \(prefers-reduced-motion: reduce\) \{\s*\.path-glow,\s*\.ember-layer,\s*\.triumph-burst \{ display: none; \}/);
+  assert.match(js, /function launchTriumphFireworks/);
+  assert.match(js, /motionReduced\(\) \|\| !els\.emberLayer/);
+  assert.match(js, /motionReduced\(\) \|\| !els\.triumphBurst/);
 });
 
 test("hint and reward animations are present", () => {
