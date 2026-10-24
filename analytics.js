@@ -1,8 +1,20 @@
-// Vercel Web Analytics for the public website.
+// Vercel Web Analytics and the Meta Pixel for the public website.
 // The insights script is served by Vercel at /_vercel/insights/script.js once
 // Web Analytics is enabled for the project. Custom events go through va().
+// The Meta base code (init + PageView) is installed here, once, for every
+// public page that already loads this file. fbevents.js is async.
 // Nothing here runs inside the Capacitor app or a file:// offline copy.
+//
+// Purchase is not sent: checkout finishes on Creem and does not return a
+// reliable confirmation on this origin. The noscript PageView image from
+// Meta's snippet is omitted; this script is the only install, and a
+// noscript tag written by JavaScript never runs for visitors without it.
 (() => {
+  const META_PIXEL_ID = "1832150057779347";
+  const META_CUSTOM_EVENTS = {
+    "Game start": "StartPlay",
+    "Word complete": "CompleteWord"
+  };
   const native = Boolean(window.Capacitor) || location.protocol === "file:";
 
   if (!native) {
@@ -11,6 +23,28 @@
     script.defer = true;
     script.src = "/_vercel/insights/script.js";
     document.head.append(script);
+    installMetaPixel();
+  }
+
+  function installMetaPixel() {
+    if (window.fbq) return;
+    const fbq = window.fbq = function () {
+      if (fbq.callMethod) fbq.callMethod.apply(fbq, arguments);
+      else fbq.queue.push(arguments);
+    };
+    if (!window._fbq) window._fbq = fbq;
+    fbq.push = fbq;
+    fbq.loaded = true;
+    fbq.version = "2.0";
+    fbq.queue = [];
+    const pixel = document.createElement("script");
+    pixel.async = true;
+    pixel.src = "https://connect.facebook.net/en_US/fbevents.js";
+    const first = document.getElementsByTagName("script")[0];
+    if (first && first.parentNode) first.parentNode.insertBefore(pixel, first);
+    else document.head.append(pixel);
+    fbq("init", META_PIXEL_ID);
+    fbq("track", "PageView");
   }
 
   function cleanData(data) {
@@ -27,12 +61,29 @@
     return clean;
   }
 
+  function metaData(data) {
+    const clean = cleanData(data);
+    for (const [key, value] of Object.entries(clean)) {
+      if (typeof value === "boolean") clean[key] = value ? "true" : "false";
+    }
+    return clean;
+  }
+
+  function metaTrack(method, name, data) {
+    if (native || typeof window.fbq !== "function" || !name) return;
+    const payload = metaData(data);
+    if (Object.keys(payload).length) window.fbq(method, name, payload);
+    else window.fbq(method, name);
+  }
+
   window.ddTrack = function ddTrack(name, data) {
     if (native || !name) return;
     const event = { name: String(name).slice(0, 255) };
     const payload = cleanData(data);
     if (Object.keys(payload).length) event.data = payload;
     window.va("event", event);
+    const custom = META_CUSTOM_EVENTS[event.name];
+    if (custom) metaTrack("trackCustom", custom, payload);
   };
 
   function hideNativeSubscribe() {
@@ -100,6 +151,7 @@
       form.dataset.state = accepted ? "success" : "refused";
       const result = accepted ? "subscribed" : String(body.status || "error").slice(0, 40);
       window.ddTrack("Subscribe", { result });
+      if (accepted) metaTrack("track", "Lead", { content_name: "daily letter" });
     } catch {
       if (status) status.textContent = "The list could not be reached. This address was not saved.";
       form.dataset.state = "refused";

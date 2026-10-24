@@ -250,6 +250,12 @@ test("privacy names Vercel Web Analytics and Resend, and the homepage keeps the 
   const index = fs.readFileSync(path.join(root, "index.html"), "utf8");
   assert.match(privacy, /Vercel Web Analytics/);
   assert.match(privacy, /third-party cookies/);
+  assert.match(privacy, /Meta Pixel/);
+  assert.match(privacy, /1832150057779347/);
+  const analytics = fs.readFileSync(path.join(root, "analytics.js"), "utf8");
+  assert.match(analytics, /1832150057779347/);
+  assert.match(analytics, /connect\.facebook\.net\/en_US\/fbevents\.js/);
+  assert.doesNotMatch(index, /fbq\(|fbevents\.js|1832150057779347/);
   assert.match(privacy, /Resend/);
   assert.match(privacy, /unsubscribe/i);
   assert.match(privacy, /one letter each morning/);
