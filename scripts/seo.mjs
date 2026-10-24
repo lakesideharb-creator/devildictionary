@@ -18,6 +18,7 @@ const SITE = "https://devildictionary.com";
 const PAGES = [
   { url: "/", file: "index.html", priority: "1.0", changefreq: "weekly" },
   { url: "/print-play", file: "print-play.html", priority: "0.7", changefreq: "monthly" },
+  { url: "/promo", file: "promo/index.html", priority: "0.6", changefreq: "monthly" },
   { url: "/community", file: "community.html", priority: "0.5", changefreq: "weekly" },
   { url: "/support", file: "support.html", priority: "0.6", changefreq: "monthly" },
   { url: "/faq", file: "faq.html", priority: "0.7", changefreq: "monthly" },

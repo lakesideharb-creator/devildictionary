@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<!-- /promo has no trailing slash, so this base keeps src="bed.mp3" at /promo/bed.mp3. -->
+<base href="/promo/">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Devil’s Dictionary · Promo</title>
+<meta name="description" content="Guess the word. Survive the definition. A satirical word game from Ambrose Bierce’s Devil’s Dictionary.">
+<meta property="og:title" content="The Devil’s Dictionary · Promo">
+<meta property="og:description" content="Guess the word. Survive the definition.">
+<meta property="og:url" content="https://devildictionary.com/promo">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://devildictionary.com/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+:root{--bg:#120708;--fg:#f3e9d8;--red:#d6261e;--dim:#9b8a78;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:Georgia,"Times New Roman",serif;overflow:hidden}
+#stage{position:relative;height:100%;display:flex;align-items:center;justify-content:center;cursor:pointer;
+background:radial-gradient(ellipse at 50% 120%,#5a0f0b 0%,#120708 60%)}
+.scene{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:6vw;opacity:0;pointer-events:none;transition:opacity .6s}
+.scene.on{opacity:1}
+.word{font-size:clamp(40px,10vw,110px);letter-spacing:.06em;color:var(--red);font-weight:700;text-transform:uppercase;transform:scale(.8);opacity:0}
+.on .word{animation:pop .8s .1s forwards}
+.pos{font-style:italic;color:var(--dim);margin:.2em 0 1em;font-size:clamp(16px,3vw,28px);opacity:0}
+.on .pos{animation:fade .6s .7s forwards}
+.def{max-width:900px;font-size:clamp(20px,4.2vw,44px);line-height:1.4;min-height:4.2em}
+.def::after{content:"▍";color:var(--red);animation:blink .7s infinite}
+.src{margin-top:1.2em;color:var(--dim);font-size:clamp(13px,2vw,18px);letter-spacing:.2em;opacity:0}
+.on .src{animation:fade .6s 3.2s forwards}
+h1{font-size:clamp(34px,8.5vw,96px);margin:.1em 0;letter-spacing:.04em;opacity:0;transform:translateY(30px)}
+.on h1{animation:rise 1s .3s forwards}
+.sub{font-size:clamp(15px,3vw,28px);color:var(--dim);letter-spacing:.3em;opacity:0}
+.on .sub{animation:fade 1s 1.2s forwards}
+.horns{font-size:clamp(60px,14vw,150px);opacity:0;filter:drop-shadow(0 0 30px var(--red))}
+.on .horns{animation:fade 1s forwards, flick 1.4s 1s infinite}
+.num{font-size:clamp(70px,20vw,220px);color:var(--red);font-weight:700;line-height:1}
+.on .num{animation:pop .9s forwards}
+.cta{font-size:clamp(28px,7vw,76px);border-bottom:3px solid var(--red);padding-bottom:.1em;opacity:0}
+.on .cta{animation:rise 1s .4s forwards, glow 2s 1.4s infinite}
+.tag{margin-top:1.2em;color:var(--dim);font-size:clamp(14px,2.6vw,24px);opacity:0}
+.on .tag{animation:fade 1s 1.2s forwards}
+#bar{position:absolute;left:0;bottom:0;height:4px;background:var(--red);width:0}
+#hint{position:absolute;right:16px;top:calc(12px + env(safe-area-inset-top,0px));font:13px system-ui,sans-serif;color:var(--dim)}
+#credit{position:absolute;left:16px;bottom:calc(14px + env(safe-area-inset-bottom,0px));font:11px system-ui,sans-serif;color:var(--dim);opacity:.7;max-width:70%}
+@keyframes pop{to{opacity:1;transform:scale(1)}}
+@keyframes fade{to{opacity:1}}
+@keyframes rise{to{opacity:1;transform:none}}
+@keyframes blink{50%{opacity:0}}
+@keyframes flick{50%{transform:scale(1.06) rotate(-2deg)}}
+@keyframes glow{50%{text-shadow:0 0 24px var(--red)}}
+@media (prefers-reduced-motion: reduce){
+  .scene{transition:none}
+  .on .word,.on .pos,.on .src,.on h1,.on .sub,.on .horns,.on .num,.on .cta,.on .tag{animation:none;opacity:1;transform:none}
+  .def::after{animation:none}
+}
+</style>
+</head>
+<body>
+<audio id="bgm" src="bed.mp3" loop preload="auto" playsinline></audio>
+<div id="stage">
+  <div class="scene" data-t="4200"><div class="horns">😈</div><h1>The Devil’s Dictionary</h1><div class="sub">Guess the word. Survive the definition.</div></div>
+
+  <div class="scene" data-t="6200" data-def="A malevolent literary device for cramping the growth of a language and making it hard and inelastic."><div class="word">Dictionary</div><div class="pos">n.</div><div class="def"></div><div class="src">— AMBROSE BIERCE</div></div>
+
+  <div class="scene" data-t="6200" data-def="One skilled in circumventing the law."><div class="word">Lawyer</div><div class="pos">n.</div><div class="def"></div><div class="src">— AMBROSE BIERCE</div></div>
+
+  <div class="scene" data-t="6200" data-def="A person who talks when you wish him to listen."><div class="word">Bore</div><div class="pos">n.</div><div class="def"></div><div class="src">— AMBROSE BIERCE</div></div>
+
+  <div class="scene" data-t="6200" data-def="An invention of the devil which abrogates some of the advantages of making a disagreeable person keep his distance."><div class="word">Telephone</div><div class="pos">n.</div><div class="def"></div><div class="src">— AMBROSE BIERCE</div></div>
+
+  <div class="scene" data-t="4200"><div class="num" id="count">0</div><h1 style="font-size:clamp(24px,6vw,64px)">biting definitions</h1><div class="sub">Nothing sacred. No one spared.</div></div>
+
+  <div class="scene" data-t="5500"><div class="cta">devildictionary.com</div><div class="tag">Look up a word. Get insulted.</div></div>
+</div>
+<div id="hint">Tap to pause / replay</div>
+<div id="credit">Music: “Darkest Child” by Kevin MacLeod (incompetech.com) · CC BY 4.0</div>
+<div id="bar"></div>
+<script>
+const scenes=[...document.querySelectorAll('.scene')];
+const total=scenes.reduce((a,s)=>a+ +s.dataset.t,0);
+const bar=document.getElementById('bar');
+const bgm=document.getElementById('bgm');
+bgm.volume=0.45;
+let idx=0,timers=[],paused=false,raf;
+let sceneBegan=performance.now();
+
+function clearAll(){timers.forEach(clearTimeout);timers=[];cancelAnimationFrame(raf)}
+function type(el,text){
+  el.textContent='';let i=0;
+  const tick=()=>{if(i<=text.length){el.textContent=text.slice(0,i++);timers.push(setTimeout(tick,42))}};
+  timers.push(setTimeout(tick,1100));
+}
+function countUp(el,to,dur){
+  const t0=performance.now();
+  const f=now=>{const p=Math.min((now-t0)/dur,1);el.textContent=Math.floor(to*(1-Math.pow(1-p,3))).toLocaleString()+(p===1?'+':'');if(p<1)requestAnimationFrame(f)};
+  requestAnimationFrame(f);
+}
+function show(i){
+  scenes.forEach(s=>s.classList.remove('on'));
+  const s=scenes[i];
+  void s.offsetWidth;
+  s.classList.add('on');
+  sceneBegan=performance.now();
+  if(s.dataset.def)type(s.querySelector('.def'),s.dataset.def);
+  if(s.querySelector('#count'))countUp(s.querySelector('#count'),1600,2200);
+  timers.push(setTimeout(()=>{idx=(idx+1)%scenes.length;if(idx===0){try{bgm.currentTime=0}catch(e){}}show(idx)},+s.dataset.t));
+}
+function progress(){
+  let done=0;for(let i=0;i<idx;i++)done+=+scenes[i].dataset.t;
+  bar.style.width=Math.min(100,(done+(performance.now()-sceneBegan))/total*100)+'%';
+  raf=requestAnimationFrame(progress);
+}
+async function ensureMusic(){
+  try{if(bgm.paused)await bgm.play()}catch(e){/* autoplay blocked until gesture */}
+}
+function play(from){clearAll();idx=from;show(idx);progress();ensureMusic()}
+document.getElementById('stage').addEventListener('click',()=>{
+  if(!paused){paused=true;clearAll();bgm.pause();document.getElementById('hint').textContent='Paused · tap to replay'}
+  else{paused=false;document.getElementById('hint').textContent='Tap to pause / replay';play(0)}
+});
+// Kick music as soon as the browser allows (gesture or autoplay policy)
+document.addEventListener('pointerdown',()=>ensureMusic(),{once:true});
+play(0);
+ensureMusic();
+</script>
+</body>
+</html>

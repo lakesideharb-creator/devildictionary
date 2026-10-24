@@ -33,6 +33,7 @@ for (const file of [
   fs.copyFileSync(path.join(root, file), path.join(dist, file));
 }
 fs.cpSync(path.join(root, "downloads"), path.join(dist, "downloads"), { recursive: true });
+fs.cpSync(path.join(root, "promo"), path.join(dist, "promo"), { recursive: true });
 const { writeLandingPages } = await import("./landing-pages.mjs");
 writeLandingPages(dist);
 await import("./seo.mjs");
