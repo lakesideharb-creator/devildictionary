@@ -83,7 +83,7 @@
     const email = String(new FormData(form).get("email") || "");
     form.dataset.state = "pending";
     if (button) button.disabled = true;
-    if (status) status.textContent = "Joining the waitlist…";
+    if (status) status.textContent = "Saving your address…";
     try {
       const response = await fetch(form.action || "/api/subscribe", {
         method: "POST",
@@ -94,7 +94,7 @@
       const accepted = response.ok && body.ok === true && body.status === "subscribed";
       if (status) {
         status.textContent = accepted
-          ? (body.message || "You’re on the waitlist. No daily letter yet.")
+          ? (body.message || "You’re on the list. Each morning brings one letter with the day’s word, and a link to play it.")
           : (body.message || "The list could not be reached. This address was not saved.");
       }
       form.dataset.state = accepted ? "success" : "refused";

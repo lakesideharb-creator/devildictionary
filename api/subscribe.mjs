@@ -8,7 +8,7 @@
 
 const AUDIENCE_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const EMAIL = /^[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+$/i;
-const ON_THE_LIST = "You’re on the waitlist. No daily letter yet.";
+const ON_THE_LIST = "You’re on the list. Each morning brings one letter with the day’s word, and a link to play it.";
 const NOT_CONFIGURED = "The daily-word list is not configured yet. This address was not saved.";
 const NOT_SAVED = "This address was not saved.";
 
