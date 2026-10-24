@@ -5,7 +5,9 @@
  *
  * Season, in the visitor's local calendar: 24 October through 2 November
  * (the week of Halloween through All Souls' Day). Outside that window
- * nothing is shown.
+ * nothing is shown. index.html uses this same window and skips the
+ * request entirely; the check below still applies when the file is
+ * inlined (the offline edition) or forced with ?halloween=1.
  *
  *   ?halloween=1  play even after it has been seen, including outside the season
  *   ?halloween=0  never play, and hide the replay control
@@ -256,5 +258,26 @@
   };
 
   syncReplay();
-  if (openingChoice() === "play") play();
+  // The homepage adds the stylesheet from script so it stays off the
+  // critical path. Wait for it before uncovering the overlay, or the
+  // scene would flash in normal flow. No link (tests, offline file)
+  // means the rules are already here.
+  const cssLink = document.querySelector("link[data-halloween-css]");
+  let sheetReady = false;
+  if (cssLink) {
+    try { sheetReady = Boolean(cssLink.sheet); }
+    catch { sheetReady = false; }
+  }
+  const cssPending = cssLink
+    && cssLink.getAttribute("data-halloween-css") !== "ready"
+    && !sheetReady;
+  const begin = () => {
+    if (openingChoice() === "play") play();
+  };
+  if (cssPending) {
+    cssLink.addEventListener("load", begin, { once: true });
+    cssLink.addEventListener("error", begin, { once: true });
+  } else {
+    begin();
+  }
 })();
