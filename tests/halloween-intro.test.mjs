@@ -66,6 +66,45 @@ test("DESTINY copy is the dictionary entry, not generated filler", () => {
   assert.equal(html.includes("<video"), false);
   assert.match(html, /halloween-intro\.css/);
   assert.match(html, /halloween-intro\.js/);
+  assert.doesNotMatch(html, /<link rel="stylesheet" href="\.\/halloween-intro\.css"/);
+  assert.match(html, /<script src="\/analytics\.js" defer><\/script>/);
+  assert.match(html, /<script src="\.\/app\.js" defer><\/script>/);
+  assert.match(html, /<script src="\/shop\.js" defer><\/script>/);
+  assert.match(html, /month === 9 && day >= 24\) \|\| \(month === 10 && day <= 2\)/);
+  assert.match(intro, /month === 9 && day >= 24\) \|\| \(month === 10 && day <= 2\)/);
+});
+
+test("homepage fetches Halloween css and js only inside the season, or when forced", () => {
+  const head = html.match(/<script>\s*if \(!window\.Capacitor[\s\S]*?<\/script>/);
+  assert.ok(head, "season gate lives in the early inline script");
+  const source = head[0].replace(/^<script>/, "").replace(/<\/script>$/, "");
+
+  function probe(date, url) {
+    const window = new Window({ url, settings: { disableJavaScriptEvaluation: true } });
+    mockDate(window, ...date);
+    const written = [];
+    window.document.write = (chunk) => { written.push(String(chunk)); };
+    window.eval(source);
+    const css = window.document.querySelector("link[data-halloween-css]");
+    const scripts = written.join("\n");
+    const result = {
+      css: css ? css.getAttribute("href") : "",
+      script: /<script src="\.\/halloween-intro\.js" defer>/.test(scripts),
+    };
+    window.close();
+    return result;
+  }
+
+  const loaded = { css: "./halloween-intro.css", script: true };
+  const skipped = { css: "", script: false };
+  assert.deepEqual(probe([2026, 9, 23], "http://127.0.0.1:4173/"), skipped);
+  assert.deepEqual(probe([2026, 9, 24], "http://127.0.0.1:4173/"), loaded);
+  assert.deepEqual(probe([2026, 9, 31], "http://127.0.0.1:4173/"), loaded);
+  assert.deepEqual(probe([2026, 10, 2], "http://127.0.0.1:4173/"), loaded);
+  assert.deepEqual(probe([2026, 10, 3], "http://127.0.0.1:4173/"), skipped);
+  assert.deepEqual(probe([2026, 6, 4], "http://127.0.0.1:4173/"), skipped);
+  assert.deepEqual(probe([2026, 6, 4], "http://127.0.0.1:4173/?halloween=1"), loaded);
+  assert.deepEqual(probe([2026, 9, 31], "http://127.0.0.1:4173/?halloween=0"), skipped);
 });
 
 test("season window is 24 October through 2 November, local time", () => {
