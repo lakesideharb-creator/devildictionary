@@ -1771,12 +1771,14 @@ body.hw-lock { overflow: hidden; }
  * (the week of Halloween through All Souls' Day). Outside that window
  * nothing is shown.
  *
- *   ?halloween=1  play even after it has been seen, including outside the season
+ *   ?halloween=1  play on this load, including outside the season
  *   ?halloween=0  never play, and hide the replay control
  *
- * Skip, Escape, or letting the scene finish stores
- * dd-halloween-intro-YYYY=seen for that calendar year. The colophon
- * control "Replay the Halloween intro" clears the flag and plays it again.
+ * Every full page load during the season plays the intro. Skip, Escape,
+ * or letting the scene finish only closes this visit. Nothing is stored,
+ * so a return to the homepage plays it again until the season ends.
+ * The colophon control "Replay the Halloween intro" plays it again
+ * without reloading.
  *
  * prefers-reduced-motion skips the grid, fire, and bats and holds the
  * definition card briefly. The card quotes only the real DESTINY entry
@@ -1813,10 +1815,6 @@ body.hw-lock { overflow: hidden; }
     return (month === 9 && day >= 24) || (month === 10 && day <= 2);
   }
 
-  function storageKey(now = new Date()) {
-    return `dd-halloween-intro-${now.getFullYear()}`;
-  }
-
   function flag() {
     try {
       return new URLSearchParams(location.search).get("halloween");
@@ -1825,27 +1823,10 @@ body.hw-lock { overflow: hidden; }
     }
   }
 
-  function readSeen(now) {
-    try {
-      return localStorage.getItem(storageKey(now));
-    } catch {
-      return null;
-    }
-  }
-
-  function markSeen(now = new Date()) {
-    try {
-      localStorage.setItem(storageKey(now), "seen");
-    } catch {
-      /* Private mode and blocked storage still get the intro; it just won't be remembered. */
-    }
-  }
-
   function openingChoice(now = new Date()) {
     const forced = flag();
     if (forced === "0") return "off";
     if (forced !== "1" && !inSeason(now)) return "off";
-    if (forced !== "1" && readSeen(now) === "seen") return "seen";
     return "play";
   }
 
@@ -1941,7 +1922,6 @@ body.hw-lock { overflow: hidden; }
     if (mode !== "playing" || !root.isConnected) return;
     mode = "closing";
     clearTimers();
-    markSeen();
     root.classList.add("scene-out");
     const delay = root.classList.contains("hw-reduce") ? 40 : 640;
     later(() => {
@@ -1976,7 +1956,6 @@ body.hw-lock { overflow: hidden; }
 
   function replay() {
     if (mode === "playing") return;
-    try { localStorage.removeItem(storageKey()); } catch { /* ignore */ }
     play();
   }
 
@@ -2013,7 +1992,6 @@ body.hw-lock { overflow: hidden; }
   window.__HALLOWEEN_INTRO__ = {
     inSeason,
     openingChoice,
-    storageKey,
     replay,
     play,
     stop

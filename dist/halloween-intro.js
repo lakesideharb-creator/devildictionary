@@ -5,14 +5,18 @@
  *
  * Season, in the visitor's local calendar: 24 October through 2 November
  * (the week of Halloween through All Souls' Day). Outside that window
- * nothing is shown.
+ * nothing is shown. index.html uses this same window and skips the
+ * request entirely; the check below still applies when the file is
+ * inlined (the offline edition) or forced with ?halloween=1.
  *
- *   ?halloween=1  play even after it has been seen, including outside the season
+ *   ?halloween=1  play on this load, including outside the season
  *   ?halloween=0  never play, and hide the replay control
  *
- * Skip, Escape, or letting the scene finish stores
- * dd-halloween-intro-YYYY=seen for that calendar year. The colophon
- * control "Replay the Halloween intro" clears the flag and plays it again.
+ * Every full page load during the season plays the intro. Skip, Escape,
+ * or letting the scene finish only closes this visit. Nothing is stored,
+ * so a return to the homepage plays it again until the season ends.
+ * The colophon control "Replay the Halloween intro" plays it again
+ * without reloading.
  *
  * prefers-reduced-motion skips the grid, fire, and bats and holds the
  * definition card briefly. The card quotes only the real DESTINY entry
@@ -49,10 +53,6 @@
     return (month === 9 && day >= 24) || (month === 10 && day <= 2);
   }
 
-  function storageKey(now = new Date()) {
-    return `dd-halloween-intro-${now.getFullYear()}`;
-  }
-
   function flag() {
     try {
       return new URLSearchParams(location.search).get("halloween");
@@ -61,27 +61,10 @@
     }
   }
 
-  function readSeen(now) {
-    try {
-      return localStorage.getItem(storageKey(now));
-    } catch {
-      return null;
-    }
-  }
-
-  function markSeen(now = new Date()) {
-    try {
-      localStorage.setItem(storageKey(now), "seen");
-    } catch {
-      /* Private mode and blocked storage still get the intro; it just won't be remembered. */
-    }
-  }
-
   function openingChoice(now = new Date()) {
     const forced = flag();
     if (forced === "0") return "off";
     if (forced !== "1" && !inSeason(now)) return "off";
-    if (forced !== "1" && readSeen(now) === "seen") return "seen";
     return "play";
   }
 
@@ -177,7 +160,6 @@
     if (mode !== "playing" || !root.isConnected) return;
     mode = "closing";
     clearTimers();
-    markSeen();
     root.classList.add("scene-out");
     const delay = root.classList.contains("hw-reduce") ? 40 : 640;
     later(() => {
@@ -212,7 +194,6 @@
 
   function replay() {
     if (mode === "playing") return;
-    try { localStorage.removeItem(storageKey()); } catch { /* ignore */ }
     play();
   }
 
@@ -249,12 +230,32 @@
   window.__HALLOWEEN_INTRO__ = {
     inSeason,
     openingChoice,
-    storageKey,
     replay,
     play,
     stop
   };
 
   syncReplay();
-  if (openingChoice() === "play") play();
+  // The homepage adds the stylesheet from script so it stays off the
+  // critical path. Wait for it before uncovering the overlay, or the
+  // scene would flash in normal flow. No link (tests, offline file)
+  // means the rules are already here.
+  const cssLink = document.querySelector("link[data-halloween-css]");
+  let sheetReady = false;
+  if (cssLink) {
+    try { sheetReady = Boolean(cssLink.sheet); }
+    catch { sheetReady = false; }
+  }
+  const cssPending = cssLink
+    && cssLink.getAttribute("data-halloween-css") !== "ready"
+    && !sheetReady;
+  const begin = () => {
+    if (openingChoice() === "play") play();
+  };
+  if (cssPending) {
+    cssLink.addEventListener("load", begin, { once: true });
+    cssLink.addEventListener("error", begin, { once: true });
+  } else {
+    begin();
+  }
 })();
