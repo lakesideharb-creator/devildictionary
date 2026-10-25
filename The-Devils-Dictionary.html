@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#17120e" />
-    <meta name="description" content="Slide a word out of a grid of letters, then let the dictionary define you back. A pocket edition of cynical definitions." />
+    <meta name="description" content="Slide a word out of a grid of letters, then let the dictionary define you back. A free pocket game of cynical definitions in the voice of Ambrose Bierce." />
 
     <!-- Auto-translation wrecks the letter grid (tiles are English words), so
          ask Google and browsers to leave the page alone. -->
@@ -1035,6 +1035,169 @@ h1 { margin-top: 8px; font-size: clamp(28px, 4vw, 37px); font-weight: 700; lette
   .word-triumph.show .word-triumph-text { animation: none; opacity: 1; transform: none; }
 }
 
+/* First-party rails in the dark gutters beside the 660px game sheet.
+   Hidden until a fine pointer and a hover-capable desktop are wide enough
+   for a 176px card plus a 22px gap: 50% - 330px - 176px - 22px >= 16px,
+   which starts at 1100px. Touch layouts and anything narrower stay clear. */
+.house-rail { display: none; }
+.house-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+@media (min-width: 1100px) and (hover: hover) and (pointer: fine) {
+  .house-rail {
+    display: block;
+    position: fixed;
+    z-index: 3;
+    top: calc(28px + env(safe-area-inset-top));
+    width: 176px;
+  }
+  .house-rail-left { left: max(16px, calc(50% - 528px)); }
+  .house-rail-right { right: max(16px, calc(50% - 528px)); }
+}
+@media (min-width: 1100px) and (hover: hover) and (pointer: fine) and (max-height: 850px) {
+  .house-rail { top: 16px; }
+}
+@media print {
+  .house-rail { display: none !important; }
+}
+.house-ad {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 12px 14px;
+  color: #f2e2bc;
+  text-decoration: none;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(196, 58, 45, 0.18), transparent 70%),
+    #1c1612;
+  border: 1px solid rgba(216, 166, 58, 0.5);
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 1px rgba(255, 236, 210, 0.05), 0 16px 36px rgba(0, 0, 0, 0.35);
+}
+.house-ad:hover { border-color: #ffe09a; }
+.house-ad:focus-visible { outline: 3px solid #d8a63a; outline-offset: 3px; }
+.house-ad.house-book { display: none; }
+html[data-house-book="dictionary"] .house-ad.house-book-dictionary,
+html[data-house-book="defines"] .house-ad.house-book-defines,
+html:not([data-house-book]) .house-ad.house-book-dictionary { display: flex; }
+.house-ad img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: min(300px, calc(100vh - 280px));
+  object-fit: contain;
+  object-position: center top;
+  background: #100e0c;
+  border-radius: 2px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+}
+.house-kicker {
+  margin: 0;
+  color: #d8a63a;
+  font: 700 12px/1.2 Arial, sans-serif;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+.house-line {
+  margin: 0;
+  color: #f2e2bc;
+  font: italic 15px/1.35 Georgia, serif;
+}
+.house-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 8px 10px;
+  color: #1a120e;
+  background: #d8a63a;
+  font: 700 12px/1.2 Arial, sans-serif;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  text-align: center;
+}
+.house-ad:hover .house-cta { background: #ffe09a; }
+.house-pack {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  max-height: min(300px, calc(100vh - 280px));
+  margin: 0;
+  overflow: hidden;
+}
+.house-pack-sheet {
+  position: absolute;
+  inset: 10% 8%;
+  border: 1px solid #782d29;
+  border-radius: 2px;
+  background: radial-gradient(ellipse at 50% 0%, #fff6e2, #efe0c4 72%);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.35);
+}
+.house-pack-back { transform: rotate(-6deg); }
+.house-pack-mid { transform: rotate(5deg); }
+.house-pack-front {
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: #17120e;
+  text-align: center;
+}
+@media (prefers-reduced-motion: reduce) {
+  .house-pack-back,
+  .house-pack-mid { transform: none; opacity: 0; }
+}
+.house-pack-mark { color: #782d29; font-size: 14px; }
+.house-pack-front strong { font: 700 28px/1 Georgia, serif; letter-spacing: -.03em; }
+.house-pack-front em { color: #782d29; font: italic 14px/1.2 Georgia, serif; }
+
+/* Crawlable note under the pocket sheet. It stays in normal flow, below the
+   board, so it never covers the grid, the house-ad rails, or a touch drag. */
+.edition-note {
+  width: min(560px, 100%);
+  margin: 2px auto 0;
+  padding: 2px 8px 0;
+  color: #d9c6a6;
+  text-align: center;
+  user-select: text;
+  -webkit-user-select: text;
+}
+.edition-note h2 {
+  margin: 0 0 8px;
+  color: #f2e2bc;
+  font-size: 18px;
+  font-weight: 500;
+  font-style: italic;
+  letter-spacing: -.02em;
+  line-height: 1.3;
+}
+.edition-note p {
+  margin: 0 0 10px;
+  color: #d9c6a6;
+  font-size: 15px;
+  font-style: normal;
+  line-height: 1.55;
+}
+.edition-note a { color: #f3d99c; text-underline-offset: 3px; }
+.edition-note a:hover { color: #ffe09a; }
+.edition-note a:focus-visible { outline: 3px solid #f3d99c; outline-offset: 3px; }
+@media (max-width: 540px) {
+  .edition-note { padding-inline: 2px; }
+  .edition-note h2 { font-size: 16px; margin-bottom: 6px; }
+  .edition-note p { font-size: 14px; line-height: 1.45; margin-bottom: 8px; }
+}
+
 /* Seasonal homepage intro. The letter grid underneath is the game;
    this layer only covers it until the visitor skips or the scene ends. */
 
@@ -1319,26 +1482,46 @@ h1 { margin-top: 8px; font-size: clamp(28px, 4vw, 37px); font-weight: 700; lette
 
 .hw.scene-out { opacity: 0; }
 
-.hw-skip {
+.hw-skip,
+.hw-sound {
   position: absolute;
   z-index: 6;
   top: calc(12px + env(safe-area-inset-top));
-  right: calc(12px + env(safe-area-inset-right));
   min-width: 44px;
   min-height: 44px;
   padding: 10px 16px;
   color: #f3e2bc;
-  background: rgba(12, 8, 10, 0.55);
+  background: rgba(12, 8, 10, 0.72);
   border: 1px solid rgba(216, 166, 58, 0.75);
   font: 700 12px/1 Arial, Helvetica, sans-serif;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   cursor: pointer;
+  touch-action: manipulation;
 }
 
+.hw-skip { right: calc(12px + env(safe-area-inset-right)); }
+
+.hw-sound {
+  left: calc(12px + env(safe-area-inset-left));
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hw-sound-icon { width: 18px; height: 18px; display: block; flex: none; }
+.hw-sound-label { min-width: 4.8em; text-align: left; }
+.hw-sound-slash { opacity: 0; }
+.hw-sound.is-muted { color: #cbb89a; border-color: rgba(216, 166, 58, 0.45); }
+.hw-sound.is-muted .hw-sound-wave { opacity: 0; }
+.hw-sound.is-muted .hw-sound-slash { opacity: 1; }
+
 .hw-skip:hover,
-.hw-skip:focus-visible { color: #fff6df; border-color: #ffe09a; background: rgba(40, 22, 12, 0.78); }
-.hw-skip:focus-visible { outline: 3px solid #ffe09a; outline-offset: 3px; }
+.hw-skip:focus-visible,
+.hw-sound:hover,
+.hw-sound:focus-visible { color: #fff6df; border-color: #ffe09a; background: rgba(40, 22, 12, 0.78); }
+.hw-skip:focus-visible,
+.hw-sound:focus-visible { outline: 3px solid #ffe09a; outline-offset: 3px; }
 
 #halloweenReplay { letter-spacing: 0.12em; }
 
@@ -1424,7 +1607,8 @@ body.hw-lock { overflow: hidden; }
     -webkit-text-fill-color: CanvasText;
   }
   .hw-scroll,
-  .hw-skip { background: Canvas; color: CanvasText; border-color: CanvasText; }
+  .hw-skip,
+  .hw-sound { background: Canvas; color: CanvasText; border-color: CanvasText; }
   .hw-def,
   .hw-word,
   .hw-slogan,
@@ -1482,7 +1666,8 @@ body.hw-lock { overflow: hidden; }
             "name": "The Devil's Dictionary",
             "description": "A word-sliding game built on 100 cynical definitions: 45 original, 55 from Ambrose Bierce's 1911 public-domain classic.",
             "inLanguage": "en",
-            "publisher": { "@id": "https://devildictionary.com/#organization" }
+            "publisher": { "@id": "https://devildictionary.com/#organization" },
+            "mainEntity": { "@id": "https://devildictionary.com/#game" }
           },
           {
             "@type": "Organization",
@@ -1502,7 +1687,28 @@ body.hw-lock { overflow: hidden; }
             }
           },
           {
+            "@type": "WebPage",
+            "@id": "https://devildictionary.com/#webpage",
+            "url": "https://devildictionary.com/",
+            "name": "The Devil's Dictionary — A Word-Sliding Game",
+            "description": "Slide a word out of a grid of letters, then let the dictionary define you back. A free pocket game of cynical definitions in the voice of Ambrose Bierce.",
+            "inLanguage": "en",
+            "isPartOf": { "@id": "https://devildictionary.com/#website" },
+            "about": { "@id": "https://devildictionary.com/#game" },
+            "significantLink": [
+              "https://devildictionary.com/daily",
+              "https://devildictionary.com/word/lawyer",
+              "https://devildictionary.com/word/politics",
+              "https://devildictionary.com/word/telephone",
+              "https://devildictionary.com/print-play",
+              "https://devildictionary.com/promo",
+              "https://devildictionary.com/community",
+              "https://devildictionary.com/faq"
+            ]
+          },
+          {
             "@type": "VideoGame",
+            "@id": "https://devildictionary.com/#game",
             "name": "The Devil's Dictionary",
             "url": "https://devildictionary.com/",
             "description": "Slide a word out of a grid of letters in four stages, then face the dictionary's judgment. 100 words, free, no ads, no paywall.",
@@ -1513,6 +1719,13 @@ body.hw-lock { overflow: hidden; }
             "inLanguage": "en",
             "isAccessibleForFree": true,
             "author": { "@id": "https://devildictionary.com/#organization" },
+            "isBasedOn": {
+              "@type": "Book",
+              "name": "The Devil's Dictionary",
+              "author": { "@type": "Person", "name": "Ambrose Bierce" },
+              "datePublished": "1911",
+              "inLanguage": "en"
+            },
             "offers": {
               "@type": "Offer",
               "price": "0",
@@ -1616,6 +1829,13 @@ body.hw-lock { overflow: hidden; }
       <div class="shop-banner shop-deferred" hidden><span>Take the game to your table.</span><a href="/print-play" data-shop-open>Get Printable Cards ↗</a><small>From $2.99 · one-time purchase</small></div>
       </article>
 
+      <section class="edition-note" aria-labelledby="about-game">
+        <h2 id="about-game">Guess the word. Survive the definition.</h2>
+        <p>The Devil’s Dictionary is a free word game. One entry hides in a grid of letters. Hold the first letter and slide — along a row, a column, or a diagonal — until the word is spelled. The dictionary then reads its definition back, and it is rarely the comfortable one.</p>
+        <p>The title, and fifty-five of the definitions, come from Ambrose Bierce’s <em>The Devil’s Dictionary</em> (1911), a public-domain book of cynical definitions. Forty-five more were written for this edition in that same voice. One hundred entries, four stages, and no account to open. <a href="/faq">Where the definitions come from</a>.</p>
+        <p>A few of the entries are already written out: <a href="/word/lawyer">Lawyer</a>, <a href="/word/politics">Politics</a>, and <a href="/word/telephone">Telephone</a>. <a href="/daily">Today’s word</a> changes with the date. There is also a <a href="/promo">short promo</a>, <a href="/print-play">printable cards</a> for the table, and a <a data-community href="/community">community edition</a> for lines written by readers.</p>
+      </section>
+
       <footer class="colophon">
         <div class="colophon-row">
           <p>“Common sense is prejudice that finally reached retirement age.”</p>
@@ -1680,6 +1900,15 @@ body.hw-lock { overflow: hidden; }
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
     <div id="halloweenIntro" class="hw" role="dialog" aria-modal="true" aria-labelledby="halloweenTitle" hidden>
+      <button type="button" class="hw-sound" id="halloweenSound" aria-pressed="false" aria-label="Mute Halloween intro sound">
+        <svg class="hw-sound-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path fill="currentColor" d="M4 9.5v5h3.2L12 18.2V5.8L7.2 9.5H4z"/>
+          <path class="hw-sound-wave" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M15.2 9.2a3.6 3.6 0 0 1 0 5.6"/>
+          <path class="hw-sound-wave" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M17.4 7a6.2 6.2 0 0 1 0 10"/>
+          <path class="hw-sound-slash" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M5 5l14 14"/>
+        </svg>
+        <span class="hw-sound-label">Sound</span>
+      </button>
       <button type="button" class="hw-skip" id="halloweenSkip" aria-label="Skip the Halloween introduction">Skip</button>
       <div class="hw-sky" aria-hidden="true">
         <div class="hw-stars"></div>
@@ -1769,7 +1998,9 @@ body.hw-lock { overflow: hidden; }
  *
  * Season, in the visitor's local calendar: 24 October through 2 November
  * (the week of Halloween through All Souls' Day). Outside that window
- * nothing is shown.
+ * nothing is shown. index.html uses this same window and skips the
+ * request entirely; the check below still applies when the file is
+ * inlined (the offline edition) or forced with ?halloween=1.
  *
  *   ?halloween=1  play on this load, including outside the season
  *   ?halloween=0  never play, and hide the replay control
@@ -1783,6 +2014,13 @@ body.hw-lock { overflow: hidden; }
  * prefers-reduced-motion skips the grid, fire, and bats and holds the
  * definition card briefly. The card quotes only the real DESTINY entry
  * from app.js: “A tyrant’s authority for crime and fool’s excuse for failure.”
+ *
+ * Audio (original Web Audio synthesis — no samples, recordings, or
+ * third-party files) plays only while this overlay is up: a short looping
+ * drone, a card chime, and a bat flutter. It stops on skip, finish, stop(),
+ * or leaving the page. Mute is remembered at localStorage
+ * dd-halloween-audio-muted ("1" muted, "0" or absent unmuted). Reduced
+ * motion keeps the drone and one soft chime, quieter, and skips the bats.
  */
 (() => {
   "use strict";
@@ -1799,15 +2037,28 @@ body.hw-lock { overflow: hidden; }
   const FULL_END = 7100;
   const REDUCED_END = 1800;
 
+  const MUTE_KEY = "dd-halloween-audio-muted";
+
   const root = document.getElementById("halloweenIntro");
   const grid = document.getElementById("halloweenGrid");
   const skipBtn = document.getElementById("halloweenSkip");
+  const soundBtn = document.getElementById("halloweenSound");
   const replayBtn = document.getElementById("halloweenReplay");
   const defEl = document.getElementById("halloweenDef");
   if (!root) return;
 
   let mode = "idle";
   let timers = [];
+  let audioCtx = null;
+  let masterGain = null;
+  let bedSource = null;
+  let bedGain = null;
+  let bedBuffer = null;
+  let audioGeneration = 0;
+  let autoplayBlocked = false;
+  let gestureArmed = false;
+  let suppressSoundClick = false;
+  const audioCues = [];
 
   function inSeason(now = new Date()) {
     const month = now.getMonth();
@@ -1843,6 +2094,400 @@ body.hw-lock { overflow: hidden; }
     } catch {
       return false;
     }
+  }
+
+  function readMuted() {
+    try {
+      return localStorage.getItem(MUTE_KEY) === "1";
+    } catch {
+      return false;
+    }
+  }
+
+  function writeMuted(muted) {
+    try {
+      localStorage.setItem(MUTE_KEY, muted ? "1" : "0");
+    } catch {
+      /* Private mode still toggles for this visit. */
+    }
+  }
+
+  function reducedAudio() {
+    return root.classList.contains("hw-reduce");
+  }
+
+  function showsMuted() {
+    return readMuted() || autoplayBlocked;
+  }
+
+  function canHear() {
+    return Boolean(
+      audioCtx && masterGain && audioCtx.state === "running"
+      && !readMuted() && mode === "playing"
+    );
+  }
+
+  function syncSoundButton() {
+    if (!soundBtn) return;
+    const muted = showsMuted();
+    soundBtn.classList.toggle("is-muted", muted);
+    soundBtn.setAttribute("aria-pressed", muted ? "true" : "false");
+    soundBtn.setAttribute(
+      "aria-label",
+      muted ? "Unmute Halloween intro sound" : "Mute Halloween intro sound"
+    );
+    const label = soundBtn.querySelector(".hw-sound-label");
+    if (label) label.textContent = muted ? "Muted" : "Sound";
+  }
+
+  function envelope(time, at, duration) {
+    const unit = (time - at) / duration;
+    if (unit <= 0 || unit >= 1) return 0;
+    if (unit < 0.08) return unit / 0.08;
+    return (1 - (unit - 0.08) / 0.92) ** 2;
+  }
+
+  // Four-second D-minor drone. Partials complete an integer number of
+  // cycles so the loop does not click. Generated here; nothing is fetched.
+  function makeBed(context) {
+    const rate = context.sampleRate || 44100;
+    const seconds = 4;
+    const length = Math.max(1, Math.floor(rate * seconds));
+    const buffer = context.createBuffer(1, length, rate);
+    const data = buffer.getChannelData(0);
+    const partials = [
+      [73.5, 0.16],
+      [87.5, 0.07],
+      [110, 0.09],
+      [146.75, 0.04]
+    ];
+    let wind = 0;
+    for (let index = 0; index < length; index += 1) {
+      const time = index / rate;
+      let sample = 0;
+      for (const [freq, amp] of partials) {
+        sample += Math.sin(2 * Math.PI * freq * time) * amp;
+      }
+      const pulse = 0.86 + 0.14 * Math.sin((2 * Math.PI * time) / seconds);
+      wind += ((Math.random() * 2 - 1) - wind) * 0.02;
+      const motif = Math.sin(2 * Math.PI * 220 * time) * envelope(time, 0.4, 1.05) * 0.045
+        + Math.sin(2 * Math.PI * 174.61 * time) * envelope(time, 2.3, 1.05) * 0.035;
+      data[index] = sample * pulse + wind * 0.025 + motif;
+    }
+    return buffer;
+  }
+
+  function ensureAudio() {
+    if (audioCtx && audioCtx.state !== "closed") return audioCtx;
+    const Ctor = window.AudioContext || window.webkitAudioContext;
+    if (typeof Ctor !== "function") return null;
+    try {
+      audioCtx = new Ctor();
+      masterGain = audioCtx.createGain();
+      masterGain.gain.value = 0;
+      masterGain.connect(audioCtx.destination);
+    } catch {
+      audioCtx = null;
+      masterGain = null;
+      return null;
+    }
+    return audioCtx;
+  }
+
+  function startBed() {
+    if (bedSource || !audioCtx || !masterGain || readMuted() || mode !== "playing") return;
+    if (audioCtx.state === "closed") return;
+    let source;
+    try {
+      if (!bedBuffer) bedBuffer = makeBed(audioCtx);
+      source = audioCtx.createBufferSource();
+      source.buffer = bedBuffer;
+      source.loop = true;
+      bedGain = audioCtx.createGain();
+      bedGain.gain.value = reducedAudio() ? 0.34 : 0.46;
+      let node = source;
+      try {
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = "lowpass";
+        filter.frequency.value = 720;
+        source.connect(filter);
+        node = filter;
+      } catch {
+        node = source;
+      }
+      node.connect(bedGain);
+      bedGain.connect(masterGain);
+      source.start();
+    } catch {
+      bedSource = null;
+      bedGain = null;
+      return;
+    }
+    bedSource = source;
+  }
+
+  function openMaster() {
+    if (!audioCtx || !masterGain || audioCtx.state !== "running" || readMuted()) return;
+    try {
+      const now = audioCtx.currentTime || 0;
+      const target = reducedAudio() ? 0.62 : 0.85;
+      masterGain.gain.cancelScheduledValues(now);
+      masterGain.gain.setValueAtTime(masterGain.gain.value || 0, now);
+      masterGain.gain.linearRampToValueAtTime(target, now + 0.08);
+    } catch {
+      /* The bed can still be heard if the gain was already open. */
+    }
+  }
+
+  function silence() {
+    if (bedSource) {
+      try { bedSource.stop(); } catch { /* already stopped */ }
+      try { bedSource.disconnect(); } catch { /* ignore */ }
+    }
+    bedSource = null;
+    bedGain = null;
+    if (audioCtx && masterGain && audioCtx.state !== "closed") {
+      try {
+        const now = audioCtx.currentTime || 0;
+        masterGain.gain.cancelScheduledValues(now);
+        masterGain.gain.setValueAtTime(0, now);
+      } catch {
+        /* ignore */
+      }
+    }
+  }
+
+  function stopAudio() {
+    audioGeneration += 1;
+    autoplayBlocked = false;
+    disarmGesture();
+    silence();
+    bedBuffer = null;
+    const closing = audioCtx;
+    audioCtx = null;
+    masterGain = null;
+    if (closing && closing.state !== "closed" && typeof closing.close === "function") {
+      closing.close().catch(() => {});
+    }
+  }
+
+  function tone(frequency, duration, options = {}) {
+    const start = audioCtx.currentTime + (options.delay || 0);
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = options.type || "sine";
+    osc.frequency.setValueAtTime(frequency, start);
+    if (options.slide && options.slide !== frequency) {
+      osc.frequency.exponentialRampToValueAtTime(Math.max(1, options.slide), start + duration);
+    }
+    const level = Math.max(0.0001, options.gain || 0.05);
+    gain.gain.setValueAtTime(0.0001, start);
+    gain.gain.exponentialRampToValueAtTime(level, start + Math.min(0.03, duration / 3));
+    gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+    osc.connect(gain);
+    gain.connect(masterGain);
+    osc.start(start);
+    osc.stop(start + duration + 0.03);
+  }
+
+  function rustle(duration, frequency, level, delay = 0) {
+    const start = audioCtx.currentTime + delay;
+    const length = Math.max(1, Math.floor(audioCtx.sampleRate * duration));
+    const buffer = audioCtx.createBuffer(1, length, audioCtx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let index = 0; index < length; index += 1) {
+      const env = Math.sin((Math.PI * index) / length);
+      data[index] = (Math.random() * 2 - 1) * env;
+    }
+    const source = audioCtx.createBufferSource();
+    const filter = audioCtx.createBiquadFilter();
+    const gain = audioCtx.createGain();
+    source.buffer = buffer;
+    filter.type = "bandpass";
+    filter.frequency.setValueAtTime(frequency, start);
+    filter.Q.setValueAtTime(0.8, start);
+    gain.gain.setValueAtTime(0.0001, start);
+    gain.gain.exponentialRampToValueAtTime(Math.max(0.0001, level), start + Math.min(0.02, duration / 4));
+    gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+    source.connect(filter);
+    filter.connect(gain);
+    gain.connect(masterGain);
+    source.start(start);
+    source.stop(start + duration + 0.02);
+  }
+
+  function duckBed(duration) {
+    if (!bedGain || !audioCtx) return;
+    const now = audioCtx.currentTime || 0;
+    const base = reducedAudio() ? 0.34 : 0.46;
+    try {
+      bedGain.gain.cancelScheduledValues(now);
+      bedGain.gain.setValueAtTime(Math.max(0.0001, bedGain.gain.value || base), now);
+      bedGain.gain.linearRampToValueAtTime(base * 0.55, now + 0.04);
+      bedGain.gain.linearRampToValueAtTime(base, now + duration);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  function cardReveal() {
+    const soft = reducedAudio();
+    rustle(soft ? 0.12 : 0.18, 1500, soft ? 0.035 : 0.06);
+    tone(440, soft ? 0.26 : 0.34, { type: "sine", gain: soft ? 0.04 : 0.08, slide: 523.25 });
+    if (!soft) tone(659.25, 0.28, { type: "triangle", gain: 0.04, delay: 0.05 });
+  }
+
+  function batFlutter() {
+    rustle(0.055, 2100, 0.055, 0);
+    rustle(0.05, 2700, 0.045, 0.09);
+    rustle(0.045, 1800, 0.04, 0.17);
+    tone(784, 0.2, { type: "sine", gain: 0.028, slide: 392, delay: 0.02 });
+  }
+
+  function fireSfx(kind) {
+    if (!canHear() || audioCues.includes(kind)) return;
+    if (kind === "bats" && reducedAudio()) return;
+    audioCues.push(kind);
+    try {
+      if (kind === "card") {
+        duckBed(0.45);
+        cardReveal();
+      } else if (kind === "bats") {
+        duckBed(0.4);
+        batFlutter();
+      }
+    } catch {
+      /* A failed cue should not take the overlay down with it. */
+    }
+  }
+
+  function flushSfx() {
+    if (root.classList.contains("scene-bats")) fireSfx("bats");
+    else if (root.classList.contains("scene-scroll") || reducedAudio()) fireSfx("card");
+  }
+
+  function markBlocked() {
+    if (mode !== "playing" || readMuted()) return;
+    autoplayBlocked = true;
+    armGesture();
+    syncSoundButton();
+  }
+
+  function applyPlayback(generation) {
+    if (generation !== audioGeneration || mode !== "playing" || readMuted()) return;
+    if (!audioCtx || audioCtx.state !== "running") {
+      markBlocked();
+      return;
+    }
+    autoplayBlocked = false;
+    disarmGesture();
+    try {
+      startBed();
+      openMaster();
+      flushSfx();
+    } catch {
+      /* ignore */
+    }
+    syncSoundButton();
+  }
+
+  function beginPlayback() {
+    const generation = audioGeneration;
+    if (readMuted()) {
+      syncSoundButton();
+      return;
+    }
+    let context = null;
+    try { context = ensureAudio(); } catch { context = null; }
+    if (!context) {
+      if (generation === audioGeneration && mode === "playing") {
+        autoplayBlocked = true;
+        syncSoundButton();
+      }
+      return;
+    }
+    armGesture();
+    try { startBed(); } catch { /* resume may still unlock a later attempt */ }
+    let pending = null;
+    try { pending = context.resume(); } catch { pending = null; }
+    applyPlayback(generation);
+    if (pending && typeof pending.then === "function") {
+      pending.then(() => applyPlayback(generation)).catch(() => {
+        if (generation !== audioGeneration || mode !== "playing") return;
+        markBlocked();
+      });
+    }
+  }
+
+  function disarmGesture() {
+    if (!gestureArmed) return;
+    gestureArmed = false;
+    document.removeEventListener("pointerdown", onUnlockGesture, true);
+    document.removeEventListener("keydown", onUnlockGesture, true);
+  }
+
+  function armGesture() {
+    if (gestureArmed) return;
+    gestureArmed = true;
+    document.addEventListener("pointerdown", onUnlockGesture, true);
+    document.addEventListener("keydown", onUnlockGesture, true);
+  }
+
+  function onUnlockGesture(event) {
+    if (mode !== "playing") return;
+    const target = event.target;
+    if (soundBtn && target && soundBtn.contains(target)) return;
+    if (skipBtn && target && skipBtn.contains(target)) return;
+    if (readMuted()) {
+      try { ensureAudio()?.resume()?.catch(() => {}); } catch { /* ignore */ }
+      return;
+    }
+    const generation = audioGeneration;
+    let pending = null;
+    try { pending = ensureAudio()?.resume(); } catch { pending = null; }
+    applyPlayback(generation);
+    if (pending && typeof pending.then === "function") {
+      pending.then(() => applyPlayback(generation)).catch(() => {});
+    }
+  }
+
+  function toggleSound() {
+    if (mode !== "playing") return;
+    if (showsMuted()) {
+      writeMuted(false);
+      autoplayBlocked = false;
+      beginPlayback();
+    } else {
+      writeMuted(true);
+      autoplayBlocked = false;
+      silence();
+      disarmGesture();
+      syncSoundButton();
+    }
+  }
+
+  function onSoundPointer(event) {
+    if (mode !== "playing") return;
+    suppressSoundClick = true;
+    toggleSound();
+    if (event.type === "pointerdown") event.preventDefault();
+  }
+
+  function onSoundKey(event) {
+    if (mode !== "playing") return;
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    suppressSoundClick = true;
+    toggleSound();
+  }
+
+  function onSoundClick(event) {
+    if (suppressSoundClick) {
+      suppressSoundClick = false;
+      event.preventDefault();
+      return;
+    }
+    toggleSound();
   }
 
   function later(fn, ms) {
@@ -1907,14 +2552,16 @@ body.hw-lock { overflow: hidden; }
       });
     }
     if (name === "scroll") announceDef();
+    if (name === "scroll") fireSfx("card");
+    if (name === "bats") fireSfx("bats");
   }
 
-  function focusSkip() {
-    if (!skipBtn) return;
+  function focusControl(el) {
+    if (!el) return;
     try {
-      skipBtn.focus({ preventScroll: true });
+      el.focus({ preventScroll: true });
     } catch {
-      try { skipBtn.focus(); } catch { /* ignore */ }
+      try { el.focus(); } catch { /* ignore */ }
     }
   }
 
@@ -1922,6 +2569,7 @@ body.hw-lock { overflow: hidden; }
     if (mode !== "playing" || !root.isConnected) return;
     mode = "closing";
     clearTimers();
+    stopAudio();
     root.classList.add("scene-out");
     const delay = root.classList.contains("hw-reduce") ? 40 : 640;
     later(() => {
@@ -1938,11 +2586,14 @@ body.hw-lock { overflow: hidden; }
   function play() {
     if (!root.isConnected || mode === "playing") return;
     clearTimers();
+    stopAudio();
     mode = "playing";
+    audioCues.length = 0;
     const reduce = prefersReduced();
     buildGrid();
     if (defEl) delete defEl.dataset.announced;
     root.className = reduce ? "hw hw-reduce scene-scroll" : "hw scene-night";
+    syncSoundButton();
     root.hidden = false;
     document.body.classList.add("hw-lock");
     lockShell();
@@ -1951,7 +2602,8 @@ body.hw-lock { overflow: hidden; }
       for (const [name, at] of FULL) later(() => setScene(name), at);
     }
     later(() => finish(), reduce ? REDUCED_END : FULL_END);
-    focusSkip();
+    beginPlayback();
+    focusControl(skipBtn);
   }
 
   function replay() {
@@ -1961,6 +2613,7 @@ body.hw-lock { overflow: hidden; }
 
   function stop() {
     clearTimers();
+    stopAudio();
     mode = "idle";
     if (root.isConnected) {
       root.hidden = true;
@@ -1979,26 +2632,65 @@ body.hw-lock { overflow: hidden; }
       return;
     }
     if (event.key === "Tab") {
+      const controls = [soundBtn, skipBtn].filter(Boolean);
+      if (!controls.length) return;
       event.preventDefault();
       event.stopPropagation();
-      focusSkip();
+      const current = controls.indexOf(document.activeElement);
+      const delta = event.shiftKey ? -1 : 1;
+      const next = controls[(current + delta + controls.length) % controls.length];
+      focusControl(next);
     }
   }
 
   skipBtn?.addEventListener("click", () => finish());
+  soundBtn?.addEventListener("pointerdown", onSoundPointer);
+  soundBtn?.addEventListener("keydown", onSoundKey);
+  soundBtn?.addEventListener("click", onSoundClick);
   replayBtn?.addEventListener("click", () => replay());
   document.addEventListener("keydown", onKey, true);
+  window.addEventListener("pagehide", () => {
+    const during = mode === "playing";
+    stopAudio();
+    if (!during) return;
+    autoplayBlocked = true;
+    syncSoundButton();
+    armGesture();
+  });
 
   window.__HALLOWEEN_INTRO__ = {
     inSeason,
     openingChoice,
     replay,
     play,
-    stop
+    stop,
+    audioCues,
+    audioMuted: readMuted
   };
 
   syncReplay();
-  if (openingChoice() === "play") play();
+  // The homepage adds the stylesheet from script so it stays off the
+  // critical path. Wait for it before uncovering the overlay, or the
+  // scene would flash in normal flow. No link (tests, offline file)
+  // means the rules are already here.
+  const cssLink = document.querySelector("link[data-halloween-css]");
+  let sheetReady = false;
+  if (cssLink) {
+    try { sheetReady = Boolean(cssLink.sheet); }
+    catch { sheetReady = false; }
+  }
+  const cssPending = cssLink
+    && cssLink.getAttribute("data-halloween-css") !== "ready"
+    && !sheetReady;
+  const begin = () => {
+    if (openingChoice() === "play") play();
+  };
+  if (cssPending) {
+    cssLink.addEventListener("load", begin, { once: true });
+    cssLink.addEventListener("error", begin, { once: true });
+  } else {
+    begin();
+  }
 })();
 
 (() => {

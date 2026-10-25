@@ -27,7 +27,122 @@ function mockDate(window, y, m, d) {
   window.Date = D;
 }
 
-function boot({ url = "http://127.0.0.1:4173/", date = [2026, 9, 30], seen = false, seenKey = "", reduce = false } = {}) {
+function installAudio(window, mode) {
+  const events = [];
+  const buffers = [];
+  const gains = [];
+  let constructed = 0;
+  window.__halloweenAudio = {
+    events,
+    buffers,
+    gains,
+    constructed: () => constructed
+  };
+  if (mode === "missing") {
+    window.AudioContext = undefined;
+    window.webkitAudioContext = undefined;
+    return;
+  }
+  class AudioParam {
+    constructor() { this.value = 0; this.attack = null; }
+    setValueAtTime(value) {
+      if (this.attack == null) this.attack = value;
+      this.value = value;
+      return this;
+    }
+    linearRampToValueAtTime(value) { this.value = value; return this; }
+    exponentialRampToValueAtTime(value) { this.value = value; return this; }
+    cancelScheduledValues() { return this; }
+  }
+  class Node {
+    connect() { return this; }
+    disconnect() { return this; }
+  }
+  class Osc extends Node {
+    constructor() {
+      super();
+      this.frequency = new AudioParam();
+      this.type = "sine";
+    }
+    start() { events.push({ kind: "osc", frequency: this.frequency.attack ?? this.frequency.value, type: this.type }); }
+    stop() { events.push({ kind: "osc-stop" }); }
+  }
+  class Gain extends Node {
+    constructor() {
+      super();
+      this.gain = new AudioParam();
+    }
+  }
+  class Filter extends Node {
+    constructor() {
+      super();
+      this.frequency = new AudioParam();
+      this.Q = new AudioParam();
+      this.type = "lowpass";
+    }
+  }
+  class BufferSource extends Node {
+    constructor() {
+      super();
+      this.loop = false;
+      this.buffer = null;
+    }
+    start() { events.push({ kind: this.loop ? "bed" : "noise", loop: this.loop }); }
+    stop() { events.push({ kind: this.loop ? "bed-stop" : "noise-stop" }); }
+  }
+  class AudioContext {
+    constructor() {
+      constructed += 1;
+      this.currentTime = 0;
+      this.sampleRate = 8000;
+      this.state = mode === "blocked" ? "suspended" : "running";
+      this.destination = new Node();
+      this.resumeCalls = 0;
+    }
+    resume() {
+      this.resumeCalls += 1;
+      if (!(mode === "blocked" && this.resumeCalls === 1)) this.state = "running";
+      events.push({ kind: "resume", call: this.resumeCalls, state: this.state });
+      return Promise.resolve();
+    }
+    close() {
+      this.state = "closed";
+      events.push({ kind: "close" });
+      return Promise.resolve();
+    }
+    createOscillator() { return new Osc(); }
+    createGain() {
+      const node = new Gain();
+      gains.push(node);
+      return node;
+    }
+    createBiquadFilter() { return new Filter(); }
+    createBufferSource() { return new BufferSource(); }
+    createBuffer(_channels, length, rate) {
+      const data = new Float32Array(length);
+      const buffer = {
+        getChannelData: () => data,
+        length,
+        sampleRate: rate,
+        duration: length / rate
+      };
+      buffers.push(buffer);
+      return buffer;
+    }
+  }
+  window.AudioContext = AudioContext;
+  window.webkitAudioContext = AudioContext;
+}
+
+function boot({
+  url = "http://127.0.0.1:4173/",
+  date = [2026, 9, 30],
+  seen = false,
+  seenKey = "",
+  reduce = false,
+  audio = "running",
+  muted = null
+} = {}) {
   const window = new Window({ url });
   mockDate(window, ...date);
   if (reduce) {
@@ -43,7 +158,9 @@ function boot({ url = "http://127.0.0.1:4173/", date = [2026, 9, 30], seen = fal
   }
   window.document.write(page);
   window.document.close();
+  installAudio(window, audio);
   if (seen) window.localStorage.setItem(seenKey || `dd-halloween-intro-${date[0]}`, "seen");
+  if (muted != null) window.localStorage.setItem("dd-halloween-audio-muted", muted);
   window.eval(intro);
   return window;
 }
@@ -171,7 +288,7 @@ test("skip and Escape close this visit, and the next load still plays", async ()
   again.document.dispatchEvent(new again.KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
   await sleep(700);
   assert.equal(again.document.getElementById("halloweenIntro").hidden, true);
-  assert.equal(again.localStorage.getItem("dd-halloween-intro-2026"), "seen");
+  assert.equal(again.localStorage.getItem("dd-halloween-intro-2026"), "seen", "a leftover flag is ignored, not rewritten");
   again.close();
 });
 
@@ -187,6 +304,11 @@ test("reduced motion opens on the readable definition and dismisses quickly", as
   await sleep(1800);
   assert.equal(overlay.hidden, true);
   assert.equal(window.localStorage.getItem("dd-halloween-intro-2026"), null);
+  assert.ok(window.__HALLOWEEN_INTRO__.audioCues.includes("card"), "reduced motion still plays the card chime");
+  assert.equal(window.__HALLOWEEN_INTRO__.audioCues.includes("bats"), false);
+  const frequencies = window.__halloweenAudio.events.filter(event => event.kind === "osc").map(event => event.frequency);
+  assert.ok(frequencies.includes(440));
+  assert.equal(frequencies.includes(784), false, "the bat chirp stays out of reduced motion");
   window.close();
 });
 
@@ -219,4 +341,157 @@ test("query flags and the calendar gate the homepage without touching other page
   assert.equal(nextYear.document.getElementById("halloweenIntro").hidden, false, "in season plays even with a leftover flag");
   nextYear.__HALLOWEEN_INTRO__.stop();
   nextYear.close();
+});
+
+test("intro audio is synthesized, gated with the overlay, and remembered when muted", async () => {
+  const game = fs.readFileSync(path.join(root, "app.js"), "utf8");
+  assert.match(html, /id="halloweenSound"/);
+  assert.match(intro, /dd-halloween-audio-muted/);
+  assert.match(intro, /Original Web Audio synthesis|original Web Audio synthesis/);
+  assert.doesNotMatch(intro, /\.mp3|\.ogg|\.wav|youtube|createElement\("audio"\)/i);
+  assert.doesNotMatch(game, /dd-halloween-audio-muted/);
+  assert.doesNotMatch(html, /<audio|\.mp3|\.wav|\.ogg/i);
+
+  const playing = boot();
+  const sound = playing.document.getElementById("halloweenSound");
+  assert.equal(sound.classList.contains("is-muted"), false);
+  assert.equal(sound.getAttribute("aria-pressed"), "false");
+  assert.equal(sound.getAttribute("aria-label"), "Mute Halloween intro sound");
+  assert.equal(playing.localStorage.getItem("dd-halloween-audio-muted"), null);
+  assert.equal(playing.__halloweenAudio.constructed(), 1);
+  assert.ok(playing.__halloweenAudio.events.some(event => event.kind === "bed"));
+  const bed = playing.__halloweenAudio.buffers.find(buffer => buffer.length === 8000 * 4);
+  assert.ok(bed, "ambient bed is a 4s generated buffer");
+  let peak = 0;
+  for (const sample of bed.getChannelData()) peak = Math.max(peak, Math.abs(sample));
+  assert.ok(peak > 0.08 && peak < 0.9, `bed peak ${peak} stays audible and below clipping`);
+  assert.ok(playing.__halloweenAudio.gains[0].gain.value > 0.5, "master opens when autoplay is allowed");
+
+  sound.click();
+  assert.equal(playing.localStorage.getItem("dd-halloween-audio-muted"), "1");
+  assert.equal(sound.classList.contains("is-muted"), true);
+  assert.equal(sound.querySelector(".hw-sound-label").textContent, "Muted");
+  assert.equal(sound.getAttribute("aria-label"), "Unmute Halloween intro sound");
+  assert.ok(playing.__halloweenAudio.events.some(event => event.kind === "bed-stop"));
+  assert.equal(playing.__halloweenAudio.gains[0].gain.value, 0);
+
+  playing.document.getElementById("halloweenSkip").click();
+  assert.ok(playing.__halloweenAudio.events.some(event => event.kind === "close"));
+  const bedsAfterSkip = playing.__halloweenAudio.events.filter(event => event.kind === "bed").length;
+  await sleep(7500);
+  assert.equal(playing.document.getElementById("halloweenIntro").hidden, true);
+  assert.equal(playing.__HALLOWEEN_INTRO__.audioCues.includes("bats"), false, "skip cancels cues that have not played");
+  assert.equal(playing.__halloweenAudio.events.filter(event => event.kind === "bed").length, bedsAfterSkip);
+  playing.close();
+
+  const remembered = boot({ muted: "1" });
+  assert.equal(remembered.document.getElementById("halloweenIntro").hidden, false);
+  assert.equal(remembered.document.getElementById("halloweenSound").classList.contains("is-muted"), true);
+  assert.equal(remembered.__halloweenAudio.constructed(), 0, "a remembered mute does not start a context");
+  assert.equal(remembered.__HALLOWEEN_INTRO__.audioMuted(), true);
+  remembered.document.getElementById("halloweenSound").click();
+  assert.equal(remembered.localStorage.getItem("dd-halloween-audio-muted"), "0");
+  assert.equal(remembered.document.getElementById("halloweenSound").classList.contains("is-muted"), false);
+  assert.ok(remembered.__halloweenAudio.events.some(event => event.kind === "bed"));
+  remembered.__HALLOWEEN_INTRO__.stop();
+  remembered.close();
+
+  const replayMute = boot({ muted: "1" });
+  replayMute.document.getElementById("halloweenSkip").click();
+  await sleep(700);
+  replayMute.document.getElementById("halloweenReplay").click();
+  assert.equal(replayMute.document.getElementById("halloweenSound").classList.contains("is-muted"), true);
+  assert.equal(replayMute.__halloweenAudio.constructed(), 0, "replay keeps a remembered mute");
+  replayMute.close();
+
+  const off = boot({ url: "http://127.0.0.1:4173/?halloween=0", date: [2026, 9, 31] });
+  assert.equal(off.document.getElementById("halloweenIntro").hidden, true);
+  assert.equal(off.__halloweenAudio.constructed(), 0);
+  off.close();
+
+  const seen = boot({ seen: true });
+  assert.equal(seen.document.getElementById("halloweenIntro").hidden, false, "a leftover seen flag does not skip the season");
+  assert.equal(seen.__halloweenAudio.constructed(), 1, "in-season audio still starts with a leftover seen flag");
+  seen.__HALLOWEEN_INTRO__.stop();
+  seen.close();
+});
+
+test("blocked autoplay shows muted until a gesture, including reduced motion", async () => {
+  const blocked = boot({ audio: "blocked" });
+  await sleep(0);
+  const sound = blocked.document.getElementById("halloweenSound");
+  assert.equal(sound.classList.contains("is-muted"), true);
+  assert.equal(sound.getAttribute("aria-pressed"), "true");
+  assert.equal(blocked.localStorage.getItem("dd-halloween-audio-muted"), null, "autoplay failure is not stored as a mute");
+  assert.equal(blocked.__halloweenAudio.gains[0].gain.value, 0, "master stays closed while the context is suspended");
+  assert.equal(blocked.__halloweenAudio.events.at(-1).state, "suspended");
+
+  blocked.document.querySelector(".hw-stage").dispatchEvent(
+    new blocked.PointerEvent("pointerdown", { bubbles: true, cancelable: true })
+  );
+  await sleep(0);
+  assert.equal(sound.classList.contains("is-muted"), false);
+  assert.equal(blocked.__halloweenAudio.events.some(event => event.kind === "resume" && event.state === "running"), true);
+  assert.ok(blocked.__halloweenAudio.gains[0].gain.value > 0.5);
+  blocked.document.getElementById("halloweenSkip").click();
+  assert.ok(blocked.__halloweenAudio.events.some(event => event.kind === "close"), "skip still stops audio");
+  blocked.close();
+
+  const quiet = boot({ audio: "blocked", reduce: true });
+  await sleep(0);
+  assert.equal(quiet.__HALLOWEEN_INTRO__.audioCues.includes("card"), false, "the chime waits until audio can actually play");
+  quiet.document.querySelector(".hw-brand").dispatchEvent(
+    new quiet.PointerEvent("pointerdown", { bubbles: true, cancelable: true })
+  );
+  await sleep(0);
+  assert.ok(quiet.__HALLOWEEN_INTRO__.audioCues.includes("card"));
+  assert.equal(quiet.__HALLOWEEN_INTRO__.audioCues.includes("bats"), false);
+  quiet.__HALLOWEEN_INTRO__.stop();
+  quiet.close();
+
+  const gone = boot();
+  gone.dispatchEvent(new gone.Event("pagehide"));
+  assert.ok(gone.__halloweenAudio.events.some(event => event.kind === "close"));
+  assert.equal(gone.__halloweenAudio.gains[0].gain.value, 0);
+  assert.equal(gone.document.getElementById("halloweenSound").classList.contains("is-muted"), true);
+  gone.document.querySelector(".hw-stage").dispatchEvent(
+    new gone.PointerEvent("pointerdown", { bubbles: true, cancelable: true })
+  );
+  await sleep(0);
+  assert.equal(gone.document.getElementById("halloweenSound").classList.contains("is-muted"), false, "a later gesture can start audio again");
+  assert.ok(gone.__halloweenAudio.events.filter(event => event.kind === "bed").length >= 2);
+  gone.close();
+
+  const toggled = boot();
+  const toggle = toggled.document.getElementById("halloweenSound");
+  toggle.dispatchEvent(new toggled.PointerEvent("pointerdown", { bubbles: true, cancelable: true }));
+  toggle.click();
+  assert.equal(toggled.localStorage.getItem("dd-halloween-audio-muted"), "1");
+  assert.equal(toggle.classList.contains("is-muted"), true, "pointerdown and the click that follows it mute once");
+  toggled.__HALLOWEEN_INTRO__.stop();
+  toggled.close();
+
+  const missing = boot({ audio: "missing" });
+  assert.equal(missing.document.getElementById("halloweenIntro").hidden, false);
+  assert.equal(missing.document.getElementById("halloweenSound").classList.contains("is-muted"), true);
+  missing.document.getElementById("halloweenSound").click();
+  assert.equal(missing.document.getElementById("halloweenIntro").hidden, false);
+  missing.document.getElementById("halloweenSkip").click();
+  await sleep(700);
+  assert.equal(missing.document.getElementById("halloweenIntro").hidden, true);
+  missing.close();
+});
+
+test("card and bat cues follow the intro beats", { timeout: 20_000 }, async () => {
+  const window = boot();
+  await sleep(4500);
+  assert.ok(window.__HALLOWEEN_INTRO__.audioCues.includes("card"));
+  assert.equal(window.__HALLOWEEN_INTRO__.audioCues.includes("bats"), false);
+  assert.ok(window.__halloweenAudio.events.some(event => event.kind === "osc" && event.frequency === 440));
+  await sleep(3500);
+  assert.ok(window.__HALLOWEEN_INTRO__.audioCues.includes("bats"));
+  assert.ok(window.__halloweenAudio.events.some(event => event.kind === "osc" && event.frequency === 784));
+  window.__HALLOWEEN_INTRO__.stop();
+  assert.ok(window.__halloweenAudio.events.some(event => event.kind === "close"));
+  window.close();
 });

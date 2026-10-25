@@ -282,26 +282,46 @@
 
 .hw.scene-out { opacity: 0; }
 
-.hw-skip {
+.hw-skip,
+.hw-sound {
   position: absolute;
   z-index: 6;
   top: calc(12px + env(safe-area-inset-top));
-  right: calc(12px + env(safe-area-inset-right));
   min-width: 44px;
   min-height: 44px;
   padding: 10px 16px;
   color: #f3e2bc;
-  background: rgba(12, 8, 10, 0.55);
+  background: rgba(12, 8, 10, 0.72);
   border: 1px solid rgba(216, 166, 58, 0.75);
   font: 700 12px/1 Arial, Helvetica, sans-serif;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   cursor: pointer;
+  touch-action: manipulation;
 }
 
+.hw-skip { right: calc(12px + env(safe-area-inset-right)); }
+
+.hw-sound {
+  left: calc(12px + env(safe-area-inset-left));
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hw-sound-icon { width: 18px; height: 18px; display: block; flex: none; }
+.hw-sound-label { min-width: 4.8em; text-align: left; }
+.hw-sound-slash { opacity: 0; }
+.hw-sound.is-muted { color: #cbb89a; border-color: rgba(216, 166, 58, 0.45); }
+.hw-sound.is-muted .hw-sound-wave { opacity: 0; }
+.hw-sound.is-muted .hw-sound-slash { opacity: 1; }
+
 .hw-skip:hover,
-.hw-skip:focus-visible { color: #fff6df; border-color: #ffe09a; background: rgba(40, 22, 12, 0.78); }
-.hw-skip:focus-visible { outline: 3px solid #ffe09a; outline-offset: 3px; }
+.hw-skip:focus-visible,
+.hw-sound:hover,
+.hw-sound:focus-visible { color: #fff6df; border-color: #ffe09a; background: rgba(40, 22, 12, 0.78); }
+.hw-skip:focus-visible,
+.hw-sound:focus-visible { outline: 3px solid #ffe09a; outline-offset: 3px; }
 
 #halloweenReplay { letter-spacing: 0.12em; }
 
@@ -387,7 +407,8 @@ body.hw-lock { overflow: hidden; }
     -webkit-text-fill-color: CanvasText;
   }
   .hw-scroll,
-  .hw-skip { background: Canvas; color: CanvasText; border-color: CanvasText; }
+  .hw-skip,
+  .hw-sound { background: Canvas; color: CanvasText; border-color: CanvasText; }
   .hw-def,
   .hw-word,
   .hw-slogan,
