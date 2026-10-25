@@ -109,8 +109,7 @@ test("homepage fetches Halloween css and js only inside the season, or when forc
 
 test("season window is 24 October through 2 November, local time", () => {
   const window = boot();
-  const { inSeason, openingChoice, storageKey } = window.__HALLOWEEN_INTRO__;
-  assert.equal(storageKey(new window.Date(2026, 9, 30)), "dd-halloween-intro-2026");
+  const { inSeason, openingChoice } = window.__HALLOWEEN_INTRO__;
   assert.equal(inSeason(new window.Date(2026, 9, 23)), false);
   assert.equal(inSeason(new window.Date(2026, 9, 24)), true);
   assert.equal(inSeason(new window.Date(2026, 9, 31)), true);
@@ -118,7 +117,10 @@ test("season window is 24 October through 2 November, local time", () => {
   assert.equal(inSeason(new window.Date(2026, 10, 2)), true);
   assert.equal(inSeason(new window.Date(2026, 10, 3)), false);
   assert.equal(inSeason(new window.Date(2026, 6, 4)), false);
+  window.localStorage.setItem("dd-halloween-intro-2026", "seen");
   assert.equal(openingChoice(new window.Date(2026, 9, 23)), "off");
+  assert.equal(openingChoice(new window.Date(2026, 9, 31)), "play");
+  assert.equal(openingChoice(new window.Date(2026, 10, 2)), "play");
   assert.equal(openingChoice(new window.Date(2026, 10, 3)), "off");
   window.__HALLOWEEN_INTRO__.stop();
   window.close();
@@ -148,21 +150,22 @@ test("first visit in season plays the intro and lights a real DESTINY row", () =
   window.close();
 });
 
-test("skip and Escape remember the visit for the rest of the year", async () => {
+test("skip and Escape close this visit, and the next load still plays", async () => {
   const window = boot();
   window.document.getElementById("halloweenSkip").click();
   await sleep(80);
   assert.equal(window.document.getElementById("halloweenIntro").hidden, false, "full-motion fade is still on screen");
   await sleep(700);
   assert.equal(window.document.getElementById("halloweenIntro").hidden, true);
-  assert.equal(window.localStorage.getItem("dd-halloween-intro-2026"), "seen");
+  assert.equal(window.localStorage.getItem("dd-halloween-intro-2026"), null);
   assert.equal(window.document.body.classList.contains("hw-lock"), false);
   assert.equal(window.document.querySelector(".shell").inert, false);
   window.close();
 
   const again = boot({ seen: true });
-  assert.equal(again.document.getElementById("halloweenIntro").hidden, true);
-  assert.equal(again.__HALLOWEEN_INTRO__.openingChoice(new again.Date(2026, 9, 31)), "seen");
+  assert.equal(again.document.getElementById("halloweenIntro").hidden, false, "a leftover seen flag does not skip the season");
+  assert.equal(again.__HALLOWEEN_INTRO__.openingChoice(new again.Date(2026, 9, 31)), "play");
+  again.__HALLOWEEN_INTRO__.stop();
   again.document.getElementById("halloweenReplay").click();
   assert.equal(again.document.getElementById("halloweenIntro").hidden, false);
   again.document.dispatchEvent(new again.KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
@@ -183,20 +186,22 @@ test("reduced motion opens on the readable definition and dismisses quickly", as
   assert.equal(overlay.hidden, false, "the card stays long enough to read");
   await sleep(1800);
   assert.equal(overlay.hidden, true);
-  assert.equal(window.localStorage.getItem("dd-halloween-intro-2026"), "seen");
+  assert.equal(window.localStorage.getItem("dd-halloween-intro-2026"), null);
   window.close();
 });
 
 test("query flags and the calendar gate the homepage without touching other pages", () => {
-  const off = boot({ url: "http://127.0.0.1:4173/?halloween=0", date: [2026, 9, 31] });
+  const off = boot({ url: "http://127.0.0.1:4173/?halloween=0", date: [2026, 9, 31], seen: true });
   assert.equal(off.document.getElementById("halloweenIntro").hidden, true);
   assert.equal(off.document.getElementById("halloweenReplay").hidden, true);
   assert.equal(off.document.body.classList.contains("hw-lock"), false);
+  assert.equal(off.__HALLOWEEN_INTRO__.openingChoice(), "off");
   off.close();
 
   const summer = boot({ date: [2026, 6, 4] });
   assert.equal(summer.document.getElementById("halloweenIntro").hidden, true);
   assert.equal(summer.document.getElementById("halloweenReplay").hidden, true);
+  assert.equal(summer.__HALLOWEEN_INTRO__.openingChoice(), "off");
   summer.close();
 
   const forced = boot({
@@ -211,7 +216,7 @@ test("query flags and the calendar gate the homepage without touching other page
 
   const nextYear = boot({ date: [2027, 9, 30], seen: true, seenKey: "dd-halloween-intro-2026" });
   assert.equal(nextYear.localStorage.getItem("dd-halloween-intro-2026"), "seen");
-  assert.equal(nextYear.document.getElementById("halloweenIntro").hidden, false, "a new year plays again");
+  assert.equal(nextYear.document.getElementById("halloweenIntro").hidden, false, "in season plays even with a leftover flag");
   nextYear.__HALLOWEEN_INTRO__.stop();
   nextYear.close();
 });
