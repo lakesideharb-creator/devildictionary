@@ -1120,6 +1120,7 @@
 
   function completeEntry() {
     const previousCoins = Math.floor(save.completed.length / 5);
+    const previousTier = getStage().tier;
     const isNew = !save.completed.includes(round.entry.word);
     if (isNew) save.completed.push(round.entry.word);
     save.order.push(round.entry.word);
@@ -1127,7 +1128,9 @@
     const currentCoins = Math.floor(save.completed.length / 5);
     persist();
     updateHUD();
-    window.ddTrack?.("Word complete", { word: round.entry.word, tier: round.entry.tier, fresh: isNew });
+    window.ddTrack?.("Word complete", { word: round.entry.word, tier: round.entry.tier, fresh: isNew, completed: save.completed.length });
+    const stage = getStage();
+    if (stage.tier > previousTier) window.ddTrack?.("Stage reached", { stage: stage.tier, completed: save.completed.length });
     return { isNew, previousCoins, currentCoins };
   }
 

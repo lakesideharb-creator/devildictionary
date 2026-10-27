@@ -142,7 +142,40 @@ test("a buy link is not a Meta Purchase and stays a PostHog Purchase CTA", () =>
   assert.equal(calls(window).some(entry => entry[1] === "Purchase"), false);
   const queued = captures(window);
   assert.equal(queued.length, 1);
-  assert.deepEqual(queued[0], ["capture", "Purchase CTA", { place: "checkout" }]);
+  assert.deepEqual(queued[0], ["capture", "Purchase CTA", { place: "checkout", product: "prod_example", page: "/" }]);
+  window.happyDOM.close();
+});
+
+test("checkout clicks name the product and price, and shop opens keep their place", () => {
+  const window = boot("https://devildictionary.com/print-play");
+  window.document.body.innerHTML = `
+    <div class="shop-banner"><a href="/print-play" data-shop-open>Get Printable Cards</a></div>
+    <div class="shop-mobile"><a href="/print-play" data-shop-open>Get Printable Cards</a></div>
+    <a class="shop-buy" href="https://www.creem.io/payment/prod_XEhxj6wfeIfoNzHcvuVxR">Adult</a>
+    <a href="https://www.creem.io/payment/prod_5x9nABognL3Zp8viH8hiCS">Family</a>
+    <a class="shop-buy" href="https://www.creem.io/payment/prod_GdeLw30T7sPq6MO1UQdsG">Bundle</a>`;
+  for (const link of window.document.querySelectorAll("a")) {
+    link.addEventListener("click", event => event.preventDefault());
+    link.dispatchEvent(new window.MouseEvent("click", { bubbles: true, cancelable: true }));
+  }
+  assert.deepEqual(captures(window), [
+    ["capture", "Purchase CTA", { place: "banner" }],
+    ["capture", "Purchase CTA", { place: "mobile" }],
+    ["capture", "Purchase CTA", { place: "checkout", product: "adult", price: 2.99, page: "/print-play" }],
+    ["capture", "Purchase CTA", { place: "checkout", product: "family", price: 2.99, page: "/print-play" }],
+    ["capture", "Purchase CTA", { place: "checkout", product: "bundle", price: 4.99, page: "/print-play" }]
+  ]);
+  assert.equal(calls(window).some(entry => entry[1] === "Purchase"), false);
+  window.happyDOM.close();
+});
+
+test("a stage unlock reaches Vercel and PostHog as Stage reached", () => {
+  const window = boot("https://devildictionary.com/");
+  window.ddTrack("Stage reached", { stage: 2, completed: 25 });
+  assert.deepEqual(captures(window).at(-1), ["capture", "Stage reached", { stage: 2, completed: 25 }]);
+  const vercel = [...window.vaq].map(entry => Array.from(entry));
+  assert.equal(vercel.at(-1)[1].name, "Stage reached");
+  assert.equal(vercel.at(-1)[1].data.stage, 2);
   window.happyDOM.close();
 });
 
