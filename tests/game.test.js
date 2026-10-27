@@ -95,6 +95,27 @@ test("legal pages sell paper and PDFs, never access to the game", () => {
   }
 });
 
+test("the board hides tile numbers and keeps social icons below the first click", () => {
+  const masthead = html.slice(html.indexOf('<header class="masthead">'), html.indexOf("</header>"));
+  assert.doesNotMatch(masthead, /social-links/);
+  assert.match(html, /social-links-footer/);
+  assert.match(html, /social-links-modal/);
+  assert.match(html, /class="afterword"/);
+  assert.match(js, /data-index="\$\{String\(index \+ 1\)\.padStart\(2, "0"\)\}"/);
+  assert.match(css, /\.letter::after\s*\{[^}]*clip:\s*rect\(0,\s*0,\s*0,\s*0\)/);
+  assert.match(css, /content:\s*attr\(data-index\)/);
+});
+
+test("shop notes reuse the print and paperback links and stay off the free words", () => {
+  assert.match(html, /id="shopNudge"/);
+  assert.match(html, /data-shop-open/);
+  assert.match(html, /data-house-target="B0HLN1S6V6"/);
+  assert.match(js, /shop_nudge_shown/);
+  assert.match(js, /dd-shop-nudge-dismissed/);
+  assert.match(js, /if \(Native\.isNative \|\| !els\.shopNudge/);
+  assert.doesNotMatch(js, /FREE_LIMIT|openPaywall|hasFullAccess/);
+});
+
 test("mechanical sound system is synthesized without external audio files", () => {
   assert.match(js, /function createSoundEngine/);
   assert.match(js, /window\.AudioContext \|\| window\.webkitAudioContext/);

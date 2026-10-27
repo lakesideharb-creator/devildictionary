@@ -333,6 +333,7 @@
     "newEntryBadge", "modalProgress", "nextButton", "coinCelebration", "coinMilestone", "stageCurtain",
     "curtainSigil", "curtainKicker", "curtainName", "curtainNote",
     "toast", "coinVault", "soundToggle", "resetButton", "gestureNote", "saveCardButton", "shareWordButton", "copyWordButton",
+    "shopNudge", "shopNudgeKicker", "shopNudgeCopy", "shopNudgeClose",
     "emberLayer", "wordTriumph", "wordTriumphText", "triumphBurst"
   ].map(id => [id, document.getElementById(id)]));
 
@@ -1152,6 +1153,7 @@
       : "BIND IT IN · NEXT WORD";
     els.newEntryBadge.textContent = isNew ? "NEW ENTRY" : "REVISITED";
     els.modalProgress.textContent = `${save.completed.length} / ${ENTRIES.length} COLLECTED`;
+    if (isNew && save.completed.length === ENTRIES.length) showShopNudge("complete");
     openModal(els.nextButton);
   }
 
@@ -1229,6 +1231,8 @@
     const result = completeEntry();
     els.newEntryBadge.textContent = result.isNew ? "VERDICT SEALED" : "REVISITED";
     els.modalProgress.textContent = `${save.completed.length} / ${ENTRIES.length} COLLECTED`;
+    if (result.isNew && save.completed.length === ENTRIES.length) showShopNudge("complete");
+    else showShopNudge("verdict");
     els.nextButton.hidden = false;
     window.setTimeout(() => els.nextButton.focus(), 420);
     if (result.currentCoins > result.previousCoins) {
@@ -1263,7 +1267,99 @@
     window.setTimeout(() => focusTarget?.focus(), 480);
   }
 
+  const NUDGE_KEY = "dd-shop-nudge-dismissed";
+  const nudgeShown = new Set();
+  const STAGE_NOTES = {
+    2: {
+      kicker: "Stage II is open",
+      copy: "The dictionary has stopped trusting you. A Print & Play deck puts these words on the table."
+    },
+    3: {
+      kicker: "Stage III is open",
+      copy: "You kept turning the page. The same words start a worse conversation once they are a deck on the table."
+    },
+    4: {
+      kicker: "Stage IV is open",
+      copy: "The pen is yours. A Print & Play deck lets someone across the table hold it."
+    }
+  };
+
+  function nudgeDismissed(moment) {
+    try {
+      const list = JSON.parse(sessionStorage.getItem(NUDGE_KEY) || "[]");
+      return Array.isArray(list) && list.includes(moment);
+    } catch {
+      return false;
+    }
+  }
+
+  function rememberNudgeDismiss(moment) {
+    try {
+      const list = JSON.parse(sessionStorage.getItem(NUDGE_KEY) || "[]");
+      const next = Array.isArray(list) ? list : [];
+      if (!next.includes(moment)) next.push(moment);
+      sessionStorage.setItem(NUDGE_KEY, JSON.stringify(next));
+    } catch {
+      // Private mode can refuse sessionStorage. The in-memory set still hides it.
+    }
+  }
+
+  function dismissShopNudge() {
+    if (!els.shopNudge) return;
+    const moment = els.shopNudge.dataset.moment;
+    if (moment) {
+      nudgeShown.add(moment);
+      rememberNudgeDismiss(moment);
+    }
+    els.shopNudge.hidden = true;
+  }
+
+  // Shown once on this page. A dismiss lasts for the tab session, per moment.
+  // Stage II, III, and IV each get their own note. The verdict note is not repeated on every trial.
+  function showShopNudge(moment, stageTier) {
+    const key = moment === "stage" ? `stage-${stageTier}` : moment;
+    if (Native.isNative || !els.shopNudge || nudgeShown.has(key) || nudgeDismissed(key)) return;
+    const note = moment === "stage" ? STAGE_NOTES[stageTier] : null;
+    if (moment === "stage" && !note) return;
+    const printLink = els.shopNudge.querySelector(".shop-nudge-print");
+    const bookLink = els.shopNudge.querySelector(".shop-nudge-book");
+    const home = document.getElementById("shopNudgeHome");
+    const share = document.querySelector("#definitionReveal .share-actions");
+    if (moment === "stage") {
+      els.shopNudgeKicker.textContent = note.kicker;
+      els.shopNudgeCopy.textContent = note.copy;
+      if (bookLink) bookLink.hidden = true;
+      home?.append(els.shopNudge);
+    } else if (moment === "verdict") {
+      els.shopNudgeKicker.textContent = "After the verdict";
+      els.shopNudgeCopy.textContent = "You found the uncomfortable one. A Print & Play deck deals that same trial across a table.";
+      if (bookLink) bookLink.hidden = true;
+      share?.before(els.shopNudge);
+    } else if (moment === "complete") {
+      els.shopNudgeKicker.textContent = "You’ve read the whole dictionary";
+      els.shopNudgeCopy.textContent = "One hundred words, still free. The paperback keeps them. Print & Play brings them to the table.";
+      if (bookLink) bookLink.hidden = false;
+      share?.before(els.shopNudge);
+    } else return;
+    els.shopNudge.dataset.moment = key;
+    for (const link of els.shopNudge.querySelectorAll("[data-shop-nudge]")) link.dataset.shopNudge = moment;
+    els.shopNudge.hidden = false;
+    nudgeShown.add(key);
+    const payload = { moment };
+    if (stageTier) payload.stage = stageTier;
+    window.ddTrack?.("shop_nudge_shown", payload);
+  }
+
+  function parkShopNudge() {
+    if (!els.shopNudge) return;
+    const moment = els.shopNudge.dataset.moment;
+    if (moment !== "verdict" && moment !== "complete") return;
+    els.shopNudge.hidden = true;
+    document.getElementById("shopNudgeHome")?.append(els.shopNudge);
+  }
+
   function nextRound() {
+    parkShopNudge();
     document.querySelector(".shell").inert = false;
     const enteredTier = getStage().tier;
     const curtain = round.entry.tier < enteredTier ? STAGE_CURTAINS[enteredTier] : null;
@@ -1284,6 +1380,7 @@
         els.stageCurtain.classList.remove("show");
         els.stageCurtain.setAttribute("aria-hidden", "true");
         makeBoard(next);
+        showShopNudge("stage", enteredTier);
       }, 2350);
       return;
     }
@@ -1931,6 +2028,7 @@
     els.coinVault.addEventListener("click", () => { sound.coinTap(); showToast("Every 5 different entries completed resets the count and mints one more coin."); });
     els.soundToggle.addEventListener("click", toggleSound);
     els.resetButton.addEventListener("click", resetProgress);
+    els.shopNudgeClose?.addEventListener("click", dismissShopNudge);
     window.addEventListener("resize", () => requestAnimationFrame(() => {
       measureBoard();
       drawPath(selection, false);
