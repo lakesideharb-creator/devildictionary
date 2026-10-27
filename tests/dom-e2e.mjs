@@ -41,6 +41,9 @@ function boot(storage, options = {}) {
   }
   window.AudioContext = AudioContext;
   window.__audioEvents = audioEvents;
+  // analytics.js is not loaded here; record what the game hands to ddTrack.
+  window.__tracked = [];
+  window.ddTrack = (name, data) => window.__tracked.push([name, data]);
   if (storage) window.localStorage.setItem("devils-dictionary-save-v3", JSON.stringify(storage));
   if (options.native) {
     // Stand in for the Capacitor bridge the iOS shell injects, to prove the game
@@ -283,6 +286,10 @@ const unlock = boot({ completed: first24, order: first24.slice(-5), current: nul
 await swipeCurrent(unlock);
 assert.equal(unlock.document.getElementById("completedCount").textContent, "25");
 assert.match(unlock.document.getElementById("nextButton").textContent, /ENTER STAGE II/);
+// Copy out of the page realm so deepEqual compares plain objects.
+const stageEvents = page => JSON.parse(JSON.stringify(page.__tracked.filter(([name]) => name === "Stage reached").map(([, data]) => data)));
+assert.deepEqual(stageEvents(unlock), [{ stage: 2, completed: 25 }], "the 25th word reports reaching stage II once");
+assert.equal(unlock.__tracked.find(([name]) => name === "Word complete")[1].completed, 25, "word events carry the running total");
 unlock.document.getElementById("nextButton").click();
 assert.ok(unlock.document.getElementById("stageCurtain").classList.contains("show"), "stage two gets a dramatic unlock curtain");
 await sleep(2400);
@@ -303,6 +310,7 @@ unlock.document.querySelector('.definition-choice[data-correct="true"]').click()
 assert.equal(unlock.document.getElementById("completedCount").textContent, "26", "correct anti-common-sense verdict collects the entry");
 assert.equal(unlock.document.getElementById("definitionReveal").hidden, false);
 assert.match(unlock.document.getElementById("readerNote").textContent, /READER'S NOTE/);
+assert.equal(stageEvents(unlock).length, 1, "a later word inside stage II does not report the stage again");
 
 const throughThree = window.__DEVILS_GAME__.entries.filter(entry => entry.tier <= 3).map(entry => entry.word);
 const first74 = throughThree.slice(0, 74);
@@ -314,6 +322,7 @@ assert.match(stageFourDocument.getElementById("stageName").textContent, /STAGE I
 await swipeCurrent(stageFour);
 assert.equal(stageFourDocument.getElementById("completedCount").textContent, "75", "third-stage words are not judged");
 assert.match(stageFourDocument.getElementById("nextButton").textContent, /ENTER STAGE IV/);
+assert.deepEqual(stageEvents(stageFour), [{ stage: 4, completed: 75 }], "the 75th word reports reaching stage IV");
 stageFourDocument.getElementById("nextButton").click();
 assert.ok(stageFourDocument.getElementById("stageCurtain").classList.contains("show"), "stage four gets its own unlock curtain");
 assert.equal(stageFourDocument.getElementById("curtainName").textContent, "STAGE IV · THE AUTHOR");

@@ -23,6 +23,12 @@
     "Word complete": "CompleteWord",
     "house_ad_click": "house_ad_click"
   };
+  // Creem product ids behind the shop dialog and Print & Play buy links.
+  const CHECKOUT_PRODUCTS = {
+    prod_XEhxj6wfeIfoNzHcvuVxR: { product: "adult", price: 2.99 },
+    prod_5x9nABognL3Zp8viH8hiCS: { product: "family", price: 2.99 },
+    prod_GdeLw30T7sPq6MO1UQdsG: { product: "bundle", price: 4.99 }
+  };
   const POSTHOG_KEY = "phc_yEVJFtudPsoM57mHjf9MgFontV6iZNptaDjCUBDD5Puh";
   const POSTHOG_HOST = "https://us.i.posthog.com";
   const STRIPPED_KEYS = new Set(["email", "address", "definition", "en"]);
@@ -215,7 +221,13 @@
       else if (link.closest(".shop-banner")) place = "banner";
       else if (link.classList.contains("shop-buy") || href.includes("creem.io/payment")) place = "checkout";
       else if (link.closest(".shop-result")) place = "result";
-      window.ddTrack("Purchase CTA", { place });
+      const data = { place };
+      if (place === "checkout") {
+        const id = (href.match(/prod_[A-Za-z0-9]+/) || [""])[0];
+        Object.assign(data, CHECKOUT_PRODUCTS[id] || { product: id || "unknown" });
+        data.page = location.pathname;
+      }
+      window.ddTrack("Purchase CTA", data);
       return;
     }
     if (!link.closest(".social-links, .legal-social")) return;
