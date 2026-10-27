@@ -45,6 +45,9 @@ function boot(storage, options = {}) {
   window.__tracked = [];
   window.ddTrack = (name, data) => window.__tracked.push([name, data]);
   if (storage) window.localStorage.setItem("devils-dictionary-save-v3", JSON.stringify(storage));
+  if (options.dismissedNudges) {
+    window.sessionStorage.setItem("dd-shop-nudge-dismissed", JSON.stringify(options.dismissedNudges));
+  }
   if (options.native) {
     // Stand in for the Capacitor bridge the iOS shell injects, to prove the game
     // behaves identically inside the native wrapper.
@@ -200,7 +203,10 @@ assert.equal(document.getElementById("coinPips").getAttribute("role"), "img");
 assert.match(document.getElementById("coinPips").getAttribute("aria-label"), /0 of 5 words toward the next coin/);
 assert.equal(document.querySelector(".shop-banner").hidden, true, "pay banner stays hidden until a word is finished");
 assert.equal(document.querySelector(".shop-mobile").hidden, true, "mobile pay bar stays hidden until a word is finished");
-assert.equal(document.querySelectorAll(".social-links").length, 3);
+assert.equal(document.querySelector(".masthead .social-links"), null, "social icons are not between the title and the board");
+assert.equal(document.querySelectorAll(".social-links").length, 2, "social icons stay in the footer and beside the share actions");
+assert.ok(document.querySelector(".colophon .social-links-footer"));
+assert.ok(document.querySelector(".afterword .social-links-modal"));
 for (const nav of document.querySelectorAll(".social-links")) {
   assert.equal(nav.querySelectorAll("a").length, 3, "one icon for X, YouTube, and Instagram");
   assert.equal(nav.querySelectorAll("svg").length, 3);
@@ -212,6 +218,9 @@ assert.equal(document.querySelector('.social-links a[data-network="instagram"]')
 assert.equal(document.querySelector('a[href*="intent/follow"]'), null);
 assert.equal(document.body.textContent.includes("Visit @Lakesideobhj"), false);
 assert.equal(document.querySelectorAll(".letter").length, 25, "beginner stage renders a 5×5 board");
+assert.equal(document.querySelector(".letter").dataset.index, "01", "tile indexes stay on the button");
+assert.equal(document.querySelector(".letter").textContent.trim(), document.querySelector(".letter").getAttribute("aria-label"), "tile indexes are not painted into the letter");
+assert.equal(document.getElementById("shopNudge").hidden, true, "shop note stays hidden until a qualifying moment");
 assert.equal(window.__DEVILS_GAME__.entries.length, 100, "expanded dictionary loads");
 
 assert.equal(document.getElementById("soundToggle").getAttribute("aria-pressed"), "true");
@@ -295,6 +304,15 @@ assert.ok(unlock.document.getElementById("stageCurtain").classList.contains("sho
 await sleep(2400);
 assert.equal(unlock.document.querySelectorAll(".letter").length, 36, "stage two upgrades to a 6×6 board");
 assert.ok(unlock.document.querySelector("#targetWord .mask"), "stage two conceals the inner letters");
+const stageNudge = unlock.document.getElementById("shopNudge");
+assert.equal(stageNudge.hidden, false, "stage two offers one shop note");
+assert.match(stageNudge.textContent, /Stage II is open/);
+assert.match(stageNudge.textContent, /Print & Play/);
+assert.equal(stageNudge.querySelector(".shop-nudge-book").hidden, true, "the stage note points at the deck, not the paperback");
+assert.equal(stageNudge.querySelector("[data-shop-open]").getAttribute("href"), "/print-play");
+assert.equal(unlock.__tracked.filter(([name]) => name === "shop_nudge_shown").length, 1);
+assert.equal(unlock.__tracked.find(([name]) => name === "shop_nudge_shown")[1].moment, "stage");
+assert.equal(unlock.__tracked.find(([name]) => name === "shop_nudge_shown")[1].stage, 2);
 
 await swipeCurrent(unlock);
 assert.ok(unlock.document.getElementById("definitionModal").classList.contains("judging"));
@@ -310,6 +328,19 @@ unlock.document.querySelector('.definition-choice[data-correct="true"]').click()
 assert.equal(unlock.document.getElementById("completedCount").textContent, "26", "correct anti-common-sense verdict collects the entry");
 assert.equal(unlock.document.getElementById("definitionReveal").hidden, false);
 assert.match(unlock.document.getElementById("readerNote").textContent, /READER'S NOTE/);
+assert.equal(stageNudge.hidden, false, "the verdict keeps a single shop note");
+assert.equal(stageNudge.closest("#definitionReveal") !== null, true, "the verdict note sits with the reader's note");
+assert.match(unlock.document.getElementById("shopNudgeKicker").textContent, /After the verdict/);
+assert.equal(stageNudge.querySelector(".shop-nudge-book").hidden, true);
+assert.equal(unlock.__tracked.filter(([name, data]) => name === "shop_nudge_shown" && data.moment === "verdict").length, 1);
+stageNudge.querySelector("#shopNudgeClose").click();
+assert.equal(stageNudge.hidden, true, "the verdict note closes");
+assert.deepEqual(JSON.parse(unlock.sessionStorage.getItem("dd-shop-nudge-dismissed")), ["verdict"]);
+unlock.document.getElementById("nextButton").click();
+await sleep(300);
+await swipeCurrent(unlock);
+unlock.document.querySelector('.definition-choice[data-correct="true"]').click();
+assert.equal(unlock.document.getElementById("shopNudge").hidden, true, "a dismissed verdict note stays down for the rest of the page");
 assert.equal(stageEvents(unlock).length, 1, "a later word inside stage II does not report the stage again");
 
 const throughThree = window.__DEVILS_GAME__.entries.filter(entry => entry.tier <= 3).map(entry => entry.word);
@@ -328,6 +359,7 @@ assert.ok(stageFourDocument.getElementById("stageCurtain").classList.contains("s
 assert.equal(stageFourDocument.getElementById("curtainName").textContent, "STAGE IV · THE AUTHOR");
 await sleep(2400);
 assert.equal(stageFourDocument.querySelectorAll(".letter").length, 64, "stage four upgrades to an 8×8 board");
+assert.match(stageFourDocument.getElementById("shopNudge").textContent, /Stage IV is open/);
 
 await swipeCurrent(stageFour);
 assert.ok(stageFourDocument.getElementById("definitionModal").classList.contains("judging"), "stage four also judges definitions");
@@ -339,6 +371,44 @@ assert.equal(stageFourDocument.getElementById("completedCount").textContent, "76
 await sleep(690);
 assert.equal(stageFourDocument.getElementById("coinCount").textContent, "15", "75→76 boundary earns the fifteenth coin");
 assert.ok(stageFourDocument.getElementById("coinCelebration").classList.contains("show"));
+
+const heldBack = window.__DEVILS_GAME__.entries.find(entry => entry.tier === 4);
+const rest = window.__DEVILS_GAME__.entries.map(entry => entry.word).filter(word => word !== heldBack.word);
+const finale = boot({ completed: rest, order: rest.slice(-5), current: null, hints: 0, rounds: 99 });
+await swipeCurrent(finale);
+assert.equal(finale.document.getElementById("shopNudge").hidden, true, "the completion note waits for the verdict");
+finale.document.querySelector('.definition-choice[data-correct="false"]').click();
+assert.equal(finale.document.getElementById("shopNudge").hidden, true, "a wrong verdict does not offer the shop");
+finale.document.querySelector('.definition-choice[data-correct="true"]').click();
+assert.equal(finale.document.getElementById("completedCount").textContent, "100");
+const finaleNudge = finale.document.getElementById("shopNudge");
+assert.equal(finaleNudge.hidden, false, "finishing the dictionary offers the paperback and the deck");
+assert.match(finale.document.getElementById("shopNudgeKicker").textContent, /whole dictionary/);
+assert.equal(finaleNudge.querySelector(".shop-nudge-book").hidden, false);
+assert.match(finaleNudge.querySelector(".shop-nudge-book").getAttribute("href"), /B0HLN1S6V6/);
+assert.equal(finaleNudge.querySelector("[data-shop-open]").getAttribute("href"), "/print-play");
+assert.equal(finale.document.getElementById("lockPanel"), null, "the hundred words stay free");
+assert.equal(finale.__tracked.find(([name]) => name === "shop_nudge_shown")[1].moment, "complete");
+
+const quiet = boot(
+  { completed: first24, order: first24.slice(-5), current: null, hints: 0, rounds: 24 },
+  { dismissedNudges: ["stage-2"] }
+);
+await swipeCurrent(quiet);
+quiet.document.getElementById("nextButton").click();
+await sleep(2400);
+assert.equal(quiet.document.getElementById("shopNudge").hidden, true, "a dismissed stage note stays down for the tab session");
+assert.equal(quiet.document.querySelectorAll(".letter").length, 36, "dismissing the note still opens stage two");
+
+const nativeUnlock = boot(
+  { completed: first24, order: first24.slice(-5), current: null, hints: 0, rounds: 24 },
+  { native: true }
+);
+await swipeCurrent(nativeUnlock);
+nativeUnlock.document.getElementById("nextButton").click();
+await sleep(2400);
+assert.equal(nativeUnlock.document.getElementById("shopNudge").hidden, true, "the native shell does not grow a shop note");
+assert.equal(nativeUnlock.__tracked.filter(([name]) => name === "shop_nudge_shown").length, 0);
 
 // ---------- nothing is gated, on the web or inside the native shell ----------
 const everyWord = window.__DEVILS_GAME__.entries.map(entry => entry.word);
@@ -379,7 +449,7 @@ const dense = boot({
 assert.equal(dense.document.querySelectorAll(".letter").length, 36, "entry 26 is the dense 6×6 board");
 assert.ok(dense.document.getElementById("board").classList.contains("is-dense"));
 exerciseDenseFeel(dense, { cell: 48, gap: 3, origin: 80 });
-// Desktop board is 380px, or 300px when the laptop window is shorter than 850px.
+// Desktop board is 380px, or 300px when the laptop window is shorter than 900px.
 // 6×6 tiles land near 58px; the short-laptop 6×6 is near 45px. 8×8 on that
 // laptop is near 33px. The pointer aims at the glyph, not the centerline.
 exerciseMouseFeel(dense, { cell: 58, gap: 4, origin: 120 });

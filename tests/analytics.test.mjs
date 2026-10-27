@@ -169,6 +169,34 @@ test("checkout clicks name the product and price, and shop opens keep their plac
   window.happyDOM.close();
 });
 
+test("a shop nudge click is its own event and still counts as a purchase or house ad", () => {
+  const window = boot("https://devildictionary.com/");
+  window.document.body.innerHTML = `
+    <aside class="shop-nudge">
+      <a class="shop-nudge-print" href="/print-play" data-shop-open data-shop-nudge="verdict" data-shop-nudge-target="print-play">Shop Print & Play</a>
+      <a class="shop-nudge-book" href="https://www.amazon.com/dp/B0HLN1S6V6" data-house-ad data-house-placement="nudge" data-house-target="B0HLN1S6V6" data-shop-nudge="complete" data-shop-nudge-target="B0HLN1S6V6">The paperback</a>
+    </aside>`;
+  for (const link of window.document.querySelectorAll("a")) {
+    link.addEventListener("click", event => event.preventDefault());
+    link.dispatchEvent(new window.MouseEvent("click", { bubbles: true, cancelable: true }));
+  }
+  assert.equal(calls(window).some(entry => entry[1] === "Purchase"), false);
+  assert.equal(calls(window).some(entry => entry[1] === "shop_nudge_click" || entry[1] === "shop_nudge_shown"), false);
+  assert.equal(calls(window).some(entry => entry[1] === "house_ad_click"), true);
+  assert.deepEqual(captures(window), [
+    ["capture", "shop_nudge_click", { moment: "verdict", target: "print-play" }],
+    ["capture", "Purchase CTA", { place: "nudge" }],
+    ["capture", "shop_nudge_click", { moment: "complete", target: "B0HLN1S6V6" }],
+    ["capture", "house_ad_click", { placement: "nudge", target: "B0HLN1S6V6" }]
+  ]);
+  window.ddTrack("shop_nudge_shown", { moment: "stage", stage: 2 });
+  assert.deepEqual(captures(window).at(-1), ["capture", "shop_nudge_shown", { moment: "stage", stage: 2 }]);
+  const vercel = [...window.vaq].map(entry => Array.from(entry));
+  assert.equal(vercel.at(-1)[1].name, "shop_nudge_shown");
+  assert.equal(vercel.at(-1)[1].data.stage, 2);
+  window.happyDOM.close();
+});
+
 test("a stage unlock reaches Vercel and PostHog as Stage reached", () => {
   const window = boot("https://devildictionary.com/");
   window.ddTrack("Stage reached", { stage: 2, completed: 25 });

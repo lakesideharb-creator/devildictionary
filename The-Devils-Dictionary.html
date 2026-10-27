@@ -464,10 +464,10 @@ h1 { margin: 4px 0 0; font-size: clamp(30px, 4vw, 52px); line-height: .95; font-
 [hidden] { display: none !important; }
 body { background: radial-gradient(ellipse at 50% 25%, #49372b, #211a15 65%, #17120e); }
 .grain { opacity: .1; }
-.shell { width: min(660px, calc(100% - 40px)); padding-top: calc(28px + env(safe-area-inset-top)); gap: 22px; align-content: start; }
+.shell { width: min(660px, calc(100% - 40px)); padding-top: calc(16px + env(safe-area-inset-top)); gap: 16px; align-content: start; }
 .edition {
   position: relative;
-  padding: 22px 44px 24px;
+  padding: 14px 40px 16px;
   border: 6px solid #f7ecd7;
   border-radius: 100px 100px 22px 22px / 38px 38px 22px 22px;
   background: radial-gradient(ellipse at 45% 0%, #fbf1dc, transparent 72%), var(--paper);
@@ -476,12 +476,12 @@ body { background: radial-gradient(ellipse at 50% 25%, #49372b, #211a15 65%, #17
 .edition::before { content: ""; position: absolute; inset: 8px; border: 1px solid #782d2966; border-radius: 82px 82px 13px 13px / 27px 27px 13px 13px; pointer-events: none; }
 .edition::after { content: ""; position: absolute; right: -3px; bottom: -3px; width: 37px; height: 37px; border-radius: 12px 0 17px 0; background: linear-gradient(135deg, #ded0b6 45%, #fff9e9 49%, #baaa8f 53%, #f7ecd7 78%); box-shadow: -3px -3px 6px #604c2812; pointer-events: none; }
 .masthead { display: block; color: var(--ink); }
-.brand-lockup { display: flex; flex-direction: column; gap: 8px; text-align: center; }
-.devil-engraving { width: 240px; height: 120px; object-fit: contain; }
+.brand-lockup { display: flex; flex-direction: column; gap: 4px; text-align: center; }
+.devil-engraving { width: 180px; height: 90px; object-fit: contain; }
 .eyebrow { color: #806653; font-size: 8px; letter-spacing: .24em; }
-h1 { margin-top: 8px; font-size: clamp(28px, 4vw, 37px); font-weight: 700; letter-spacing: -.045em; line-height: 1.1; }
-.subtitle { margin-top: 8px; color: var(--blood); font-size: 14px; font-style: italic; }
-.status-cluster { border-block: 1px solid #782d2938; margin-top: 20px; padding: 10px 0; gap: 14px; }
+h1 { margin-top: 4px; font-size: clamp(26px, 3.5vw, 34px); font-weight: 700; letter-spacing: -.045em; line-height: 1.1; }
+.subtitle { margin-top: 4px; color: var(--blood); font-size: 14px; font-style: italic; }
+.status-cluster { border-block: 1px solid #782d2938; margin-top: 10px; padding: 6px 0; gap: 14px; }
 .progress-card { flex: 1; order: -1; width: auto; }
 .progress-copy { color: #685547; font-size: 9px; line-height: 1.3; letter-spacing: .04em; }
 .progress-copy b { color: var(--blood); font-size: 11px; }
@@ -495,7 +495,7 @@ h1 { margin-top: 8px; font-size: clamp(28px, 4vw, 37px); font-weight: 700; lette
 .coin-vault .coin { width: 27px; font-size: 14px; box-shadow: inset 0 0 0 2px #e2ae38, inset 0 0 0 3px #966316; }
 .coin-vault strong { color: var(--blood); font: 700 16px/1 Georgia, serif; }
 .coin-vault small { color: #685547; font-size: 7px; margin-top: 3px; }
-.game-card { width: 100%; padding: 20px 0 0; border: 0; background: none; box-shadow: none; }
+.game-card { width: 100%; padding: 10px 0 0; border: 0; background: none; box-shadow: none; }
 .game-card::before, .game-card::after, .ornament { display: none; }
 .round-head { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; padding: 0; border: 0; }
 .round-head > div:first-child { display: flex; align-items: center; gap: 12px; }
@@ -552,22 +552,25 @@ h1 { margin-top: 8px; font-size: clamp(28px, 4vw, 37px); font-weight: 700; lette
 .modal { align-items: safe center; }
 .modal-backdrop { position: fixed; }
 .toast { max-width: calc(100% - 32px); width: max-content; text-align: center; line-height: 1.5; }
-@media (min-width: 541px) and (max-height: 850px) {
-  .shell { padding-top: 16px; width: min(600px, calc(100% - 40px)); }
-  .edition { padding-top: 14px; padding-bottom: 18px; }
-  .devil-engraving { width: 160px; height: 80px; }
-  .brand-lockup { gap: 4px; }
-  h1 { font-size: 30px; margin-top: 5px; }
-  .subtitle { margin-top: 5px; font-size: 12px; }
-  .status-cluster { margin-top: 12px; padding: 4px 0; }
-  .game-card { padding-top: 12px; }
-  .target-word { font-size: 40px; }
+@media (min-width: 541px) and (max-height: 900px) {
+  .shell { padding-top: 10px; width: min(600px, calc(100% - 40px)); }
+  .edition { padding-top: 10px; padding-bottom: 12px; }
+  .devil-engraving { width: 140px; height: 70px; }
+  .brand-lockup { gap: 2px; }
+  h1 { font-size: 28px; margin-top: 2px; }
+  .subtitle { margin-top: 2px; font-size: 13px; }
+  .status-cluster { margin-top: 8px; padding: 2px 0; }
+  .game-card { padding-top: 6px; }
+  .round-head { gap: 4px; }
+  .target-word { font-size: 36px; }
+  .selection-line { margin-top: 4px; }
   .board-frame, .selection-line, .coin-rule { width: min(300px, 100%); }
+  .board-frame { margin-top: 0; }
   .letter { font-size: 28px; }
-  .gesture-note { font-size: 10px; }
-  .controls { margin-top: 12px; }
-  .coin-rule { margin-top: 12px; padding-top: 10px; }
-  .edition-signoff { margin-top: 14px; }
+  .gesture-note { font-size: 12px; }
+  .controls { margin-top: 10px; }
+  .coin-rule { margin-top: 10px; padding-top: 8px; }
+  .edition-signoff { margin-top: 12px; }
 }
 @media (max-width: 540px) {
   .shell { width: calc(100% - 20px); padding-top: calc(10px + env(safe-area-inset-top)); gap: 16px; }
@@ -631,8 +634,7 @@ h1 { margin-top: 8px; font-size: clamp(28px, 4vw, 37px); font-weight: 700; lette
 .edition-signoff span,
 .button,
 .share-actions .button,
-.modal-meta,
-.letter::after {
+.modal-meta {
   font-size: 12px;
 }
 .eyebrow { letter-spacing: .12em; }
@@ -670,7 +672,16 @@ h1 { margin-top: 8px; font-size: clamp(28px, 4vw, 37px); font-weight: 700; lette
   background: rgba(216, 166, 58, 0.34);
 }
 .social-links a:focus-visible { outline: 3px solid #b0893e; outline-offset: 3px; }
-.social-links-modal { margin-top: 18px; }
+.afterword {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px 14px;
+  margin-top: 24px;
+}
+.afterword .share-actions { margin-top: 0; flex: 1 1 260px; }
+.social-links-modal { margin-top: 0; }
 .social-links-footer { margin: 4px 0 0; }
 .colophon .social-links a {
   color: #f0ddba;
@@ -1161,6 +1172,80 @@ html:not([data-house-book]) .house-ad.house-book-dictionary { display: flex; }
 .house-pack-mark { color: #782d29; font-size: 14px; }
 .house-pack-front strong { font: 700 28px/1 Georgia, serif; letter-spacing: -.03em; }
 .house-pack-front em { color: #782d29; font: italic 14px/1.2 Georgia, serif; }
+
+/* Tile indexes stay on data-index. They are not painted on the stone. */
+.letter::after {
+  content: attr(data-index);
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+  color: transparent;
+  background: none;
+  opacity: 0;
+  font-size: 1px;
+  pointer-events: none;
+}
+
+.shop-nudge {
+  position: relative;
+  width: min(440px, 100%);
+  margin: 14px auto 0;
+  padding: 12px 40px 12px 14px;
+  border: 1px solid rgba(120, 45, 41, 0.35);
+  background: rgba(255, 248, 234, 0.78);
+  color: #30241c;
+  text-align: left;
+}
+.shop-nudge-kicker {
+  margin: 0 0 4px;
+  color: #782d29;
+  font: 700 12px/1.3 Arial, sans-serif;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.shop-nudge-copy {
+  margin: 0;
+  font: italic 15px/1.45 Georgia, serif;
+}
+.shop-nudge-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin-top: 8px;
+}
+.shop-nudge-actions a {
+  color: #782d29;
+  font: 700 13px/1.3 Arial, sans-serif;
+  text-underline-offset: 3px;
+}
+.shop-nudge-close {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  background: transparent;
+  color: #782d29;
+  font: 400 24px/1 Georgia, serif;
+  cursor: pointer;
+}
+.shop-nudge-close:focus-visible,
+.shop-nudge-actions a:focus-visible {
+  outline: 3px solid #b0893e;
+  outline-offset: 2px;
+}
+.definition-reveal .shop-nudge {
+  width: 100%;
+  margin-top: 16px;
+}
 
 /* Crawlable note under the pocket sheet. It stays in normal flow, below the
    board, so it never covers the grid, the house-ad rails, or a touch drag. */
@@ -1754,7 +1839,6 @@ body.hw-lock { overflow: hidden; }
             <p class="subtitle">Find the word. Face the truth.</p>
           </div>
         </div>
-        <nav class="social-links" aria-label="Follow The Devil’s Dictionary"><a href="https://x.com/Lakesideobhj" data-network="x" target="_blank" rel="me noopener noreferrer" aria-label="Follow on X" title="Follow on X"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.234 10.162 22.977 0h-2.072l-7.591 8.824L7.251 0H.258l9.168 13.343L.258 24h2.072l8.016-9.318L16.749 24h6.993zm-2.837 3.299-.929-1.329L3.076 1.56h3.182l5.965 8.532.929 1.329 7.754 11.09h-3.182z"/></svg></a><a href="https://www.youtube.com/@DevilsDictionary" data-network="youtube" target="_blank" rel="me noopener noreferrer" aria-label="YouTube: Devil's Dictionary" title="YouTube: Devil's Dictionary"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a><a href="https://www.instagram.com/lakesideharb/" data-network="instagram" target="_blank" rel="me noopener noreferrer" aria-label="Instagram @lakesideharb" title="Instagram @lakesideharb"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg></a></nav>
 
         <div class="status-cluster" aria-label="Game progress">
           <button class="sound-toggle" id="soundToggle" type="button" aria-label="Mute sound" aria-pressed="true" title="Sound">
@@ -1807,6 +1891,18 @@ body.hw-lock { overflow: hidden; }
             </div>
           </div>
           <p class="gesture-note" id="gestureNote">Hold the first letter and slide · rows, columns and diagonals all work</p>
+        </div>
+
+        <div id="shopNudgeHome">
+          <aside class="shop-nudge" id="shopNudge" hidden>
+            <button type="button" class="shop-nudge-close" id="shopNudgeClose" aria-label="Dismiss this note">×</button>
+            <p class="shop-nudge-kicker" id="shopNudgeKicker"></p>
+            <p class="shop-nudge-copy" id="shopNudgeCopy"></p>
+            <div class="shop-nudge-actions">
+              <a class="shop-nudge-print" href="/print-play" data-shop-open data-shop-nudge="stage" data-shop-nudge-target="print-play">Shop Print &amp; Play</a>
+              <a class="shop-nudge-book" href="https://www.amazon.com/dp/B0HLN1S6V6" target="_blank" rel="noopener noreferrer" data-house-ad data-house-placement="nudge" data-house-target="B0HLN1S6V6" data-shop-nudge="complete" data-shop-nudge-target="B0HLN1S6V6" hidden>The paperback</a>
+            </div>
+          </aside>
         </div>
 
         <div class="controls">
@@ -1867,12 +1963,14 @@ body.hw-lock { overflow: hidden; }
         <div class="definition-reveal" id="definitionReveal">
           <p class="definition-text" id="definitionText"></p>
           <p class="reader-note" id="readerNote" hidden></p>
+          <div class="afterword">
           <div class="share-actions">
             <button class="button button-ghost" id="saveCardButton" type="button">SAVE WORD CARD ↓</button>
             <button class="button button-ghost" id="shareWordButton" type="button">SHARE ON X ↗</button>
             <button class="button button-ghost" id="copyWordButton" type="button">COPY</button>
           </div>
           <nav class="social-links social-links-modal" aria-label="Follow The Devil’s Dictionary"><a href="https://x.com/Lakesideobhj" data-network="x" target="_blank" rel="me noopener noreferrer" aria-label="Follow on X" title="Follow on X"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.234 10.162 22.977 0h-2.072l-7.591 8.824L7.251 0H.258l9.168 13.343L.258 24h2.072l8.016-9.318L16.749 24h6.993zm-2.837 3.299-.929-1.329L3.076 1.56h3.182l5.965 8.532.929 1.329 7.754 11.09h-3.182z"/></svg></a><a href="https://www.youtube.com/@DevilsDictionary" data-network="youtube" target="_blank" rel="me noopener noreferrer" aria-label="YouTube: Devil's Dictionary" title="YouTube: Devil's Dictionary"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a><a href="https://www.instagram.com/lakesideharb/" data-network="instagram" target="_blank" rel="me noopener noreferrer" aria-label="Instagram @lakesideharb" title="Instagram @lakesideharb"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg></a></nav>
+          </div>
         </div>
         <p class="shop-result"><a href="/print-play">Enjoyed that? Get the printable card collection ↗</a></p>
         <div class="modal-meta">
@@ -3028,6 +3126,7 @@ body.hw-lock { overflow: hidden; }
     "newEntryBadge", "modalProgress", "nextButton", "coinCelebration", "coinMilestone", "stageCurtain",
     "curtainSigil", "curtainKicker", "curtainName", "curtainNote",
     "toast", "coinVault", "soundToggle", "resetButton", "gestureNote", "saveCardButton", "shareWordButton", "copyWordButton",
+    "shopNudge", "shopNudgeKicker", "shopNudgeCopy", "shopNudgeClose",
     "emberLayer", "wordTriumph", "wordTriumphText", "triumphBurst"
   ].map(id => [id, document.getElementById(id)]));
 
@@ -3847,6 +3946,7 @@ body.hw-lock { overflow: hidden; }
       : "BIND IT IN · NEXT WORD";
     els.newEntryBadge.textContent = isNew ? "NEW ENTRY" : "REVISITED";
     els.modalProgress.textContent = `${save.completed.length} / ${ENTRIES.length} COLLECTED`;
+    if (isNew && save.completed.length === ENTRIES.length) showShopNudge("complete");
     openModal(els.nextButton);
   }
 
@@ -3924,6 +4024,8 @@ body.hw-lock { overflow: hidden; }
     const result = completeEntry();
     els.newEntryBadge.textContent = result.isNew ? "VERDICT SEALED" : "REVISITED";
     els.modalProgress.textContent = `${save.completed.length} / ${ENTRIES.length} COLLECTED`;
+    if (result.isNew && save.completed.length === ENTRIES.length) showShopNudge("complete");
+    else showShopNudge("verdict");
     els.nextButton.hidden = false;
     window.setTimeout(() => els.nextButton.focus(), 420);
     if (result.currentCoins > result.previousCoins) {
@@ -3958,7 +4060,99 @@ body.hw-lock { overflow: hidden; }
     window.setTimeout(() => focusTarget?.focus(), 480);
   }
 
+  const NUDGE_KEY = "dd-shop-nudge-dismissed";
+  const nudgeShown = new Set();
+  const STAGE_NOTES = {
+    2: {
+      kicker: "Stage II is open",
+      copy: "The dictionary has stopped trusting you. A Print & Play deck puts these words on the table."
+    },
+    3: {
+      kicker: "Stage III is open",
+      copy: "You kept turning the page. The same words start a worse conversation once they are a deck on the table."
+    },
+    4: {
+      kicker: "Stage IV is open",
+      copy: "The pen is yours. A Print & Play deck lets someone across the table hold it."
+    }
+  };
+
+  function nudgeDismissed(moment) {
+    try {
+      const list = JSON.parse(sessionStorage.getItem(NUDGE_KEY) || "[]");
+      return Array.isArray(list) && list.includes(moment);
+    } catch {
+      return false;
+    }
+  }
+
+  function rememberNudgeDismiss(moment) {
+    try {
+      const list = JSON.parse(sessionStorage.getItem(NUDGE_KEY) || "[]");
+      const next = Array.isArray(list) ? list : [];
+      if (!next.includes(moment)) next.push(moment);
+      sessionStorage.setItem(NUDGE_KEY, JSON.stringify(next));
+    } catch {
+      // Private mode can refuse sessionStorage. The in-memory set still hides it.
+    }
+  }
+
+  function dismissShopNudge() {
+    if (!els.shopNudge) return;
+    const moment = els.shopNudge.dataset.moment;
+    if (moment) {
+      nudgeShown.add(moment);
+      rememberNudgeDismiss(moment);
+    }
+    els.shopNudge.hidden = true;
+  }
+
+  // Shown once on this page. A dismiss lasts for the tab session, per moment.
+  // Stage II, III, and IV each get their own note. The verdict note is not repeated on every trial.
+  function showShopNudge(moment, stageTier) {
+    const key = moment === "stage" ? `stage-${stageTier}` : moment;
+    if (Native.isNative || !els.shopNudge || nudgeShown.has(key) || nudgeDismissed(key)) return;
+    const note = moment === "stage" ? STAGE_NOTES[stageTier] : null;
+    if (moment === "stage" && !note) return;
+    const printLink = els.shopNudge.querySelector(".shop-nudge-print");
+    const bookLink = els.shopNudge.querySelector(".shop-nudge-book");
+    const home = document.getElementById("shopNudgeHome");
+    const share = document.querySelector("#definitionReveal .share-actions");
+    if (moment === "stage") {
+      els.shopNudgeKicker.textContent = note.kicker;
+      els.shopNudgeCopy.textContent = note.copy;
+      if (bookLink) bookLink.hidden = true;
+      home?.append(els.shopNudge);
+    } else if (moment === "verdict") {
+      els.shopNudgeKicker.textContent = "After the verdict";
+      els.shopNudgeCopy.textContent = "You found the uncomfortable one. A Print & Play deck deals that same trial across a table.";
+      if (bookLink) bookLink.hidden = true;
+      share?.before(els.shopNudge);
+    } else if (moment === "complete") {
+      els.shopNudgeKicker.textContent = "You’ve read the whole dictionary";
+      els.shopNudgeCopy.textContent = "One hundred words, still free. The paperback keeps them. Print & Play brings them to the table.";
+      if (bookLink) bookLink.hidden = false;
+      share?.before(els.shopNudge);
+    } else return;
+    els.shopNudge.dataset.moment = key;
+    for (const link of els.shopNudge.querySelectorAll("[data-shop-nudge]")) link.dataset.shopNudge = moment;
+    els.shopNudge.hidden = false;
+    nudgeShown.add(key);
+    const payload = { moment };
+    if (stageTier) payload.stage = stageTier;
+    window.ddTrack?.("shop_nudge_shown", payload);
+  }
+
+  function parkShopNudge() {
+    if (!els.shopNudge) return;
+    const moment = els.shopNudge.dataset.moment;
+    if (moment !== "verdict" && moment !== "complete") return;
+    els.shopNudge.hidden = true;
+    document.getElementById("shopNudgeHome")?.append(els.shopNudge);
+  }
+
   function nextRound() {
+    parkShopNudge();
     document.querySelector(".shell").inert = false;
     const enteredTier = getStage().tier;
     const curtain = round.entry.tier < enteredTier ? STAGE_CURTAINS[enteredTier] : null;
@@ -3979,6 +4173,7 @@ body.hw-lock { overflow: hidden; }
         els.stageCurtain.classList.remove("show");
         els.stageCurtain.setAttribute("aria-hidden", "true");
         makeBoard(next);
+        showShopNudge("stage", enteredTier);
       }, 2350);
       return;
     }
@@ -4626,6 +4821,7 @@ body.hw-lock { overflow: hidden; }
     els.coinVault.addEventListener("click", () => { sound.coinTap(); showToast("Every 5 different entries completed resets the count and mints one more coin."); });
     els.soundToggle.addEventListener("click", toggleSound);
     els.resetButton.addEventListener("click", resetProgress);
+    els.shopNudgeClose?.addEventListener("click", dismissShopNudge);
     window.addEventListener("resize", () => requestAnimationFrame(() => {
       measureBoard();
       drawPath(selection, false);
