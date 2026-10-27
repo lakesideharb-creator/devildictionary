@@ -12,9 +12,11 @@
  *   ?halloween=1  play on this load, including outside the season
  *   ?halloween=0  never play, and hide the replay control
  *
- * Every full page load during the season plays the intro. Skip, Escape,
- * or letting the scene finish only closes this visit. Nothing is stored,
- * so a return to the homepage plays it again until the season ends.
+ * The first homepage load of each local calendar day in the season plays
+ * the intro, and stores that day at localStorage dd-halloween-intro-day
+ * ("YYYY-MM-DD") as it starts. Later loads that day go straight to the
+ * game; the next day plays it again. Blocked storage just means it plays
+ * every load. The old yearly dd-halloween-intro-YYYY flag is ignored.
  * The colophon control "Replay the Halloween intro" plays it again
  * without reloading.
  *
@@ -45,6 +47,7 @@
   const REDUCED_END = 1800;
 
   const MUTE_KEY = "dd-halloween-audio-muted";
+  const DAY_KEY = "dd-halloween-intro-day";
 
   const root = document.getElementById("halloweenIntro");
   const grid = document.getElementById("halloweenGrid");
@@ -81,10 +84,32 @@
     }
   }
 
+  function dayStamp(now = new Date()) {
+    const pad = n => String(n).padStart(2, "0");
+    return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+  }
+
+  function playedOn(now) {
+    try {
+      return localStorage.getItem(DAY_KEY) === dayStamp(now);
+    } catch {
+      return false;
+    }
+  }
+
+  function markPlayed(now = new Date()) {
+    try {
+      localStorage.setItem(DAY_KEY, dayStamp(now));
+    } catch {
+      /* Private mode and blocked storage still get the intro; it just won't be remembered. */
+    }
+  }
+
   function openingChoice(now = new Date()) {
     const forced = flag();
     if (forced === "0") return "off";
     if (forced !== "1" && !inSeason(now)) return "off";
+    if (forced !== "1" && playedOn(now)) return "seen";
     return "play";
   }
 
@@ -668,6 +693,7 @@
   window.__HALLOWEEN_INTRO__ = {
     inSeason,
     openingChoice,
+    dayStamp,
     replay,
     play,
     stop,
@@ -690,7 +716,9 @@
     && cssLink.getAttribute("data-halloween-css") !== "ready"
     && !sheetReady;
   const begin = () => {
-    if (openingChoice() === "play") play();
+    if (openingChoice() !== "play") return;
+    markPlayed();
+    play();
   };
   if (cssPending) {
     cssLink.addEventListener("load", begin, { once: true });

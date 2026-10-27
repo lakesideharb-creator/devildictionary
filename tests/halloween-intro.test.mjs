@@ -139,6 +139,8 @@ function boot({
   date = [2026, 9, 30],
   seen = false,
   seenKey = "",
+  playedDay = "",
+  blockStorage = false,
   reduce = false,
   audio = "running",
   muted = null
@@ -161,6 +163,10 @@ function boot({
   installAudio(window, audio);
   if (seen) window.localStorage.setItem(seenKey || `dd-halloween-intro-${date[0]}`, "seen");
   if (muted != null) window.localStorage.setItem("dd-halloween-audio-muted", muted);
+  if (playedDay) window.localStorage.setItem("dd-halloween-intro-day", playedDay);
+  if (blockStorage) {
+    Object.defineProperty(window, "localStorage", { configurable: true, get() { throw new Error("blocked"); } });
+  }
   window.eval(intro);
   return window;
 }
@@ -267,7 +273,43 @@ test("first visit in season plays the intro and lights a real DESTINY row", () =
   window.close();
 });
 
-test("skip and Escape close this visit, and the next load still plays", async () => {
+test("the intro plays once per local day, and replay or ?halloween=1 still show it", async () => {
+  const first = boot({ date: [2026, 9, 30] });
+  assert.equal(first.document.getElementById("halloweenIntro").hidden, false, "first load of the day plays");
+  assert.equal(first.localStorage.getItem("dd-halloween-intro-day"), "2026-10-30", "the day is stored as the intro starts");
+  first.__HALLOWEEN_INTRO__.stop();
+  first.close();
+
+  const sameDay = boot({ date: [2026, 9, 30], playedDay: "2026-10-30" });
+  assert.equal(sameDay.document.getElementById("halloweenIntro").hidden, true, "a second load that day goes straight to the game");
+  assert.equal(sameDay.document.body.classList.contains("hw-lock"), false);
+  assert.equal(sameDay.document.querySelector(".shell").inert, false);
+  assert.equal(sameDay.__HALLOWEEN_INTRO__.openingChoice(), "seen");
+  assert.equal(sameDay.__halloweenAudio.constructed(), 0, "no audio starts when the intro is skipped for the day");
+  assert.equal(sameDay.document.getElementById("halloweenReplay").hidden, false, "replay stays available");
+  sameDay.document.getElementById("halloweenReplay").click();
+  assert.equal(sameDay.document.getElementById("halloweenIntro").hidden, false, "replay plays it on demand");
+  sameDay.__HALLOWEEN_INTRO__.stop();
+  sameDay.close();
+
+  const nextDay = boot({ date: [2026, 9, 31], playedDay: "2026-10-30" });
+  assert.equal(nextDay.document.getElementById("halloweenIntro").hidden, false, "the next day plays again");
+  assert.equal(nextDay.localStorage.getItem("dd-halloween-intro-day"), "2026-10-31");
+  nextDay.__HALLOWEEN_INTRO__.stop();
+  nextDay.close();
+
+  const forced = boot({ url: "http://127.0.0.1:4173/?halloween=1", date: [2026, 9, 30], playedDay: "2026-10-30" });
+  assert.equal(forced.document.getElementById("halloweenIntro").hidden, false, "?halloween=1 plays even after today's showing");
+  forced.__HALLOWEEN_INTRO__.stop();
+  forced.close();
+
+  const blocked = boot({ date: [2026, 9, 30], blockStorage: true });
+  assert.equal(blocked.document.getElementById("halloweenIntro").hidden, false, "blocked storage still gets the intro");
+  blocked.__HALLOWEEN_INTRO__.stop();
+  blocked.close();
+});
+
+test("skip and Escape close this visit, and a fresh browser still plays", async () => {
   const window = boot();
   window.document.getElementById("halloweenSkip").click();
   await sleep(80);
