@@ -125,6 +125,7 @@
             "about": { "@id": "https://devildictionary.com/#game" },
             "significantLink": [
               "https://devildictionary.com/daily",
+              "https://devildictionary.com/?daily=1",
               "https://devildictionary.com/word/lawyer",
               "https://devildictionary.com/word/politics",
               "https://devildictionary.com/word/telephone",
@@ -203,6 +204,13 @@
       </header>
 
       <section class="game-card" aria-labelledby="roundTitle">
+        <div class="mode-switch" role="group" aria-label="Game mode">
+          <button class="mode-option" id="campaignMode" type="button" aria-pressed="true">Campaign</button>
+          <button class="mode-option" id="dailyMode" type="button" aria-pressed="false">
+            Daily
+            <span id="dailyStreakLabel">Streak 0</span>
+          </button>
+        </div>
         <div class="ornament ornament-left" aria-hidden="true">☞</div>
         <div class="ornament ornament-right" aria-hidden="true">☜</div>
 
@@ -263,6 +271,16 @@
           <strong id="coinRuleText">5 words to go</strong>
         </div>
 
+        <section class="daily-result" id="dailyResult" hidden>
+          <p class="daily-result-note" id="dailyResultNote"></p>
+          <pre class="daily-share" id="dailySharePreview" aria-label="Spoiler-free result"></pre>
+          <div class="controls">
+            <button class="button button-ink" id="dailyShareButton" type="button">SHARE RESULT ↗</button>
+            <button class="button button-ghost" id="dailyCopyButton" type="button">COPY RESULT</button>
+            <button class="button button-ghost" id="dailyReadButton" type="button">READ THE ENTRY</button>
+          </div>
+        </section>
+
       </section>
       <p class="edition-signoff"><span aria-hidden="true">✦</span> A little wiser. A little less innocent. <span aria-hidden="true">✦</span></p>
       <div class="shop-banner shop-deferred" hidden><span>Take the game to your table.</span><a href="/print-play" data-shop-open>Get Printable Cards ↗</a><small>From $2.99 · one-time purchase</small></div>
@@ -310,7 +328,7 @@
         <h2 id="about-game">Guess the word. Survive the definition.</h2>
         <p>The Devil’s Dictionary is a free word game. One entry hides in a grid of letters. Hold the first letter and slide — along a row, a column, or a diagonal — until the word is spelled. The dictionary then reads its definition back, and it is rarely the comfortable one.</p>
         <p>The title, and fifty-five of the definitions, come from Ambrose Bierce’s <em>The Devil’s Dictionary</em> (1911), a public-domain book of cynical definitions. Forty-five more were written for this edition in that same voice. One hundred entries, four stages, and no account to open. <a href="/faq">Where the definitions come from</a>.</p>
-        <p>A few of the entries are already written out: <a href="/word/lawyer">Lawyer</a>, <a href="/word/politics">Politics</a>, and <a href="/word/telephone">Telephone</a>. <a href="/daily">Today’s word</a> changes with the date. There is also a <a href="/promo">short promo</a>, <a href="/print-play">printable cards</a> for the table, and a <a data-community href="/community">community edition</a> for lines written by readers.</p>
+        <p>A few of the entries are already written out: <a href="/word/lawyer">Lawyer</a>, <a href="/word/politics">Politics</a>, and <a href="/word/telephone">Telephone</a>. <a href="/daily">Today’s word</a> names the UTC day’s entry. The <a href="/?daily=1">daily puzzle</a> uses that same word, hides it until it is solved, and keeps a streak on this device. There is also a <a href="/promo">short promo</a>, <a href="/print-play">printable cards</a> for the table, and a <a data-community href="/community">community edition</a> for lines written by readers.</p>
       </section>
 
       <footer class="colophon">
@@ -360,8 +378,9 @@
         <p class="judgment-prompt" id="judgmentPrompt" hidden>All three definitions are reasonable. The real one is usually the least comfortable.</p>
         <div class="definition-choices" id="definitionChoices" hidden></div>
         <p class="judgment-feedback" id="judgmentFeedback" hidden></p>
-        <div class="definition-reveal" id="definitionReveal">
+          <div class="definition-reveal" id="definitionReveal">
           <p class="definition-text" id="definitionText"></p>
+          <pre class="daily-share" id="dailyModalShare" hidden></pre>
           <p class="reader-note" id="readerNote" hidden></p>
           <div class="afterword">
           <div class="share-actions">
@@ -489,6 +508,7 @@
       </div>
     </div>
 
+    <script src="./daily-puzzle.js" defer></script>
     <script src="/analytics.js" defer></script>
     <script src="./app.js" defer></script>
   <script src="/shop.js" defer></script><div class="shop-mobile shop-deferred" hidden><a href="/print-play" data-shop-open>Get Printable Cards <span>from $2.99 ↗</span></a></div></body>

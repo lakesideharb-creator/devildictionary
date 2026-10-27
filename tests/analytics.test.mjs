@@ -349,4 +349,29 @@ test("the private editor does not load analytics, the pixel, or the PostHog toke
   assert.doesNotMatch(editor, /analytics\.js|posthog|phc_yEVJ|fbevents|fbq\(|1832150057779347/);
   assert.match(fs.readFileSync(new URL("../app.js", import.meta.url), "utf8"), /ddTrack\?\.\("Game start"\)/);
   assert.match(fs.readFileSync(new URL("../app.js", import.meta.url), "utf8"), /ddTrack\?\.\("Word complete"/);
+  const game = fs.readFileSync(new URL("../app.js", import.meta.url), "utf8");
+  assert.match(game, /ddTrack\?\.\("Daily start"/);
+  assert.match(game, /ddTrack\?\.\("Daily complete"/);
+  assert.match(game, /ddTrack\?\.\("Daily share"/);
+  assert.match(game, /ddTrack\?\.\("Daily streak"/);
+});
+
+test("daily puzzle events reach PostHog and Vercel without a new Meta mapping", () => {
+  const window = boot("https://devildictionary.com/");
+  window.ddTrack("Daily start", { puzzle: 300, date: "2026-10-27", word: "HOPE" });
+  window.ddTrack("Daily complete", { puzzle: 300, date: "2026-10-27", word: "HOPE", streak: 2, best: 4, misses: 1, hinted: false });
+  window.ddTrack("Daily share", { method: "copy", puzzle: 300, streak: 2 });
+  window.ddTrack("Daily streak", { streak: 2, best: 4, date: "2026-10-27" });
+  window.ddTrack("Game start");
+  assert.equal(calls(window).some(entry => entry[0] === "trackCustom" && String(entry[1]).startsWith("Daily")), false);
+  assert.equal(calls(window).some(entry => entry[1] === "StartPlay"), true);
+  assert.equal(calls(window).some(entry => entry[1] === "Purchase"), false);
+  const names = captures(window).map(entry => entry[1]);
+  assert.deepEqual(names, ["Daily start", "Daily complete", "Daily share", "Daily streak", "StartPlay"]);
+  const vercel = [...window.vaq].map(entry => Array.from(entry));
+  assert.deepEqual(vercel.slice(0, 4).map(entry => entry[1].name), ["Daily start", "Daily complete", "Daily share", "Daily streak"]);
+  assert.equal(vercel[1][1].data.word, "HOPE");
+  assert.equal(vercel[1][1].data.streak, 2);
+  assert.doesNotMatch(source, /"Daily start"|"Daily complete"|"Daily share"|"Daily streak"/);
+  window.happyDOM.close();
 });

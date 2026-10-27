@@ -2,6 +2,8 @@
 
 One letter each morning to the Resend segment in `RESEND_AUDIENCE_ID`. The word is the same UTC day as [https://devildictionary.com/daily](https://devildictionary.com/daily): days since 2026-01-01, from `dailyEntry()` in `lib/landing.mjs`.
 
+The playable daily puzzle (`/?daily=1`) uses that same UTC date and the same index. Midnight UTC starts the next word for the page, the letter, and the puzzle together. Pacific time is not the boundary: it would disagree with `/daily` for part of each evening. The letter still names the word. The puzzle hides it until it is solved, and the share line does not repeat it.
+
 The subject teases (`Today’s word awaits`). The body includes the word, the definition, a play link (`/?word=…`), and `/daily`. Subscribers who never open the grid still get the entry.
 
 ## Schedule
