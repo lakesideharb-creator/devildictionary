@@ -12,7 +12,10 @@ test("page contains all playable surfaces", () => {
   for (const id of ["board", "pathLayer", "emberLayer", "wordTriumph", "triumphBurst", "hintButton", "soundToggle", "definitionModal", "definitionChoices", "judgmentFeedback", "stageCurtain", "coinCount", "coinCelebration", "progressFill"]) {
     assert.match(html, new RegExp(`id="${id}"`));
   }
-  assert.match(html, /<script src="\.\/app\.js" defer><\/script>/);
+  assert.match(html, /<script src="\.\/daily-puzzle\.js" defer><\/script>\s*<script src="\/analytics\.js" defer><\/script>\s*<script src="\.\/app\.js" defer><\/script>/);
+  assert.match(html, /id="dailyMode"/);
+  assert.match(html, /id="dailyResult"/);
+  assert.match(html, /id="dailySharePreview"/);
 });
 
 test("dictionary has 100 unique playable entries across four stages", () => {
