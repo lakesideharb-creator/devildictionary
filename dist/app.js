@@ -2386,6 +2386,6 @@ if (window.Capacitor) {
   // The app sells nothing and bundles only the game, so website copy, commerce,
   // community links, share actions and social links stay on the web. Clean URLs such as /privacy do not resolve from the
   // bundle, so the policy pages that remain open on the site.
-  document.querySelectorAll('.edition-note, .book-invitation, .house-rail, .colophon-actions, .community-invitation, .share-actions, .social-links, .colophon-links a[href="/daily"], .colophon-links a[href="/pricing"], .colophon-links a[href="/refund"]').forEach(el => el.remove());
+  document.querySelectorAll('.edition-note, .book-invitation, .house-rail, .shop-banner, .shop-mobile, .shop-result, .shop-nudge, [data-subscribe], .colophon-actions, .community-invitation, .share-actions, #dailyShareButton, #dailyCopyButton, #dailySharePreview, #dailyModalShare, .social-links, .colophon-links a[href="/daily"], .colophon-links a[href="/pricing"], .colophon-links a[href="/refund"]').forEach(el => el.remove());
   document.querySelectorAll('.colophon-links a').forEach(link => { link.href = 'https://devildictionary.com' + link.getAttribute('href'); });
 }

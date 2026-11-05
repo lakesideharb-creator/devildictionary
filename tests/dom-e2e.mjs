@@ -416,7 +416,7 @@ const nativeUnlock = boot(
 await swipeCurrent(nativeUnlock);
 nativeUnlock.document.getElementById("nextButton").click();
 await sleep(2400);
-assert.equal(nativeUnlock.document.getElementById("shopNudge").hidden, true, "the native shell does not grow a shop note");
+assert.equal(nativeUnlock.document.getElementById("shopNudge"), null, "the native shell does not grow a shop note");
 assert.equal(nativeUnlock.__tracked.filter(([name]) => name === "shop_nudge_shown").length, 0);
 
 // ---------- nothing is gated, on the web or inside the native shell ----------
@@ -434,12 +434,14 @@ const gated = boot(gatedSave, { native: true });
 assert.equal(gated.__DEVILS_GAME__.isNative, true);
 assert.equal(gated.document.getElementById("lockPanel"), null, "the native shell has no paywall either");
 assert.ok(gated.document.querySelectorAll(".letter").length >= 36, "the native shell deals past 30 entries");
-// shop.js removes its own banners in the native shell; it is not evaluated here.
-const nativeHrefs = [...gated.document.querySelectorAll("a[href]")].filter(link => !link.closest(".shop-banner, .shop-mobile, .shop-result")).map(link => link.getAttribute("href"));
+const nativeHrefs = [...gated.document.querySelectorAll("a[href]")].map(link => link.getAttribute("href"));
 assert.ok(!nativeHrefs.some(href => /print-play|pricing|refund|community|amazon\.com|^\/word\/|^\/daily/.test(href)), "the native shell links to no shop, price, community, or unbundled page");
 assert.ok(nativeHrefs.includes("https://devildictionary.com/privacy"), "the native shell opens policy pages on the site");
 assert.equal(gated.document.querySelector(".share-actions"), null, "the native shell has no share actions");
 assert.equal(gated.document.querySelector(".social-links"), null, "the native shell has no social links");
+assert.equal(gated.document.getElementById("dailyShareButton"), null, "the native shell has no daily share button");
+assert.equal(gated.document.getElementById("dailyCopyButton"), null, "the native shell has no daily copy button");
+assert.equal(gated.document.getElementById("dailyModalShare"), null, "the native shell has no daily share card");
 await sleep(0);
 assert.deepEqual(
   gated.__nativeCalls.map(([plugin, method]) => `${plugin}.${method}`).slice(0, 3),

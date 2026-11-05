@@ -6,6 +6,7 @@ character counts have been checked against Apple's limits.
 | Item | Value |
 | --- | --- |
 | Bundle ID | `com.devildictionary.app` |
+| Home screen name | `Devil's Dictionary` (`CFBundleDisplayName`) |
 | SKU | `DD-IOS-2026-001` (any unique string you like) |
 | Version | `1.0` (build `1`) |
 | Category | Primary **Games › Word** · Secondary **Games › Puzzle** |

@@ -22,7 +22,7 @@
 
 ## iOS 版（Capacitor）
 
-网页版与 iOS 版共用同一份 `dist/`，游戏内容完全一致（商店、社区、分享和社交入口只在网页版）：**100 个词条全免费，没有内购、没有解锁、没有付费墙**。原生壳只做平台适配，不做商业化。
+iOS 版的网页资源由 `dist/` 裁剪到 `dist-ios/`（只留游戏本身），游戏内容完全一致（商店、社区、分享和社交入口只在网页版）：**100 个词条全免费，没有内购、没有解锁、没有付费墙**。原生壳只做平台适配，不做商业化。
 
 - Bundle ID：`com.devildictionary.app`
 - 依赖管理：**Swift Package Manager**（`cap add ios --packagemanager SPM`），不需要 CocoaPods
@@ -30,7 +30,7 @@
 - 原生插件：StatusBar / SplashScreen / Haptics
 
 ```bash
-npm run build          # 生成 dist/
+npm run build:ios      # 生成 dist/ 和 dist-ios/
 npx cap sync ios       # 同步 Web 资源与插件
 npx cap open ios       # 在 Xcode 中打开
 ```
