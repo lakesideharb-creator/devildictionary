@@ -134,6 +134,9 @@ test("the daily page publishes JSON-LD and more crawlable copy without dropping 
   assert.equal(term.description, entry.en);
   assert.equal(term.url, "https://devildictionary.com/word/ambition");
   assert.match(daily, /midnight UTC/);
+  assert.match(daily, /href="\/\?daily=1"/);
+  assert.match(daily, /Play today’s puzzle/);
+  assert.match(daily, /same word/);
   assert.match(daily, /href="\/word\/ambition"/);
   assert.match(daily, /<nav class="related"/);
   assert.match(daily, /55 definitions in this edition are quoted from Ambrose Bierce/);
@@ -409,6 +412,7 @@ test("the homepage carries static copy and real internal links", () => {
     "/word/politics",
     "/word/telephone",
     "/daily",
+    "/?daily=1",
     "/promo",
     "/print-play",
     "/community"

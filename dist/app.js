@@ -341,11 +341,17 @@
     "newEntryBadge", "modalProgress", "nextButton", "coinCelebration", "coinMilestone", "stageCurtain",
     "curtainSigil", "curtainKicker", "curtainName", "curtainNote",
     "toast", "coinVault", "soundToggle", "resetButton", "gestureNote", "saveCardButton", "shareWordButton", "copyWordButton",
-    "emberLayer", "wordTriumph", "wordTriumphText", "triumphBurst"
+    "shopNudge", "shopNudgeKicker", "shopNudgeCopy", "shopNudgeClose",
+    "emberLayer", "wordTriumph", "wordTriumphText", "triumphBurst",
+    "campaignMode", "dailyMode", "dailyStreakLabel", "dailyResult", "dailyResultNote", "dailySharePreview",
+    "dailyShareButton", "dailyCopyButton", "dailyReadButton", "dailyModalShare"
   ].map(id => [id, document.getElementById(id)]));
 
   let save = loadSave();
   let round = null;
+  let mode = "campaign";
+  let campaignRound = null;
+  let dailyStartTracked = "";
   let selection = [];
   let dragging = false;
   let hintTimer = null;
@@ -591,20 +597,39 @@
     return final[Math.floor(Math.random() * final.length)];
   }
 
+  function dailyBoardSize(entry) {
+    const length = entry.word.length;
+    if (length <= 5) return 5;
+    if (length === 6) return 6;
+    if (length === 7) return 7;
+    return 8;
+  }
+
   function makeBoard(entry, reshuffle = false) {
+    const daily = mode === "daily";
+    const carried = daily && reshuffle && round?.daily
+      ? { misses: round.misses || 0, hinted: Boolean(round.hinted) }
+      : { misses: 0, hinted: false };
     const stage = getStage();
-    const size = Math.max(stage.size, entry.word.length > 8 ? 7 : entry.word.length > 6 ? 6 : 5);
+    const size = daily ? dailyBoardSize(entry) : Math.max(stage.size, entry.word.length > 8 ? 7 : entry.word.length > 6 ? 6 : 5);
     const path = generatePath(size, entry.word.length);
     const letters = Array.from({ length: size * size }, () => ALPHABET[Math.floor(Math.random() * ALPHABET.length)]);
     path.forEach((cellIndex, i) => { letters[cellIndex] = entry.word[i]; });
 
-    const decoys = stage.tier > 1 ? Math.min(5, entry.word.length) : 2;
+    const decoys = daily || stage.tier > 1 ? Math.min(5, entry.word.length) : 2;
     for (let i = 0; i < decoys; i += 1) {
       const emptyIndex = Math.floor(Math.random() * letters.length);
       if (!path.includes(emptyIndex)) letters[emptyIndex] = entry.word[Math.floor(Math.random() * entry.word.length)];
     }
 
-    round = { entry, size, path, letters, judgmentAttempts: 0 };
+    round = {
+      entry, size, path, letters, judgmentAttempts: 0,
+      daily, misses: carried.misses, hinted: carried.hinted
+    };
+    if (daily) {
+      renderRound();
+      return;
+    }
     save.current = entry.word;
     save.rounds += reshuffle ? 0 : 1;
     persist();
@@ -652,14 +677,19 @@
     els.board.innerHTML = round.letters.map((letter, index) =>
       `<button class="letter" type="button" data-cell="${index}" data-index="${String(index + 1).padStart(2, "0")}" aria-label="${letter}">${letter}</button>`
     ).join("");
-    els.folio.textContent = `ENTRY № ${String(save.completed.length + 1).padStart(3, "0")}`;
-    els.targetWord.innerHTML = stage.tier === 1
-      ? round.entry.word
-      : round.entry.word.split("").map((letter, index) => index === 0 || index === round.entry.word.length - 1 ? letter : `<span class="mask">·</span>`).join("");
-    document.getElementById("roundTitle").textContent = stage.title;
-    els.gestureNote.textContent = stage.tier === 1
-      ? "Hold the first letter and slide · rows, columns and diagonals all work"
-      : `First and last letters are given · ${round.entry.word.length} letters in all`;
+    const conceal = round.daily || stage.tier !== 1;
+    els.folio.textContent = round.daily
+      ? `DAILY · ${window.DDDaily.utcDateKey(now())} UTC`
+      : `ENTRY № ${String(save.completed.length + 1).padStart(3, "0")}`;
+    els.targetWord.innerHTML = conceal
+      ? round.entry.word.split("").map((letter, index) => index === 0 || index === round.entry.word.length - 1 ? letter : `<span class="mask">·</span>`).join("")
+      : round.entry.word;
+    document.getElementById("roundTitle").textContent = round.daily ? "Today’s word" : stage.title;
+    els.gestureNote.textContent = round.daily
+      ? `First and last letters are given · ${round.entry.word.length} letters · a new word at midnight UTC`
+      : stage.tier === 1
+        ? "Hold the first letter and slide · rows, columns and diagonals all work"
+        : `First and last letters are given · ${round.entry.word.length} letters in all`;
     bindCells();
     requestAnimationFrame(resizeSvg);
     updateHUD();
@@ -1101,6 +1131,7 @@
         solveRound();
       }, triumphDelay());
     } else if (selection.length) {
+      if (round.daily) round.misses = (round.misses || 0) + 1;
       sound.invalid();
       els.board.animate([
         { transform: "translateX(0)" }, { transform: "translateX(-7px)" },
@@ -1127,6 +1158,7 @@
   }
 
   function completeEntry() {
+    if (round.daily) return completeDaily();
     const previousCoins = Math.floor(save.completed.length / 5);
     const previousTier = getStage().tier;
     const isNew = !save.completed.includes(round.entry.word);
@@ -1154,12 +1186,27 @@
     els.definitionReveal.classList.remove("judgment-result");
     els.readerNote.hidden = true;
     els.nextButton.hidden = false;
-    const upcoming = getStage().tier > round.entry.tier ? STAGE_CURTAINS[getStage().tier] : null;
-    els.nextButton.textContent = upcoming
-      ? `ENTER ${upcoming.name}`
-      : "BIND IT IN · NEXT WORD";
-    els.newEntryBadge.textContent = isNew ? "NEW ENTRY" : "REVISITED";
-    els.modalProgress.textContent = `${save.completed.length} / ${ENTRIES.length} COLLECTED`;
+    if (round.daily) {
+      const state = loadDaily();
+      if (els.dailyModalShare) {
+        els.dailyModalShare.hidden = false;
+        els.dailyModalShare.textContent = dailyShareText();
+      }
+      els.shareWordButton.textContent = "SHARE RESULT ↗";
+      els.copyWordButton.textContent = "COPY RESULT";
+      els.nextButton.textContent = "DONE FOR TODAY";
+      els.newEntryBadge.textContent = "DAILY SOLVED";
+      els.modalProgress.textContent = `STREAK ${state.streak} · BEST ${state.best}`;
+    } else {
+      restoreShareLabels();
+      const upcoming = getStage().tier > round.entry.tier ? STAGE_CURTAINS[getStage().tier] : null;
+      els.nextButton.textContent = upcoming
+        ? `ENTER ${upcoming.name}`
+        : "BIND IT IN · NEXT WORD";
+      els.newEntryBadge.textContent = isNew ? "NEW ENTRY" : "REVISITED";
+      els.modalProgress.textContent = `${save.completed.length} / ${ENTRIES.length} COLLECTED`;
+      if (isNew && save.completed.length === ENTRIES.length) showShopNudge("complete");
+    }
     openModal(els.nextButton);
   }
 
@@ -1205,8 +1252,10 @@
       haptic("LIGHT");
       round.judgmentAttempts += 1;
       round.lastBias = bias;
-      save.judgment[bias.toLowerCase()] += 1;
-      persist();
+      if (!round.daily) {
+        save.judgment[bias.toLowerCase()] += 1;
+        persist();
+      }
       button.disabled = true;
       button.classList.add("rejected");
       els.judgmentFeedback.hidden = false;
@@ -1221,8 +1270,10 @@
 
     sound.truth();
     haptic("MEDIUM");
-    save.judgment.correct += 1;
-    if (round.judgmentAttempts === 0) save.judgment.firstTry += 1;
+    if (!round.daily) {
+      save.judgment.correct += 1;
+      if (round.judgmentAttempts === 0) save.judgment.firstTry += 1;
+    }
     button.classList.add("correct");
     els.definitionChoices.classList.add("resolved");
     els.definitionChoices.querySelectorAll(".definition-choice").forEach(choice => { choice.disabled = true; });
@@ -1237,6 +1288,19 @@
     const result = completeEntry();
     els.newEntryBadge.textContent = result.isNew ? "VERDICT SEALED" : "REVISITED";
     els.modalProgress.textContent = `${save.completed.length} / ${ENTRIES.length} COLLECTED`;
+    if (round.daily) {
+      const state = loadDaily();
+      els.nextButton.textContent = "DONE FOR TODAY";
+      els.newEntryBadge.textContent = "DAILY SOLVED";
+      els.modalProgress.textContent = `STREAK ${state.streak} · BEST ${state.best}`;
+      els.shareWordButton.textContent = "SHARE RESULT ↗";
+      els.copyWordButton.textContent = "COPY RESULT";
+      if (els.dailyModalShare) {
+        els.dailyModalShare.hidden = false;
+        els.dailyModalShare.textContent = dailyShareText();
+      }
+    } else if (result.isNew && save.completed.length === ENTRIES.length) showShopNudge("complete");
+    else showShopNudge("verdict");
     els.nextButton.hidden = false;
     window.setTimeout(() => els.nextButton.focus(), 420);
     if (result.currentCoins > result.previousCoins) {
@@ -1271,7 +1335,104 @@
     window.setTimeout(() => focusTarget?.focus(), 480);
   }
 
+  const NUDGE_KEY = "dd-shop-nudge-dismissed";
+  const nudgeShown = new Set();
+  const STAGE_NOTES = {
+    2: {
+      kicker: "Stage II is open",
+      copy: "The dictionary has stopped trusting you. A Print & Play deck puts these words on the table."
+    },
+    3: {
+      kicker: "Stage III is open",
+      copy: "You kept turning the page. The same words start a worse conversation once they are a deck on the table."
+    },
+    4: {
+      kicker: "Stage IV is open",
+      copy: "The pen is yours. A Print & Play deck lets someone across the table hold it."
+    }
+  };
+
+  function nudgeDismissed(moment) {
+    try {
+      const list = JSON.parse(sessionStorage.getItem(NUDGE_KEY) || "[]");
+      return Array.isArray(list) && list.includes(moment);
+    } catch {
+      return false;
+    }
+  }
+
+  function rememberNudgeDismiss(moment) {
+    try {
+      const list = JSON.parse(sessionStorage.getItem(NUDGE_KEY) || "[]");
+      const next = Array.isArray(list) ? list : [];
+      if (!next.includes(moment)) next.push(moment);
+      sessionStorage.setItem(NUDGE_KEY, JSON.stringify(next));
+    } catch {
+      // Private mode can refuse sessionStorage. The in-memory set still hides it.
+    }
+  }
+
+  function dismissShopNudge() {
+    if (!els.shopNudge) return;
+    const moment = els.shopNudge.dataset.moment;
+    if (moment) {
+      nudgeShown.add(moment);
+      rememberNudgeDismiss(moment);
+    }
+    els.shopNudge.hidden = true;
+  }
+
+  // Shown once on this page. A dismiss lasts for the tab session, per moment.
+  // Stage II, III, and IV each get their own note. The verdict note is not repeated on every trial.
+  function showShopNudge(moment, stageTier) {
+    const key = moment === "stage" ? `stage-${stageTier}` : moment;
+    if (Native.isNative || !els.shopNudge || nudgeShown.has(key) || nudgeDismissed(key)) return;
+    const note = moment === "stage" ? STAGE_NOTES[stageTier] : null;
+    if (moment === "stage" && !note) return;
+    const printLink = els.shopNudge.querySelector(".shop-nudge-print");
+    const bookLink = els.shopNudge.querySelector(".shop-nudge-book");
+    const home = document.getElementById("shopNudgeHome");
+    const share = document.querySelector("#definitionReveal .share-actions");
+    if (moment === "stage") {
+      els.shopNudgeKicker.textContent = note.kicker;
+      els.shopNudgeCopy.textContent = note.copy;
+      if (bookLink) bookLink.hidden = true;
+      home?.append(els.shopNudge);
+    } else if (moment === "verdict") {
+      els.shopNudgeKicker.textContent = "After the verdict";
+      els.shopNudgeCopy.textContent = "You found the uncomfortable one. A Print & Play deck deals that same trial across a table.";
+      if (bookLink) bookLink.hidden = true;
+      share?.before(els.shopNudge);
+    } else if (moment === "complete") {
+      els.shopNudgeKicker.textContent = "You’ve read the whole dictionary";
+      els.shopNudgeCopy.textContent = "One hundred words, still free. The paperback keeps them. Print & Play brings them to the table.";
+      if (bookLink) bookLink.hidden = false;
+      share?.before(els.shopNudge);
+    } else return;
+    els.shopNudge.dataset.moment = key;
+    for (const link of els.shopNudge.querySelectorAll("[data-shop-nudge]")) link.dataset.shopNudge = moment;
+    els.shopNudge.hidden = false;
+    nudgeShown.add(key);
+    const payload = { moment };
+    if (stageTier) payload.stage = stageTier;
+    window.ddTrack?.("shop_nudge_shown", payload);
+  }
+
+  function parkShopNudge() {
+    if (!els.shopNudge) return;
+    const moment = els.shopNudge.dataset.moment;
+    if (moment !== "verdict" && moment !== "complete") return;
+    els.shopNudge.hidden = true;
+    document.getElementById("shopNudgeHome")?.append(els.shopNudge);
+  }
+
   function nextRound() {
+    if (round?.daily) {
+      closeModalQuiet();
+      showDailySolved();
+      return;
+    }
+    parkShopNudge();
     document.querySelector(".shell").inert = false;
     const enteredTier = getStage().tier;
     const curtain = round.entry.tier < enteredTier ? STAGE_CURTAINS[enteredTier] : null;
@@ -1292,6 +1453,7 @@
         els.stageCurtain.classList.remove("show");
         els.stageCurtain.setAttribute("aria-hidden", "true");
         makeBoard(next);
+        showShopNudge("stage", enteredTier);
       }, 2350);
       return;
     }
@@ -1317,6 +1479,10 @@
 
   function shareOnX() {
     if (els.definitionReveal.hidden) return;
+    if (round?.daily) {
+      shareDailyResult();
+      return;
+    }
     const intent = xIntentUrl(wordShareText(round.entry));
     window.ddTrack?.("Share", { method: "x", place: "game" });
     const popup = window.open(intent, "_blank", "noopener,noreferrer");
@@ -1325,6 +1491,10 @@
 
   async function copyWord() {
     if (els.definitionReveal.hidden) return;
+    if (round?.daily) {
+      await copyDailyResult();
+      return;
+    }
     const text = wordShareText(round.entry);
     try {
       if (!navigator.clipboard?.writeText) throw new Error("Clipboard unavailable");
@@ -1429,6 +1599,7 @@
     document.body.classList.toggle("has-played", played);
     document.querySelectorAll(".shop-deferred").forEach(element => { element.hidden = !played; });
     els.coinVault.setAttribute("aria-label", `${coins} Devil Coins held. One coin is minted for every 5 different entries completed.`);
+    paintDailyChrome();
     const soundOn = save.sound !== false;
     els.soundToggle.classList.toggle("muted", !soundOn);
     els.soundToggle.setAttribute("aria-pressed", String(soundOn));
@@ -1450,8 +1621,11 @@
 
   function showHint() {
     sound.hint();
-    save.hints += 1;
-    persist();
+    if (round?.daily) round.hinted = true;
+    else {
+      save.hints += 1;
+      persist();
+    }
     clearSelection();
     els.board.querySelectorAll(".letter").forEach((cell, index) => cell.classList.toggle("hint-node", round.path.includes(index)));
     drawPath(round.path, true);
@@ -1903,12 +2077,229 @@
     try { await SplashScreenPlugin.hide(); } catch { /* already hidden */ }
   }
 
+  function now() {
+    const override = window.__DD_NOW__;
+    return override ? new Date(override) : new Date();
+  }
+
+  function loadDaily() {
+    try {
+      return window.DDDaily.normalizeDailyState(JSON.parse(localStorage.getItem(window.DDDaily.STORAGE_KEY) || "null"));
+    } catch {
+      return window.DDDaily.emptyDailyState();
+    }
+  }
+
+  function persistDaily(state) {
+    localStorage.setItem(window.DDDaily.STORAGE_KEY, JSON.stringify(state));
+  }
+
+  function dailyShareText() {
+    const today = window.DDDaily.utcDateKey(now());
+    const state = loadDaily();
+    const solved = state.solved[today];
+    if (!solved) return "";
+    return window.DDDaily.shareResult({
+      puzzle: window.DDDaily.puzzleNumber(now()),
+      dateKey: today,
+      length: solved.length,
+      misses: solved.misses,
+      streak: state.streak,
+      hinted: solved.hinted
+    });
+  }
+
+  function paintDailyChrome() {
+    if (!els.dailyMode || !window.DDDaily) return;
+    const today = window.DDDaily.utcDateKey(now());
+    const state = loadDaily();
+    const streak = window.DDDaily.visibleStreak(state, today);
+    const best = state.best || 0;
+    const label = best > 0 ? `Streak ${streak} · Best ${best}` : `Streak ${streak}`;
+    els.dailyStreakLabel.textContent = label;
+    els.dailyMode.setAttribute("aria-pressed", mode === "daily" ? "true" : "false");
+    els.dailyMode.setAttribute("aria-label", `Daily puzzle, ${label}`);
+    if (els.campaignMode) els.campaignMode.setAttribute("aria-pressed", mode === "campaign" ? "true" : "false");
+    document.body.classList.toggle("is-daily", mode === "daily");
+    const solvedOpen = mode === "daily" && els.dailyResult && !els.dailyResult.hidden;
+    document.body.classList.toggle("is-daily-solved", Boolean(solvedOpen));
+  }
+
+  function restoreShareLabels() {
+    if (!els.shareWordButton) return;
+    els.shareWordButton.textContent = "SHARE ON X ↗";
+    els.copyWordButton.textContent = "COPY";
+    if (els.dailyModalShare) els.dailyModalShare.hidden = true;
+  }
+
+  function setDailyQuery(on) {
+    try {
+      const url = new URL(location.href);
+      if (on) {
+        url.searchParams.delete("word");
+        url.searchParams.set("daily", "1");
+      } else url.searchParams.delete("daily");
+      const next = `${url.pathname}${url.search}${url.hash}`;
+      if (next !== `${location.pathname}${location.search}${location.hash}`) history.replaceState(null, "", next);
+    } catch { /* file URLs and locked documents */ }
+  }
+
+  function wantsDaily() {
+    try {
+      const flag = new URLSearchParams(location.search).get("daily");
+      return flag === "1" || flag === "true";
+    } catch {
+      return false;
+    }
+  }
+
+  function closeModalQuiet() {
+    parkShopNudge();
+    const shell = document.querySelector(".shell");
+    if (shell) shell.inert = false;
+    els.definitionModal.classList.remove("open", "judging");
+    els.definitionModal.setAttribute("aria-hidden", "true");
+  }
+
+  function showDailySolved() {
+    mode = "daily";
+    const today = window.DDDaily.utcDateKey(now());
+    const state = loadDaily();
+    const entry = ENTRIES[window.DDDaily.dailyWordIndex(now(), ENTRIES.length)];
+    const solved = state.solved[today] || { misses: 0, hinted: false, length: entry.word.length };
+    round = {
+      entry, daily: true, misses: solved.misses, hinted: solved.hinted,
+      size: 0, path: [], letters: [], judgmentAttempts: 0
+    };
+    const tries = (solved.misses || 0) + 1;
+    if (els.dailyResultNote) {
+      els.dailyResultNote.textContent = `Solved in ${tries} ${tries === 1 ? "try" : "tries"}. Streak ${state.streak}, best ${state.best}. The next word arrives at midnight UTC.`;
+    }
+    if (els.dailySharePreview) els.dailySharePreview.textContent = dailyShareText();
+    if (els.dailyResult) els.dailyResult.hidden = false;
+    els.folio.textContent = `DAILY · ${today} UTC`;
+    document.getElementById("roundTitle").textContent = "Today’s word is bound";
+    els.targetWord.textContent = entry.word;
+    paintDailyChrome();
+  }
+
+  function trackDailyStart(entry) {
+    const today = window.DDDaily.utcDateKey(now());
+    if (dailyStartTracked === today) return;
+    dailyStartTracked = today;
+    window.ddTrack?.("Daily start", {
+      word: entry.word,
+      puzzle: window.DDDaily.puzzleNumber(now()),
+      date: today
+    });
+  }
+
+  function startDailyPlay() {
+    mode = "daily";
+    if (els.dailyResult) els.dailyResult.hidden = true;
+    document.body.classList.remove("is-daily-solved");
+    const entry = ENTRIES[window.DDDaily.dailyWordIndex(now(), ENTRIES.length)];
+    makeBoard(entry);
+    trackDailyStart(entry);
+  }
+
+  function enterDaily() {
+    if (mode === "daily") return;
+    if (round && !round.daily) campaignRound = round;
+    mode = "daily";
+    setDailyQuery(true);
+    const today = window.DDDaily.utcDateKey(now());
+    if (loadDaily().solved[today]) showDailySolved();
+    else startDailyPlay();
+  }
+
+  function leaveDaily() {
+    if (mode !== "daily") return;
+    closeModalQuiet();
+    mode = "campaign";
+    if (els.dailyResult) els.dailyResult.hidden = true;
+    document.body.classList.remove("is-daily", "is-daily-solved");
+    setDailyQuery(false);
+    restoreShareLabels();
+    if (campaignRound?.entry) {
+      round = campaignRound;
+      campaignRound = null;
+      renderRound();
+    } else {
+      campaignRound = null;
+      const current = ENTRIES.find(item => item.word === save.current && !save.completed.includes(item.word));
+      makeBoard(current || pickEntry());
+    }
+    paintDailyChrome();
+  }
+
+  function completeDaily() {
+    const today = window.DDDaily.utcDateKey(now());
+    const recorded = window.DDDaily.recordSolve(loadDaily(), today, {
+      misses: round.misses || 0,
+      hinted: Boolean(round.hinted),
+      length: round.entry.word.length
+    });
+    persistDaily(recorded.state);
+    if (recorded.changed) {
+      window.ddTrack?.("Daily complete", {
+        word: round.entry.word,
+        puzzle: window.DDDaily.puzzleNumber(now()),
+        date: today,
+        streak: recorded.state.streak,
+        best: recorded.state.best,
+        misses: round.misses || 0,
+        hinted: Boolean(round.hinted)
+      });
+      window.ddTrack?.("Daily streak", {
+        streak: recorded.state.streak,
+        best: recorded.state.best,
+        date: today
+      });
+    }
+    paintDailyChrome();
+    const coins = Math.floor(save.completed.length / 5);
+    return { isNew: false, previousCoins: coins, currentCoins: coins };
+  }
+
+  function shareDailyResult() {
+    const text = dailyShareText();
+    if (!text) return;
+    const intent = xIntentUrl(text);
+    window.ddTrack?.("Daily share", {
+      method: "x",
+      puzzle: window.DDDaily.puzzleNumber(now()),
+      streak: loadDaily().streak
+    });
+    const popup = window.open(intent, "_blank", "noopener,noreferrer");
+    if (!popup) window.location.assign(intent);
+  }
+
+  async function copyDailyResult() {
+    const text = dailyShareText();
+    if (!text) return;
+    const payload = {
+      method: "copy",
+      puzzle: window.DDDaily.puzzleNumber(now()),
+      streak: loadDaily().streak
+    };
+    try {
+      if (!navigator.clipboard?.writeText) throw new Error("Clipboard unavailable");
+      await navigator.clipboard.writeText(text);
+      window.ddTrack?.("Daily share", payload);
+      showToast("Result copied. The word stayed behind.");
+    } catch {
+      window.ddTrack?.("Daily share", payload);
+      window.prompt("Copy this result:", text);
+    }
+  }
+
   function resetProgress() {
     const firstClick = els.resetButton.dataset.confirm !== "yes";
     if (firstClick) {
       els.resetButton.dataset.confirm = "yes";
       els.resetButton.textContent = "TAP AGAIN TO CONFIRM RESET";
-      showToast("Every entry and every coin will be wiped.");
+      showToast("The campaign and the coins will be wiped. The daily streak stays.");
       window.setTimeout(() => {
         els.resetButton.dataset.confirm = "";
         els.resetButton.textContent = "RESET MY PROGRESS";
@@ -1917,28 +2308,52 @@
     }
     localStorage.removeItem(STORAGE_KEY);
     save = loadSave();
+    mode = "campaign";
+    campaignRound = null;
+    if (els.dailyResult) els.dailyResult.hidden = true;
+    document.body.classList.remove("is-daily", "is-daily-solved");
+    setDailyQuery(false);
+    restoreShareLabels();
     els.resetButton.dataset.confirm = "";
     els.resetButton.textContent = "RESET MY PROGRESS";
     makeBoard(pickEntry());
-    showToast("A new dictionary has been opened.");
+    showToast("A new dictionary has been opened. The daily streak is still on this device.");
   }
 
   function init() {
+    if (!window.DDDaily) throw new Error("daily-puzzle.js did not load");
     els.totalCount.textContent = ENTRIES.length;
     updateHUD();
-    const requestedWord = new URLSearchParams(location.search).get("word");
-    const requested = requestedWord ? ENTRIES.find(entry => entry.word === requestedWord.toUpperCase()) : null;
-    const current = ENTRIES.find(entry => entry.word === save.current && !save.completed.includes(entry.word));
-    makeBoard(requested || current || pickEntry());
     els.hintButton.addEventListener("click", showHint);
-    els.shuffleButton.addEventListener("click", () => { sound.shuffle(); makeBoard(round.entry, true); showToast("Same word. The lies have been rearranged."); });
+    els.shuffleButton.addEventListener("click", () => {
+      if (mode === "daily" && els.dailyResult && !els.dailyResult.hidden) return;
+      sound.shuffle();
+      makeBoard(round.entry, true);
+      showToast("Same word. The lies have been rearranged.");
+    });
     els.nextButton.addEventListener("click", nextRound);
     els.saveCardButton.addEventListener("click", saveWordCard);
     els.shareWordButton.addEventListener("click", shareOnX);
     els.copyWordButton.addEventListener("click", copyWord);
+    els.dailyShareButton?.addEventListener("click", shareDailyResult);
+    els.dailyCopyButton?.addEventListener("click", () => { copyDailyResult(); });
+    els.dailyReadButton?.addEventListener("click", () => {
+      if (mode !== "daily" || !round?.entry) return;
+      openDefinition(false);
+    });
+    els.campaignMode?.addEventListener("click", () => leaveDaily());
+    els.dailyMode?.addEventListener("click", () => enterDaily());
     els.coinVault.addEventListener("click", () => { sound.coinTap(); showToast("Every 5 different entries completed resets the count and mints one more coin."); });
     els.soundToggle.addEventListener("click", toggleSound);
     els.resetButton.addEventListener("click", resetProgress);
+    els.shopNudgeClose?.addEventListener("click", dismissShopNudge);
+    if (wantsDaily()) enterDaily();
+    else {
+      const requestedWord = new URLSearchParams(location.search).get("word");
+      const requested = requestedWord ? ENTRIES.find(entry => entry.word === requestedWord.toUpperCase()) : null;
+      const current = ENTRIES.find(entry => entry.word === save.current && !save.completed.includes(entry.word));
+      makeBoard(requested || current || pickEntry());
+    }
     window.addEventListener("resize", () => requestAnimationFrame(() => {
       measureBoard();
       drawPath(selection, false);
@@ -1956,7 +2371,7 @@
     window.__DEVILS_GAME__ = {
       entries: ENTRIES,
       isNative: Native.isNative,
-      getState: () => ({ ...save, coins: Math.floor(save.completed.length / 5), round: round ? { ...round } : null }),
+      getState: () => ({ ...save, mode, coins: Math.floor(save.completed.length / 5), round: round ? { ...round } : null }),
       solveCurrent: () => { selection = [...round.path]; paintSelection(); finishSelection(); },
       reset: () => { localStorage.removeItem(STORAGE_KEY); location.reload(); }
     };

@@ -104,6 +104,9 @@ test("the letter teases in the subject and reveals the word in the body", () => 
   const unsubscribe = [...doc.querySelectorAll("a")].find(anchor => anchor.textContent === "Unsubscribe");
   assert.equal(play.getAttribute("href"), `https://devildictionary.com/?word=${encodeURIComponent(entry.word)}`);
   assert.equal(play.textContent, "Play this word");
+  const puzzle = [...doc.querySelectorAll("a")].find(anchor => anchor.getAttribute("href") === "https://devildictionary.com/?daily=1");
+  assert.equal(puzzle.textContent, "Play today’s puzzle");
+  assert.match(letter.text, /Play today’s puzzle: https:\/\/devildictionary\.com\/\?daily=1/);
   assert.ok(daily);
   assert.equal(unsubscribe.getAttribute("href"), UNSUBSCRIBE_PLACEHOLDER);
   assert.equal(doc.body.textContent.includes(entry.word), true);

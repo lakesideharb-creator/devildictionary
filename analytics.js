@@ -195,6 +195,14 @@
   document.addEventListener("click", event => {
     const link = event.target.closest?.("a");
     if (!link) return;
+    // Shop notes keep the existing Purchase CTA / house-ad events and add their own.
+    // These names are not in META_CUSTOM_EVENTS, so Meta's mapping stays as it is.
+    if (link.matches("[data-shop-nudge]")) {
+      window.ddTrack("shop_nudge_click", {
+        moment: link.dataset.shopNudge || "",
+        target: link.dataset.shopNudgeTarget || link.dataset.houseTarget || ""
+      });
+    }
     // First-party gutter ads on the game page. ddTrack no-ops in the native
     // shell and skips Meta or PostHog when those stubs are missing.
     if (link.matches("[data-house-ad]")) {
@@ -217,7 +225,8 @@
       || link.closest(".shop-result");
     if (purchase) {
       let place = "link";
-      if (link.closest(".shop-mobile")) place = "mobile";
+      if (link.closest(".shop-nudge")) place = "nudge";
+      else if (link.closest(".shop-mobile")) place = "mobile";
       else if (link.closest(".shop-banner")) place = "banner";
       else if (link.classList.contains("shop-buy") || href.includes("creem.io/payment")) place = "checkout";
       else if (link.closest(".shop-result")) place = "result";

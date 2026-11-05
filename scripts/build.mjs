@@ -20,6 +20,7 @@ for (const file of [
   "halloween-intro.css",
   "halloween-intro.js",
   "app.js",
+  "daily-puzzle.js",
   "legal.css",
   "privacy.html",
   "refund.html",
