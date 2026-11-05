@@ -122,7 +122,7 @@ Answer these literally; the resulting rating is computed by Apple.
 | Horror or fear themes | **None** | "Devil" is a literary device, never frightening |
 | Simulated gambling | **No** | Money words are figurative; no wagering of any kind |
 | Medical or treatment information | **None** | One satirical definition of medicine, not guidance |
-| Unrestricted web access | **No** | Bundled in the binary; no external pages are loaded |
+| Unrestricted web access | **No** | Bundled in the binary; the only links out are the policy pages, which open in Safari |
 | User-generated content / messaging | **No** | No sharing, no posting, no contact with other users |
 | Third-party advertising | **No** | No ad SDK is linked |
 
@@ -146,12 +146,12 @@ category below to *Not Collected* in one step.
 | Location, contacts, photos, health | Not collected |
 | Tracking via App Tracking Transparency | **No** — no `NSUserTrackingUsageDescription` is needed and none is present |
 
-Supporting answers: no third-party SDKs are linked; there is no server; progress
+Supporting answers: no third-party SDKs are linked; the app talks to no server; progress
 lives in `UserDefaults`/web local storage on the device only.
 
 ---
 
-## 10. Review Notes — 1,250 / 4,000
+## 10. Review Notes — 1,385 / 4,000
 
 Paste this into the **Notes** field. It pre-answers the questions a reviewer
 would otherwise have to investigate.
@@ -165,6 +165,7 @@ This is a complete, self-contained word game. All content is bundled inside the 
 - Native integration beyond the web view: haptic feedback on every swipe, solve, judgment and coin; dark status bar styling; safe-area insets for notched devices; scroll and magnifier disabled on the board; portrait locked; custom launch screen.
 - Content provenance: 55 definitions are from Ambrose Bierce's "The Devil's Dictionary" (1911), which is in the public domain. The other 45 were written for this game in the same voice. Entries relying on racial or gender stereotypes were deliberately excluded.
 - The tone is satirical throughout and is never directed at any real, named individual.
+- The app has no sharing, social or community features. The only links out are Privacy, Terms, Support and FAQ, which open in Safari.
 - Support and privacy pages: https://devildictionary.com/support and https://devildictionary.com/privacy
 ```
 
@@ -172,36 +173,21 @@ This is a complete, self-contained word game. All content is bundled inside the 
 
 ## 11. Screenshots
 
-Generated art lives in `store/screenshots/`, rendered from the real entries in
-`app.js` so the copy can never drift from what ships. Regenerate with:
+Real captures from the app live in `store/screenshots/`, taken on the iPhone 17 Pro
+Max simulator with no captions added. Each is 1320×2868 with no alpha channel. Upload
+this 6.9" set; App Store Connect accepts it alone.
 
-```bash
-node scripts/generate-store-screenshots.mjs
-```
+| File | What it shows |
+| --- | --- |
+| `01-find-the-word.png` | Stage I, mid-swipe on a 5×5 board |
+| `02-four-stages.png` | Stage IV, the 8×8 board |
+| `03-definition-judgment.png` | A definition judgment with all three options |
+| `04-devil-coins.png` | A new board just after the first Devil Coin |
+| `05-nothing-to-buy.png` | A definition card |
 
-| File | Caption shown on the art | Size |
-| --- | --- | --- |
-| `01-find-the-word.png` | Every entry is hidden in plain sight, one letter at a time. | 1320×2868 |
-| `02-four-stages.png` | 25 + 25 + 25 + 25 entries, from a 5×5 board to the 8×8 of Stage IV. | 1320×2868 |
-| `03-definition-judgment.png` | Every decoy is a real definition too — just borrowed from another word. | 1320×2868 |
-| `04-devil-coins.png` | 20 coins in the complete book. They cannot be bought, only earned. | 1320×2868 |
-| `05-nothing-to-buy.png` | 100 entries · plays offline · nothing ever leaves your device | 1320×2868 |
-
-A `*-65.png` variant of each is written at 1242×2688 for the 6.5" slot.
-Upload the 6.9" set; App Store Connect accepts it alone.
-
-**These are vector mockups, not device captures.** Apple does not require real
-captures, but real ones look better and are trivially defensible. To replace
-them, run the app in the simulator and take these five shots on an
-iPhone 17 Pro Max (or 16 Pro Max) target:
-
-1. Opening board, mid-swipe with a word highlighted
-2. The stage curtain after the 25th entry
-3. A definition judgment with all three options visible
-4. A coin celebration
-5. Any board, to be captioned by App Store Connect — or the free-edition art
-
-Save as PNG, no transparency, no browser chrome, no status bar overrides.
+Retake these whenever the game's look changes. Do not run
+`scripts/generate-store-screenshots.mjs`: it overwrites them with vector mockups
+that do not match the app.
 
 **App icon**: upload `assets/icon.png` — 1024×1024, no alpha channel, no
 pre-applied corner radius (Apple masks it). Already installed into
@@ -240,9 +226,8 @@ launch screen, and a locked portrait orientation.
 If it is nonetheless rejected, the strongest fix is a genuinely native feature
 rather than an argument. The cheapest one is a system share sheet on the
 definition card — `@capacitor/share`, one plugin, about thirty lines — which
-lets a player send a definition to Messages or save it as an image. It doubles
-as distribution: every shared definition carries the app with it. Say the word
-and I will wire it up.
+lets a player send a definition to Messages or save it as an image. Version 1.0
+leaves sharing out on purpose, so this would be a product decision to bring it back.
 
 If you would rather argue than add code, reply in Resolution Center with: the
 app runs offline in airplane mode, lists the specific native APIs it uses, and
