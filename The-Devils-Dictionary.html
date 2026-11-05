@@ -3008,7 +3008,15 @@ body.hw-lock { overflow: hidden; }
   const Native = (() => {
     const bridge = window.Capacitor;
     const isNative = !!(bridge && typeof bridge.isNativePlatform === "function" && bridge.isNativePlatform());
-    return { isNative, plugin: name => (isNative ? bridge.registerPlugin(name) : null) };
+    // The page ships without @capacitor/core, so registerPlugin does not exist on
+    // the bridge the iOS shell injects. nativePromise is what that bridge provides.
+    const plugin = name => {
+      if (!isNative) return null;
+      return new Proxy({}, {
+        get: (_, method) => (method === "then" ? undefined : options => bridge.nativePromise(name, method, options)),
+      });
+    };
+    return { isNative, plugin };
   })();
 
   const HapticsPlugin = Native.plugin("Haptics");
@@ -4654,7 +4662,14 @@ body.hw-lock { overflow: hidden; }
   init();
 })();
 
-if (window.Capacitor) document.querySelectorAll('[data-community]').forEach(link => { link.href = 'https://devildictionary.com/community' + (link.hash || ''); });
+if (window.Capacitor) {
+  document.querySelectorAll('[data-community]').forEach(link => { link.href = 'https://devildictionary.com/community' + (link.hash || ''); });
+  // The app sells nothing and bundles only the game, so website copy and commerce
+  // links stay on the web. Clean URLs such as /privacy do not resolve from the
+  // bundle, so the policy pages that remain open on the site.
+  document.querySelectorAll('.edition-note, .book-invitation, .house-rail, .colophon-actions a[href^="/print-play"], .colophon-links a[href="/daily"], .colophon-links a[href="/pricing"], .colophon-links a[href="/refund"]').forEach(el => el.remove());
+  document.querySelectorAll('.colophon-links a').forEach(link => { link.href = 'https://devildictionary.com' + link.getAttribute('href'); });
+}
 
     </script>
   <div class="shop-mobile shop-deferred" hidden><a href="/print-play" data-shop-open>Get Printable Cards <span>from $2.99 ↗</span></a></div></body>

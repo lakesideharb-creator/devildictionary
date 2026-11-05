@@ -51,8 +51,14 @@ function boot(storage, options = {}) {
     window.Capacitor = {
       isNativePlatform: () => true,
       getPlatform: () => "ios",
-      registerPlugin: () => null
+      // Only what node_modules/@capacitor/ios native-bridge.js really defines. It
+      // has no registerPlugin: that lives in @capacitor/core, which is not shipped.
+      nativePromise: (plugin, method, data) => {
+        window.__nativeCalls.push([plugin, method, data]);
+        return Promise.resolve();
+      }
     };
+    window.__nativeCalls = [];
   }
   window.eval(script);
   return window;
@@ -355,6 +361,16 @@ const gated = boot(gatedSave, { native: true });
 assert.equal(gated.__DEVILS_GAME__.isNative, true);
 assert.equal(gated.document.getElementById("lockPanel"), null, "the native shell has no paywall either");
 assert.ok(gated.document.querySelectorAll(".letter").length >= 36, "the native shell deals past 30 entries");
+// shop.js removes its own banners in the native shell; it is not evaluated here.
+const nativeHrefs = [...gated.document.querySelectorAll("a[href]")].filter(link => !link.closest(".shop-banner, .shop-mobile, .shop-result")).map(link => link.getAttribute("href"));
+assert.ok(!nativeHrefs.some(href => /print-play|pricing|refund|amazon\.com|^\/word\/|^\/daily/.test(href)), "the native shell links to no shop, price, or unbundled page");
+assert.ok(nativeHrefs.includes("https://devildictionary.com/privacy"), "the native shell opens policy pages on the site");
+await sleep(0);
+assert.deepEqual(
+  gated.__nativeCalls.map(([plugin, method]) => `${plugin}.${method}`).slice(0, 3),
+  ["StatusBar.setStyle", "StatusBar.setBackgroundColor", "SplashScreen.hide"],
+  "the native shell reaches its plugins through the bridge's nativePromise"
+);
 
 // Reading every entry replays instead of dead-ending.
 const finished = boot({ completed: everyWord, order: everyWord.slice(-5), current: null, hints: 0, rounds: 100 }, { native: true });
