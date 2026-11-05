@@ -13,7 +13,7 @@ character counts have been checked against Apple's limits.
 | Minimum OS | iOS 15.0 |
 | Price | Free · no in-app purchases |
 | Age rating | Expected **9+** |
-| Signing | Automatic, Team `754YBZ3UJ42` |
+| Signing | Automatic, Team `7S4YRZ3U42` |
 
 ---
 
