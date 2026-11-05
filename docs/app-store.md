@@ -18,11 +18,13 @@ character counts have been checked against Apple's limits.
 
 ---
 
-## 1. App Name — 22 / 30
+## 1. App Name — 29 / 30
 
 ```
-The Devil's Dictionary
+Devil's Dictionary: Word Game
 ```
+
+`The Devil's Dictionary` is already taken on the App Store.
 
 ## 2. Subtitle — 24 / 30
 
@@ -41,12 +43,12 @@ Shown above the description and can be changed without a release.
 One hundred cynical definitions hidden in grids of letters. All of it free: no unlock, no ads, no account, no sign-in. Four stages, and the book gets worse as you go.
 ```
 
-## 4. Keywords — 98 / 100
+## 4. Keywords — 95 / 100
 
 No spaces after commas; do not repeat words already in the name or subtitle.
 
 ```
-word,search,puzzle,dictionary,cynical,vocabulary,definition,quote,bierce,letters,grid,brain,trivia
+search,puzzle,cynical,vocabulary,definition,quote,bierce,letters,grid,brain,trivia,satire,daily
 ```
 
 ## 5. Description — 1,679 / 4,000
