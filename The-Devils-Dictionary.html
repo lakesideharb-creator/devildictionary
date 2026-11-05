@@ -4663,11 +4663,10 @@ body.hw-lock { overflow: hidden; }
 })();
 
 if (window.Capacitor) {
-  document.querySelectorAll('[data-community]').forEach(link => { link.href = 'https://devildictionary.com/community' + (link.hash || ''); });
-  // The app sells nothing and bundles only the game, so website copy and commerce
-  // links stay on the web. Clean URLs such as /privacy do not resolve from the
+  // The app sells nothing and bundles only the game, so website copy, commerce
+  // and community links stay on the web. Clean URLs such as /privacy do not resolve from the
   // bundle, so the policy pages that remain open on the site.
-  document.querySelectorAll('.edition-note, .book-invitation, .house-rail, .colophon-actions a[href^="/print-play"], .colophon-links a[href="/daily"], .colophon-links a[href="/pricing"], .colophon-links a[href="/refund"]').forEach(el => el.remove());
+  document.querySelectorAll('.edition-note, .book-invitation, .house-rail, .colophon-actions, .community-invitation, .colophon-links a[href="/daily"], .colophon-links a[href="/pricing"], .colophon-links a[href="/refund"]').forEach(el => el.remove());
   document.querySelectorAll('.colophon-links a').forEach(link => { link.href = 'https://devildictionary.com' + link.getAttribute('href'); });
 }
 

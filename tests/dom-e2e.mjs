@@ -363,7 +363,7 @@ assert.equal(gated.document.getElementById("lockPanel"), null, "the native shell
 assert.ok(gated.document.querySelectorAll(".letter").length >= 36, "the native shell deals past 30 entries");
 // shop.js removes its own banners in the native shell; it is not evaluated here.
 const nativeHrefs = [...gated.document.querySelectorAll("a[href]")].filter(link => !link.closest(".shop-banner, .shop-mobile, .shop-result")).map(link => link.getAttribute("href"));
-assert.ok(!nativeHrefs.some(href => /print-play|pricing|refund|amazon\.com|^\/word\/|^\/daily/.test(href)), "the native shell links to no shop, price, or unbundled page");
+assert.ok(!nativeHrefs.some(href => /print-play|pricing|refund|community|amazon\.com|^\/word\/|^\/daily/.test(href)), "the native shell links to no shop, price, community, or unbundled page");
 assert.ok(nativeHrefs.includes("https://devildictionary.com/privacy"), "the native shell opens policy pages on the site");
 await sleep(0);
 assert.deepEqual(
