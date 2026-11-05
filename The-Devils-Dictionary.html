@@ -247,7 +247,7 @@ h1 { margin: 4px 0 0; font-size: clamp(30px, 4vw, 52px); line-height: .95; font-
   position: relative;
   z-index: 2;
   display: grid;
-  grid-template-columns: repeat(var(--size, 5), 1fr);
+  grid-template-columns: repeat(var(--size, 5), minmax(0, 1fr));
   gap: clamp(5px, 1.3vw, 9px);
 }
 
@@ -1021,7 +1021,8 @@ h1 { margin-top: 8px; font-size: clamp(28px, 4vw, 37px); font-weight: 700; lette
 
 @media (max-width: 540px) {
   .board { gap: 3px; padding: 7px; }
-  .definition-card { padding: 46px 18px 28px; }
+  .definition-card,
+  .modal.judging .definition-card { padding: 46px 18px 42px; }
   .definition-card > .folio-bracket { left: 10px; right: 10px; }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -3884,7 +3885,7 @@ body.hw-lock { overflow: hidden; }
     els.nextButton.hidden = true;
     els.nextButton.textContent = "ACCEPT THE VERDICT · NEXT WORD";
     els.newEntryBadge.textContent = "AWAITING VERDICT";
-    els.modalProgress.textContent = `${save.completed.length} COLLECTED · VERDICT PENDING`;
+    els.modalProgress.textContent = `${save.completed.length} COLLECTED`;
     els.definitionChoices.querySelectorAll(".definition-choice").forEach(button => {
       button.addEventListener("click", () => judgeDefinition(button));
     });
@@ -4663,10 +4664,10 @@ body.hw-lock { overflow: hidden; }
 })();
 
 if (window.Capacitor) {
-  // The app sells nothing and bundles only the game, so website copy, commerce
-  // and community links stay on the web. Clean URLs such as /privacy do not resolve from the
+  // The app sells nothing and bundles only the game, so website copy, commerce,
+  // community links, share actions and social links stay on the web. Clean URLs such as /privacy do not resolve from the
   // bundle, so the policy pages that remain open on the site.
-  document.querySelectorAll('.edition-note, .book-invitation, .house-rail, .colophon-actions, .community-invitation, .colophon-links a[href="/daily"], .colophon-links a[href="/pricing"], .colophon-links a[href="/refund"]').forEach(el => el.remove());
+  document.querySelectorAll('.edition-note, .book-invitation, .house-rail, .colophon-actions, .community-invitation, .share-actions, .social-links, .colophon-links a[href="/daily"], .colophon-links a[href="/pricing"], .colophon-links a[href="/refund"]').forEach(el => el.remove());
   document.querySelectorAll('.colophon-links a').forEach(link => { link.href = 'https://devildictionary.com' + link.getAttribute('href'); });
 }
 

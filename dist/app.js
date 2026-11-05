@@ -1189,7 +1189,7 @@
     els.nextButton.hidden = true;
     els.nextButton.textContent = "ACCEPT THE VERDICT · NEXT WORD";
     els.newEntryBadge.textContent = "AWAITING VERDICT";
-    els.modalProgress.textContent = `${save.completed.length} COLLECTED · VERDICT PENDING`;
+    els.modalProgress.textContent = `${save.completed.length} COLLECTED`;
     els.definitionChoices.querySelectorAll(".definition-choice").forEach(button => {
       button.addEventListener("click", () => judgeDefinition(button));
     });
@@ -1968,9 +1968,9 @@
 })();
 
 if (window.Capacitor) {
-  // The app sells nothing and bundles only the game, so website copy, commerce
-  // and community links stay on the web. Clean URLs such as /privacy do not resolve from the
+  // The app sells nothing and bundles only the game, so website copy, commerce,
+  // community links, share actions and social links stay on the web. Clean URLs such as /privacy do not resolve from the
   // bundle, so the policy pages that remain open on the site.
-  document.querySelectorAll('.edition-note, .book-invitation, .house-rail, .colophon-actions, .community-invitation, .colophon-links a[href="/daily"], .colophon-links a[href="/pricing"], .colophon-links a[href="/refund"]').forEach(el => el.remove());
+  document.querySelectorAll('.edition-note, .book-invitation, .house-rail, .colophon-actions, .community-invitation, .share-actions, .social-links, .colophon-links a[href="/daily"], .colophon-links a[href="/pricing"], .colophon-links a[href="/refund"]').forEach(el => el.remove());
   document.querySelectorAll('.colophon-links a').forEach(link => { link.href = 'https://devildictionary.com' + link.getAttribute('href'); });
 }

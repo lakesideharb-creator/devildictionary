@@ -365,6 +365,8 @@ assert.ok(gated.document.querySelectorAll(".letter").length >= 36, "the native s
 const nativeHrefs = [...gated.document.querySelectorAll("a[href]")].filter(link => !link.closest(".shop-banner, .shop-mobile, .shop-result")).map(link => link.getAttribute("href"));
 assert.ok(!nativeHrefs.some(href => /print-play|pricing|refund|community|amazon\.com|^\/word\/|^\/daily/.test(href)), "the native shell links to no shop, price, community, or unbundled page");
 assert.ok(nativeHrefs.includes("https://devildictionary.com/privacy"), "the native shell opens policy pages on the site");
+assert.equal(gated.document.querySelector(".share-actions"), null, "the native shell has no share actions");
+assert.equal(gated.document.querySelector(".social-links"), null, "the native shell has no social links");
 await sleep(0);
 assert.deepEqual(
   gated.__nativeCalls.map(([plugin, method]) => `${plugin}.${method}`).slice(0, 3),
