@@ -22,7 +22,7 @@
 
 ## iOS 版（Capacitor）
 
-网页版与 iOS 版共用同一份 `dist/`，内容完全一致：**100 个词条全免费，没有内购、没有解锁、没有付费墙**。原生壳只做平台适配，不做商业化。
+iOS 版的网页资源由 `dist/` 裁剪到 `dist-ios/`（只留游戏本身），游戏内容完全一致（商店、社区、分享和社交入口只在网页版）：**100 个词条全免费，没有内购、没有解锁、没有付费墙**。原生壳只做平台适配，不做商业化。
 
 - Bundle ID：`com.devildictionary.app`
 - 依赖管理：**Swift Package Manager**（`cap add ios --packagemanager SPM`），不需要 CocoaPods
@@ -30,7 +30,7 @@
 - 原生插件：StatusBar / SplashScreen / Haptics
 
 ```bash
-npm run build          # 生成 dist/
+npm run build:ios      # 生成 dist/ 和 dist-ios/
 npx cap sync ios       # 同步 Web 资源与插件
 npx cap open ios       # 在 Xcode 中打开
 ```
@@ -48,17 +48,16 @@ npx cap open ios       # 在 Xcode 中打开
 
 `docs/app-store.md` 是完整的 App Store Connect 提交包：App 名称、副标题、关键词、描述、版本说明、年龄分级问卷、App Privacy 问答、审核备注，以及提交前清单。各字段字符数已按 Apple 限额校验，可直接复制。
 
-这两个脚本只在准备上架素材时用到，依赖不写进 `package.json`（避免部署时装它们），按需安装即可：
+这个工具只在准备上架素材时用到，依赖不写进 `package.json`（避免部署时装它们），按需安装即可：
 
 ```bash
-npm i -D sharp @capacitor/assets    # 仅本地素材生成需要
+npm i -D @capacitor/assets          # 仅本地素材生成需要
 
-npm run shots                       # 生成 5 张截图（6.9" + 6.5"）
 npx capacitor-assets generate --ios \
   --iconBackgroundColor "#17120e" --splashBackgroundColor "#17120e"
 ```
 
-截图是矢量合成的（`app.js` 里读真实词条，文案不会与线上脱节），不是设备实拍。上架前建议在模拟器里重拍，脚本与清单见文档第 11 节。
+`store/screenshots/` 里是在 iPhone 17 Pro Max 模拟器上实拍的 App 截图，游戏外观变化后需要重拍。
 
 App 图标上传 `assets/icon.png`：1024×1024、无 alpha、无预置圆角（Apple 自己加遮罩）。
 

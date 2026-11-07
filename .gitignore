@@ -6,6 +6,7 @@ test-*.png
 upload/
 
 # iOS (Capacitor, SPM mode)
+dist-ios/
 ios/App/App/public/
 ios/App/App/capacitor.config.json
 ios/App/build/

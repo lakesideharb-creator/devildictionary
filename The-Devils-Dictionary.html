@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#17120e" />
+    <meta name="apple-itunes-app" content="app-id=6831218158" />
     <meta name="description" content="Slide a word out of a grid of letters, then let the dictionary define you back. A free pocket game of cynical definitions in the voice of Ambrose Bierce." />
 
     <!-- Auto-translation wrecks the letter grid (tiles are English words), so
@@ -247,7 +248,7 @@ h1 { margin: 4px 0 0; font-size: clamp(30px, 4vw, 52px); line-height: .95; font-
   position: relative;
   z-index: 2;
   display: grid;
-  grid-template-columns: repeat(var(--size, 5), 1fr);
+  grid-template-columns: repeat(var(--size, 5), minmax(0, 1fr));
   gap: clamp(5px, 1.3vw, 9px);
 }
 
@@ -1032,7 +1033,8 @@ h1 { margin-top: 4px; font-size: clamp(26px, 3.5vw, 34px); font-weight: 700; let
 
 @media (max-width: 540px) {
   .board { gap: 3px; padding: 7px; }
-  .definition-card { padding: 46px 18px 28px; }
+  .definition-card,
+  .modal.judging .definition-card { padding: 46px 18px 42px; }
   .definition-card > .folio-bracket { left: 10px; right: 10px; }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -2022,7 +2024,8 @@ body.hw-lock { overflow: hidden; }
           <button id="resetButton" class="text-button" type="button">RESET MY PROGRESS</button>
         </div>
         <button id="halloweenReplay" class="text-button" type="button" hidden>REPLAY THE HALLOWEEN INTRO</button>
-        <nav class="colophon-actions" aria-label="Community and printable cards">
+        <nav class="colophon-actions" aria-label="iPhone app, community and printable cards">
+          <a data-app-store href="https://apps.apple.com/app/id6831218158" target="_blank" rel="noopener noreferrer">Get the iPhone App ↗</a>
           <a data-community href="/community.html">Join the Community ↗</a>
           <a href="/print-play">Shop Printable Cards ↗</a>
         </nav>
@@ -3354,7 +3357,15 @@ body.hw-lock { overflow: hidden; }
   const Native = (() => {
     const bridge = window.Capacitor;
     const isNative = !!(bridge && typeof bridge.isNativePlatform === "function" && bridge.isNativePlatform());
-    return { isNative, plugin: name => (isNative ? bridge.registerPlugin(name) : null) };
+    // The page ships without @capacitor/core, so registerPlugin does not exist on
+    // the bridge the iOS shell injects. nativePromise is what that bridge provides.
+    const plugin = name => {
+      if (!isNative) return null;
+      return new Proxy({}, {
+        get: (_, method) => (method === "then" ? undefined : options => bridge.nativePromise(name, method, options)),
+      });
+    };
+    return { isNative, plugin };
   })();
 
   const HapticsPlugin = Native.plugin("Haptics");
@@ -4269,7 +4280,7 @@ body.hw-lock { overflow: hidden; }
     els.nextButton.hidden = true;
     els.nextButton.textContent = "ACCEPT THE VERDICT · NEXT WORD";
     els.newEntryBadge.textContent = "AWAITING VERDICT";
-    els.modalProgress.textContent = `${save.completed.length} COLLECTED · VERDICT PENDING`;
+    els.modalProgress.textContent = `${save.completed.length} COLLECTED`;
     els.definitionChoices.querySelectorAll(".definition-choice").forEach(button => {
       button.addEventListener("click", () => judgeDefinition(button));
     });
@@ -5415,7 +5426,13 @@ body.hw-lock { overflow: hidden; }
   init();
 })();
 
-if (window.Capacitor) document.querySelectorAll('[data-community]').forEach(link => { link.href = 'https://devildictionary.com/community' + (link.hash || ''); });
+if (window.Capacitor) {
+  // The app sells nothing and bundles only the game, so website copy, commerce,
+  // community links, share actions and social links stay on the web. Clean URLs such as /privacy do not resolve from the
+  // bundle, so the policy pages that remain open on the site.
+  document.querySelectorAll('.edition-note, .book-invitation, .house-rail, .shop-banner, .shop-mobile, .shop-result, .shop-nudge, [data-subscribe], .colophon-actions, .community-invitation, .share-actions, #dailyShareButton, #dailyCopyButton, #dailySharePreview, #dailyModalShare, .social-links, .colophon-links a[href="/daily"], .colophon-links a[href="/pricing"], .colophon-links a[href="/refund"]').forEach(el => el.remove());
+  document.querySelectorAll('.colophon-links a').forEach(link => { link.href = 'https://devildictionary.com' + link.getAttribute('href'); });
+}
 
     </script>
   <div class="shop-mobile shop-deferred" hidden><a href="/print-play" data-shop-open>Get Printable Cards <span>from $2.99 ↗</span></a></div></body>

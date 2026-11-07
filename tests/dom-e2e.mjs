@@ -56,8 +56,14 @@ function boot(storage, options = {}) {
     window.Capacitor = {
       isNativePlatform: () => true,
       getPlatform: () => "ios",
-      registerPlugin: () => null
+      // Only what node_modules/@capacitor/ios native-bridge.js really defines. It
+      // has no registerPlugin: that lives in @capacitor/core, which is not shipped.
+      nativePromise: (plugin, method, data) => {
+        window.__nativeCalls.push([plugin, method, data]);
+        return Promise.resolve();
+      }
     };
+    window.__nativeCalls = [];
   }
   window.eval(dailyScript);
   window.eval(script);
@@ -209,6 +215,7 @@ assert.equal(document.querySelector(".shop-mobile").hidden, true, "mobile pay ba
 assert.equal(document.querySelector(".masthead .social-links"), null, "social icons are not between the title and the board");
 assert.equal(document.querySelectorAll(".social-links").length, 2, "social icons stay in the footer and beside the share actions");
 assert.ok(document.querySelector(".colophon .social-links-footer"));
+assert.equal(document.querySelector("[data-app-store]")?.getAttribute("href"), "https://apps.apple.com/app/id6831218158", "the website links to the App Store");
 assert.ok(document.querySelector(".afterword .social-links-modal"));
 for (const nav of document.querySelectorAll(".social-links")) {
   assert.equal(nav.querySelectorAll("a").length, 3, "one icon for X, YouTube, and Instagram");
@@ -410,7 +417,7 @@ const nativeUnlock = boot(
 await swipeCurrent(nativeUnlock);
 nativeUnlock.document.getElementById("nextButton").click();
 await sleep(2400);
-assert.equal(nativeUnlock.document.getElementById("shopNudge").hidden, true, "the native shell does not grow a shop note");
+assert.equal(nativeUnlock.document.getElementById("shopNudge"), null, "the native shell does not grow a shop note");
 assert.equal(nativeUnlock.__tracked.filter(([name]) => name === "shop_nudge_shown").length, 0);
 
 // ---------- nothing is gated, on the web or inside the native shell ----------
@@ -428,6 +435,21 @@ const gated = boot(gatedSave, { native: true });
 assert.equal(gated.__DEVILS_GAME__.isNative, true);
 assert.equal(gated.document.getElementById("lockPanel"), null, "the native shell has no paywall either");
 assert.ok(gated.document.querySelectorAll(".letter").length >= 36, "the native shell deals past 30 entries");
+const nativeHrefs = [...gated.document.querySelectorAll("a[href]")].map(link => link.getAttribute("href"));
+assert.ok(!nativeHrefs.some(href => /print-play|pricing|refund|community|amazon\.com|^\/word\/|^\/daily/.test(href)), "the native shell links to no shop, price, community, or unbundled page");
+assert.ok(nativeHrefs.includes("https://devildictionary.com/privacy"), "the native shell opens policy pages on the site");
+assert.equal(gated.document.querySelector(".share-actions"), null, "the native shell has no share actions");
+assert.equal(gated.document.querySelector(".social-links"), null, "the native shell has no social links");
+assert.equal(gated.document.querySelector("[data-app-store]"), null, "the app does not link to its own store page");
+assert.equal(gated.document.getElementById("dailyShareButton"), null, "the native shell has no daily share button");
+assert.equal(gated.document.getElementById("dailyCopyButton"), null, "the native shell has no daily copy button");
+assert.equal(gated.document.getElementById("dailyModalShare"), null, "the native shell has no daily share card");
+await sleep(0);
+assert.deepEqual(
+  gated.__nativeCalls.map(([plugin, method]) => `${plugin}.${method}`).slice(0, 3),
+  ["StatusBar.setStyle", "StatusBar.setBackgroundColor", "SplashScreen.hide"],
+  "the native shell reaches its plugins through the bridge's nativePromise"
+);
 
 // Reading every entry replays instead of dead-ending.
 const finished = boot({ completed: everyWord, order: everyWord.slice(-5), current: null, hints: 0, rounds: 100 }, { native: true });

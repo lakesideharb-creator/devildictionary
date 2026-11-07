@@ -313,7 +313,15 @@
   const Native = (() => {
     const bridge = window.Capacitor;
     const isNative = !!(bridge && typeof bridge.isNativePlatform === "function" && bridge.isNativePlatform());
-    return { isNative, plugin: name => (isNative ? bridge.registerPlugin(name) : null) };
+    // The page ships without @capacitor/core, so registerPlugin does not exist on
+    // the bridge the iOS shell injects. nativePromise is what that bridge provides.
+    const plugin = name => {
+      if (!isNative) return null;
+      return new Proxy({}, {
+        get: (_, method) => (method === "then" ? undefined : options => bridge.nativePromise(name, method, options)),
+      });
+    };
+    return { isNative, plugin };
   })();
 
   const HapticsPlugin = Native.plugin("Haptics");
@@ -1228,7 +1236,7 @@
     els.nextButton.hidden = true;
     els.nextButton.textContent = "ACCEPT THE VERDICT · NEXT WORD";
     els.newEntryBadge.textContent = "AWAITING VERDICT";
-    els.modalProgress.textContent = `${save.completed.length} COLLECTED · VERDICT PENDING`;
+    els.modalProgress.textContent = `${save.completed.length} COLLECTED`;
     els.definitionChoices.querySelectorAll(".definition-choice").forEach(button => {
       button.addEventListener("click", () => judgeDefinition(button));
     });
@@ -2374,4 +2382,10 @@
   init();
 })();
 
-if (window.Capacitor) document.querySelectorAll('[data-community]').forEach(link => { link.href = 'https://devildictionary.com/community' + (link.hash || ''); });
+if (window.Capacitor) {
+  // The app sells nothing and bundles only the game, so website copy, commerce,
+  // community links, share actions and social links stay on the web. Clean URLs such as /privacy do not resolve from the
+  // bundle, so the policy pages that remain open on the site.
+  document.querySelectorAll('.edition-note, .book-invitation, .house-rail, .shop-banner, .shop-mobile, .shop-result, .shop-nudge, [data-subscribe], .colophon-actions, .community-invitation, .share-actions, #dailyShareButton, #dailyCopyButton, #dailySharePreview, #dailyModalShare, .social-links, .colophon-links a[href="/daily"], .colophon-links a[href="/pricing"], .colophon-links a[href="/refund"]').forEach(el => el.remove());
+  document.querySelectorAll('.colophon-links a').forEach(link => { link.href = 'https://devildictionary.com' + link.getAttribute('href'); });
+}

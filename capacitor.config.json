@@ -1,8 +1,9 @@
 {
   "appId": "com.devildictionary.app",
   "appName": "The Devil's Dictionary",
-  "webDir": "dist",
+  "webDir": "dist-ios",
   "bundledWebRuntime": false,
+  "backgroundColor": "#17120e",
   "plugins": {
     "SplashScreen": {
       "launchAutoHide": true,
@@ -21,6 +22,6 @@
     "contentInset": "always",
     "scheme": "TheDevilsDictionary",
     "allowsLinkPreview": false,
-    "scrollEnabled": false
+    "scrollEnabled": true
   }
 }
