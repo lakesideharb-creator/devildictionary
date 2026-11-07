@@ -13,7 +13,7 @@ character counts have been checked against Apple's limits.
 | Device family | iPhone only (`TARGETED_DEVICE_FAMILY = 1`) — no iPad screenshots needed |
 | Minimum OS | iOS 15.0 |
 | Price | Free · no in-app purchases |
-| Age rating | Expected **9+** |
+| Age rating | **13+** (computed by App Store Connect) |
 | Signing | Automatic, Team `7S4YRZ3U42` |
 
 ---
@@ -120,7 +120,7 @@ Answer these literally; the resulting rating is computed by Apple.
 | Sexual content | **None** | Nothing sexual; three entries touch on marriage, all chaste |
 | Nudity | **None** | — |
 | Profanity or crude humour | **None** | Satire, not swearing. No expletives appear anywhere |
-| Alcohol, tobacco, drugs | **None** | One economic metaphor, no encouragement to use |
+| Alcohol, tobacco, drugs | **Infrequent** | The ECONOMY entry mentions a barrel of whiskey; the question covers references |
 | Mature or suggestive themes | **Infrequent / Mild** | Sustained social and political satire; honest answer |
 | Horror or fear themes | **None** | "Devil" is a literary device, never frightening |
 | Simulated gambling | **No** | Money words are figurative; no wagering of any kind |
@@ -129,9 +129,7 @@ Answer these literally; the resulting rating is computed by Apple.
 | User-generated content / messaging | **No** | No sharing, no posting, no contact with other users |
 | Third-party advertising | **No** | No ad SDK is linked |
 
-Expected result: **9+**. If you answer *None* to mature themes as well, it drops
-to **4+** — but the satire is the product, so Mild is the defensible answer and
-9+ costs you nothing.
+Result: **13+**. The whiskey reference and the satire are both answered as Infrequent.
 
 ---
 
