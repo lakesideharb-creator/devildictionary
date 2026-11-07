@@ -215,6 +215,7 @@ assert.equal(document.querySelector(".shop-mobile").hidden, true, "mobile pay ba
 assert.equal(document.querySelector(".masthead .social-links"), null, "social icons are not between the title and the board");
 assert.equal(document.querySelectorAll(".social-links").length, 2, "social icons stay in the footer and beside the share actions");
 assert.ok(document.querySelector(".colophon .social-links-footer"));
+assert.equal(document.querySelector("[data-app-store]")?.getAttribute("href"), "https://apps.apple.com/app/id6831218158", "the website links to the App Store");
 assert.ok(document.querySelector(".afterword .social-links-modal"));
 for (const nav of document.querySelectorAll(".social-links")) {
   assert.equal(nav.querySelectorAll("a").length, 3, "one icon for X, YouTube, and Instagram");
@@ -439,6 +440,7 @@ assert.ok(!nativeHrefs.some(href => /print-play|pricing|refund|community|amazon\
 assert.ok(nativeHrefs.includes("https://devildictionary.com/privacy"), "the native shell opens policy pages on the site");
 assert.equal(gated.document.querySelector(".share-actions"), null, "the native shell has no share actions");
 assert.equal(gated.document.querySelector(".social-links"), null, "the native shell has no social links");
+assert.equal(gated.document.querySelector("[data-app-store]"), null, "the app does not link to its own store page");
 assert.equal(gated.document.getElementById("dailyShareButton"), null, "the native shell has no daily share button");
 assert.equal(gated.document.getElementById("dailyCopyButton"), null, "the native shell has no daily copy button");
 assert.equal(gated.document.getElementById("dailyModalShare"), null, "the native shell has no daily share card");
